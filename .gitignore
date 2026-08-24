@@ -1,0 +1,59 @@
+# ================================
+# Environment Variables & Secrets
+# ================================
+.env
+.env.*
+!.env.example
+
+# ================================
+# Node.js Backend
+# ================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ================================
+# Flutter / Dart
+# ================================
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+coverage/
+
+# ================================
+# Android / iOS Build Files
+# ================================
+*.jks
+*.keystore
+key.properties
+
+# ================================
+# IDE
+# ================================
+.idea/
+*.iml
+.vscode/
+
+# ================================
+# Operating System
+# ================================
+.DS_Store
+Thumbs.db
+
+# ================================
+# Logs
+# ================================
+*.log
+
+# ================================
+# Temporary Files
+# ================================
+*.tmp
+*.temp
+# User-uploaded/generated files
+backend/uploads/
