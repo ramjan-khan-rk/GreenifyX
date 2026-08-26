@@ -1,52 +1,63 @@
 # 🌱 GreenifyX
 
-> **A full-stack eco-social platform that transforms real-world environmental actions into a social and rewarding experience.**
+> **An eco-social mobile platform that turns environmental actions into a social and rewarding experience.**
 
-**GreenifyX** is an independently developed Flutter & Node.js application where users can share eco-friendly activities, challenge friends, earn **Eco Score**, communicate in real time, and build a community around sustainable living.
+GreenifyX is an independently developed **Flutter + Node.js** application built to encourage people to participate in real-world environmental activities, share their progress, connect with friends, and participate in challenges.
+
+The project covers the complete development stack — **mobile application, REST APIs, authentication, database systems, media storage, and real-time communication.**
 
 ---
 
-## 🚀 Key Features
+## 🚀 Features
 
 ### 👤 Authentication & Profiles
 
-* Secure user registration & login (JWT)
-* Personalized profiles with profile images
+* JWT-based user authentication
+* User registration and login
+* Personalized user profiles
+* Profile image management
 * Eco Score and activity statistics
-* Friend-based social network
 
 ### 🌍 Social Feed
 
 * Share environmental activities with images
 * Like and comment on posts
-* Activity categories (Tree Plantation, Recycling, Cycling, Water Conservation, etc.)
-* Community-driven engagement
+* Activity categories such as:
+
+  * 🌳 Tree Plantation
+  * ♻️ Recycling
+  * 🚲 Cycling
+  * 🚶 Walking
+  * 💧 Water Conservation
 
 ### 🤝 Friends & Challenges
 
-* Search and add friends
-* Send & accept friend requests
-* Create eco challenges
-* Set difficulty, target & deadline
-* Track challenge progress and completion
+* Search for users
+* Send and accept friend requests
+* Create environmental challenges
+* Set challenge difficulty, targets, and deadlines
+* Track challenge progress
 
 ### 💬 Real-Time Chat
 
 * One-to-one messaging
-* Text & image messages
-* Instant delivery using **Socket.IO**
+* Text messages
+* Image messages
+* Real-time communication using **Socket.IO**
 
-### 🔔 Notification System
+### 🔔 Notifications
+
+The backend supports notifications for events such as:
 
 * Friend requests
-* Likes & comments
+* Likes and comments
 * Challenge updates
 * New messages
 * Verification events
 
 ---
 
-## 🛠 Tech Stack
+## 🛠️ Tech Stack
 
 | Layer               | Technologies                 |
 | ------------------- | ---------------------------- |
@@ -54,37 +65,43 @@
 | **Backend**         | Node.js, Express.js          |
 | **Database**        | MongoDB, Mongoose            |
 | **Authentication**  | JWT                          |
-| **Real-time**       | Socket.IO                    |
+| **Real-Time**       | Socket.IO                    |
 | **Media Storage**   | Cloudinary                   |
-| **Version Control** | Git & GitHub                 |
+| **Version Control** | Git, GitHub                  |
 
 ---
 
-## 🏗 System Architecture
+## 🏗️ Architecture
 
 ```text
-Flutter Mobile App
-        │
-        │ REST APIs
-        ▼
-Node.js + Express
-   │      │
-   │      ├────────► MongoDB
-   │      ├────────► Cloudinary
-   │      └────────► Socket.IO
-   │
-   ▼
-Real-Time Updates
+                    ┌──────────────────┐
+                    │  Flutter Mobile  │
+                    │       App        │
+                    └────────┬─────────┘
+                             │
+                        REST APIs
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │ Node.js +        │
+                    │ Express.js       │
+                    └───────┬──────────┘
+                            │
+             ┌──────────────┼──────────────┐
+             │              │              │
+             ▼              ▼              ▼
+         MongoDB        Cloudinary      Socket.IO
+         Database       Media Storage    Real-Time
 ```
 
-The mobile application communicates with the backend through REST APIs, while Socket.IO powers instant messaging and live notifications.
+The Flutter application communicates with the backend through REST APIs. **Socket.IO** provides real-time communication for features such as messaging.
 
 ---
 
 ## 📂 Project Structure
 
 ```text
-GreenifyX
+GreenifyX/
 │
 ├── mobile/
 │   └── lib/
@@ -114,13 +131,13 @@ GreenifyX
 └── README.md
 ```
 
-The Flutter application follows a **feature-first architecture** with clear separation of **application**, **data**, **domain**, and **presentation** layers.
+The Flutter application follows a **feature-oriented structure**, while the backend separates controllers, models, routes, middleware, configuration, and real-time communication.
 
 ---
 
-## 🌱 Eco Score System
+## 🌱 Eco Score
 
-GreenifyX rewards genuine environmental actions through **Eco Score**.
+GreenifyX uses an **Eco Score** system to represent a user's participation in environmental activities.
 
 Examples include:
 
@@ -130,13 +147,13 @@ Examples include:
 * 🚶 Walking
 * 💧 Water Conservation
 
-Each activity contributes to a user's overall environmental impact within the platform.
+The goal is to make environmental participation measurable and engaging within the platform.
 
 ---
 
-## 📡 REST API Modules
+## 📡 Backend API
 
-The backend currently provides APIs for:
+The backend is organized into modules including:
 
 ```text
 /auth
@@ -150,20 +167,20 @@ The backend currently provides APIs for:
 /notifications
 ```
 
-Protected endpoints use JWT authentication middleware.
+Protected endpoints use **JWT authentication middleware**.
 
 ---
 
 ## ⚙️ Getting Started
 
-### Clone the repository
+### Clone
 
 ```bash
 git clone https://github.com/ramjan-khan-rk/GreenifyX.git
 cd GreenifyX
 ```
 
-### Mobile App
+### Mobile
 
 ```bash
 cd mobile
@@ -179,7 +196,7 @@ npm install
 npm run dev
 ```
 
-Create a `.env` file inside the backend directory with:
+Create a `.env` file inside the `backend` directory:
 
 ```env
 PORT=5000
@@ -191,53 +208,52 @@ CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 ```
 
-> **Note:** Never commit your `.env` file. It is excluded through `.gitignore`.
+> **Never commit your `.env` file or other credentials to GitHub.**
 
 ---
 
-## 🧪 Tested Functionality
+## 🧪 Current Development Status
 
-* User authentication
-* Friend requests
-* Social feed
-* Likes & comments
-* Eco challenges
-* Real-time messaging
-* Notifications
-* Cloud media uploads
-* REST API communication
+GreenifyX is an **actively developed project currently undergoing testing**.
 
----
+### Implemented
 
-## 🚧 Development Status
+* ✅ JWT Authentication
+* ✅ User Profiles
+* ✅ Friends System
+* ✅ Social Feed
+* ✅ Posts & Comments
+* ✅ Likes
+* ✅ Challenge System
+* ✅ Real-Time Chat
+* ✅ Socket.IO Integration
+* ✅ Cloudinary Media Uploads
+* ✅ REST API Communication
+* ✅ Notification Backend
 
-### ✅ Implemented
+### In Progress
 
-* JWT Authentication
-* User Profiles
-* Friends System
-* Posts & Comments
-* Likes
-* Challenge System
-* Real-Time Chat
-* Notification Backend
-* Socket.IO Integration
-* Cloudinary Uploads
+* 🔄 Production testing and optimization
+* 🔄 Mobile release testing
+* 🔄 Notification experience improvements
 
-### 🔜 Planned
+### Planned
 
-* GPS-based eco verification
-* Nearby user verification
-* Leaderboards
-* Advanced Eco Score algorithm
-* Enhanced notification UI
-* Production optimization
+* 📍 GPS-based activity verification
+* 📍 Nearby user verification
+* 🏆 Advanced leaderboard system
+* 📊 Improved Eco Score algorithm
+* ⚡ Further production optimization
 
 ---
 
 ## 🌍 Vision
 
-GreenifyX aims to make sustainability **visible, social, verifiable, and rewarding** by encouraging measurable environmental actions instead of passive awareness.
+GreenifyX aims to make sustainability:
+
+**Visible. Social. Verifiable. Rewarding.**
+
+The idea is simple — instead of only encouraging people to care about the environment, create a platform where environmental actions can be **shared, tracked, discussed, and turned into meaningful community participation.**
 
 ---
 
@@ -245,6 +261,8 @@ GreenifyX aims to make sustainability **visible, social, verifiable, and rewardi
 
 **Ramjan Khan**
 
-Full-Stack & Mobile Application Developer
+**Full-Stack Developer & Product Builder**
 
-Building practical software that combines technology with real-world impact.
+I build practical software across web, mobile, backend systems, databases, APIs, and real-time technologies.
+
+[Portfolio](https://ramjan-khan-portfolio-g7jr-three.vercel.app/) · [LinkedIn](https://www.linkedin.com/in/ramjan-khan) · [GitHub](https://github.com/ramjan-khan-rk)
