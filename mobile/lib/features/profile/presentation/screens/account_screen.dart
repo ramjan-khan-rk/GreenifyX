@@ -5,12 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/utils/media_url.dart';
 import '../../../../core/widgets/app_status.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../../chat/application/providers/chats_provider.dart';
 import '../../../auth/application/providers/auth_provider.dart';
 import '../../../friends/application/providers/friend_provider.dart';
 import '../../../friends/presentation/screens/friends_screen.dart';
+import '../../../home/presentation/screens/leaderboard_screen.dart';
 import '../../../home/presentation/widgets/eco_points_card.dart';
 import '../../application/providers/my_profile_provider.dart';
 import '../../application/providers/profile_provider.dart';
@@ -42,16 +43,10 @@ class AccountScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
               children: [
                 Center(
-                  child: CircleAvatar(
+                  child: UserAvatar(
+                    imageUrl: user.profileImage,
                     radius: 52,
-                    backgroundImage: user.profileImage.isNotEmpty
-                        ? NetworkImage(
-                            resolveMediaUrl(user.profileImage) ?? "",
-                          )
-                        : null,
-                    child: user.profileImage.isEmpty
-                        ? const Icon(Icons.person, size: 52)
-                        : null,
+                    semanticLabel: "${user.name} photo",
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -100,6 +95,20 @@ class AccountScreen extends ConsumerWidget {
                       context,
                       MaterialPageRoute(
                         builder: (_) => const FriendsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.emoji_events_outlined),
+                  title: const Text("Leaderboard"),
+                  subtitle: const Text("Verified Eco Points ranking"),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LeaderboardScreen(),
                       ),
                     );
                   },

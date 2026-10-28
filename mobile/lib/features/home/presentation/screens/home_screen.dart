@@ -3,14 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/utils/media_url.dart';
 import '../../../../core/widgets/app_status.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../../challenge/presentation/screens/challenge_screen.dart';
 import '../../../challenge/presentation/screens/create_challenge_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../../profile/application/providers/my_profile_provider.dart';
 import '../widgets/eco_points_card.dart';
 import '../widgets/quote_card.dart';
+import 'leaderboard_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -37,16 +38,10 @@ class HomeScreen extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      CircleAvatar(
+                      UserAvatar(
+                        imageUrl: user.profileImage,
                         radius: 28,
-                        backgroundImage: user.profileImage.isNotEmpty
-                            ? NetworkImage(
-                                resolveMediaUrl(user.profileImage) ?? "",
-                              )
-                            : null,
-                        child: user.profileImage.isEmpty
-                            ? const Icon(Icons.person)
-                            : null,
+                        semanticLabel: "${user.name} photo",
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -82,36 +77,48 @@ class HomeScreen extends ConsumerWidget {
                     streak: user.streak,
                   ),
                   const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.flag_outlined),
-                      label: const Text("Open challenges"),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ChallengeScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  Text("Jump in", style: AppTextStyles.title.copyWith(fontSize: 18)),
                   const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.add),
-                      label: const Text("Start a new challenge"),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const CreateChallengeScreen(),
-                          ),
-                        );
-                      },
-                    ),
+                  _HomeAction(
+                    icon: Icons.emoji_events_outlined,
+                    title: "Leaderboard",
+                    subtitle: "See who leads in verified Eco Points",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LeaderboardScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  _HomeAction(
+                    icon: Icons.flag_outlined,
+                    title: "Open challenges",
+                    subtitle: "Compete with friends on shared goals",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ChallengeScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  _HomeAction(
+                    icon: Icons.add_circle_outline,
+                    title: "Start a new challenge",
+                    subtitle: "Invite a friend and earn Eco Points",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CreateChallengeScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 20),
                   const QuoteCard(),
@@ -120,6 +127,38 @@ class HomeScreen extends ConsumerWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _HomeAction extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _HomeAction({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: AppColors.border),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: AppColors.primary),
+        title: Text(title, style: AppTextStyles.body),
+        subtitle: Text(subtitle, style: AppTextStyles.subtitle),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
       ),
     );
   }

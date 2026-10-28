@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/utils/media_url.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_status.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../application/providers/friend_provider.dart';
 import 'friend_profile_screen.dart';
 import 'search_friends_screen.dart';
@@ -11,277 +14,168 @@ class FriendsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     final friends = ref.watch(friendsProvider);
-
     final requests = ref.watch(requestsProvider);
 
     return Scaffold(
-
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-
-        title: const Text("Friends"),
-
+        title: Text("Friends", style: AppTextStyles.title),
         actions: [
-
           IconButton(
-
-            icon: const Icon(Icons.person_add),
-
+            tooltip: "Find friends",
+            icon: const Icon(Icons.person_add_alt_1_outlined),
             onPressed: () {
-
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) =>
-                      const SearchFriendsScreen(),
+                  builder: (_) => const SearchFriendsScreen(),
                 ),
               );
-
             },
-
           ),
-
         ],
-
       ),
-
       body: RefreshIndicator(
-
+        color: AppColors.primary,
         onRefresh: () async {
-
           ref.invalidate(friendsProvider);
-
           ref.invalidate(requestsProvider);
-
         },
-
         child: ListView(
-
+          padding: const EdgeInsets.only(bottom: 32),
           children: [
-
-            const SizedBox(height:10),
-
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal:16),
-              child: Text(
-                "Friend Requests",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize:18,
-                ),
-              ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text("Requests", style: AppTextStyles.title.copyWith(fontSize: 18)),
             ),
-
             requests.when(
-
-              loading: () =>
-                  const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-
-              error: (e, s) => Padding(
-                padding: const EdgeInsets.all(16),
+              loading: () => const Padding(
+                padding: EdgeInsets.all(24),
+                child: AppLoading(),
+              ),
+              error: (e, s) => const Padding(
+                padding: EdgeInsets.all(16),
                 child: Text("Couldn't load requests. Pull to retry."),
               ),
-
-              data: (list){
-
-                if(list.isEmpty){
-
+              data: (list) {
+                if (list.isEmpty) {
                   return const Padding(
-
                     padding: EdgeInsets.all(16),
-
                     child: Text(
                       "No pending requests. Find people with the add icon.",
                     ),
-
                   );
-
                 }
 
                 return Column(
-
-                  children: list.map((user){
-
-                   return ListTile(
-  leading: CircleAvatar(
-    backgroundImage: user.profileImage.isNotEmpty
-        ? NetworkImage(
-            resolveMediaUrl(user.profileImage) ?? "",
-          )
-        : null,
-    child: user.profileImage.isEmpty
-        ? const Icon(Icons.person)
-        : null,
-  ),
-
-  title: Text(user.name),
-
-  trailing: SizedBox(
-    width: 168,
-    child: Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(0, 36),
-              padding: EdgeInsets.zero,
-            ),
-            onPressed: () async {
-              await ref
-                  .read(friendRepositoryProvider)
-                  .rejectRequest(user.id);
-              ref.invalidate(friendsProvider);
-              ref.invalidate(requestsProvider);
-            },
-            child: const Text("Decline"),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(0, 36),
-              padding: EdgeInsets.zero,
-            ),
-            onPressed: () async {
-              await ref
-                  .read(friendRepositoryProvider)
-                  .acceptRequest(user.id);
-              ref.invalidate(friendsProvider);
-              ref.invalidate(requestsProvider);
-            },
-            child: const Text("Accept"),
-          ),
-        ),
-      ],
-    ),
-  ),
-);
-
-                  }).toList(),
-
+                  children: list
+                      .map(
+                        (user) => ListTile(
+                          leading: UserAvatar(
+                            imageUrl: user.profileImage,
+                            semanticLabel: "${user.name} photo",
+                          ),
+                          title: Text(user.name),
+                          trailing: SizedBox(
+                            width: 168,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      minimumSize: const Size(0, 36),
+                                      padding: EdgeInsets.zero,
+                                    ),
+                                    onPressed: () async {
+                                      await ref
+                                          .read(friendRepositoryProvider)
+                                          .rejectRequest(user.id);
+                                      ref.invalidate(friendsProvider);
+                                      ref.invalidate(requestsProvider);
+                                    },
+                                    child: const Text("Decline"),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      minimumSize: const Size(0, 36),
+                                      padding: EdgeInsets.zero,
+                                    ),
+                                    onPressed: () async {
+                                      await ref
+                                          .read(friendRepositoryProvider)
+                                          .acceptRequest(user.id);
+                                      ref.invalidate(friendsProvider);
+                                      ref.invalidate(requestsProvider);
+                                    },
+                                    child: const Text("Accept"),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 );
-
               },
-
             ),
-
             const Divider(),
-
-            const Padding(
-
-              padding: EdgeInsets.symmetric(horizontal:16),
-
-              child: Text(
-                "My Friends",
-                style: TextStyle(
-                  fontSize:18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text("My friends", style: AppTextStyles.title.copyWith(fontSize: 18)),
             ),
-
             friends.when(
-
-              loading: ()=>const Center(
-                child: CircularProgressIndicator(),
+              loading: () => const Padding(
+                padding: EdgeInsets.all(24),
+                child: AppLoading(),
               ),
-
-              error: (e, s) => Padding(
-                padding: const EdgeInsets.all(16),
+              error: (e, s) => const Padding(
+                padding: EdgeInsets.all(16),
                 child: Text("Couldn't load friends. Pull to retry."),
               ),
-
-              data:(list){
-
-                if(list.isEmpty){
-
+              data: (list) {
+                if (list.isEmpty) {
                   return const Padding(
-
                     padding: EdgeInsets.all(16),
-
                     child: Text(
                       "No friends yet. Search and send a request to get started.",
                     ),
-
                   );
-
                 }
 
                 return Column(
-
-                  children: list.map((friend){
-
-                    return ListTile(
-
-                      leading: CircleAvatar(
-
-                        backgroundImage:
-                        friend.profileImage.isNotEmpty
-                            ? NetworkImage(
-                          resolveMediaUrl(friend.profileImage) ?? "",
-                        )
-                            : null,
-
-                        child: friend.profileImage.isEmpty
-                            ? const Icon(Icons.person)
-                            : null,
-
-                      ),
-
-                      title: Text(friend.name),
-
-                      subtitle: Text(
-                        "Level ${friend.level}",
-                      ),
-
-                      trailing: const Icon(
-                        Icons.arrow_forward_ios,
-                        size:16,
-                      ),
-
-                      onTap: (){
-
-                        Navigator.push(
-
-                          context,
-
-                          MaterialPageRoute(
-
-                            builder:(_)=>
-
-                                FriendProfileScreen(
-                                  friend: friend,
-                                ),
-
+                  children: list
+                      .map(
+                        (friend) => ListTile(
+                          leading: UserAvatar(
+                            imageUrl: friend.profileImage,
+                            semanticLabel: "${friend.name} photo",
                           ),
-
-                        );
-
-                      },
-
-                    );
-
-                  }).toList(),
-
+                          title: Text(friend.name),
+                          subtitle: Text("Level ${friend.level}"),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => FriendProfileScreen(friend: friend),
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                      .toList(),
                 );
-
               },
-
             ),
-
           ],
-
         ),
-
       ),
-
     );
-
   }
-
 }

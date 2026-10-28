@@ -5,6 +5,8 @@ import Notification from "../models/Notification.js";
 import { emitToUser } from "../socket/socket.js";
 import { uploadBufferToCloudinary } from "../utils/cloudinaryUpload.js";
 import { sendServerError } from "../utils/httpError.js";
+import { parsePagination } from "../utils/pagination.js";
+import { applyVerifyAward, pointsStatusFor } from "../utils/postPoints.js";
 
 const ecoPointsMap = {
   "Tree Plantation": 50,
@@ -46,12 +48,7 @@ export const createPost = async (req, res) => {
       activity,
       ecoPoints,
       isVerified: false,
-    });
-
-    await User.findByIdAndUpdate(req.user._id, {
-      $inc: {
-        ecoPoints: ecoPoints,
-      },
+      pointsAwarded: false,
     });
 
     try {
@@ -78,29 +75,37 @@ export const createPost = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Eco activity posted successfully 🌱",
+      message: "Eco activity posted. Eco Points are awarded after a friend verifies it.",
       post,
-      pointsStatus: "unverified_self_reported",
+      pointsStatus: pointsStatusFor(post),
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Unable to create post",
-    });
+    return sendServerError(res, "Unable to create post");
   }
 };
 
 export const getPosts = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
+    const { page, limit, skip } = parsePagination(req.query, {
+      defaultLimit: 20,
+      maxLimit: 50,
+    });
 
-    const posts = await Post.find({
+    const filter = {
       user: {
         $in: [...user.friends, req.user._id],
       },
-    })
-      .populate("user", "name profileImage ecoPoints level")
-      .sort({ createdAt: -1 });
+    };
+
+    const [posts, total] = await Promise.all([
+      Post.find(filter)
+        .populate("user", "name profileImage ecoPoints level")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Post.countDocuments(filter),
+    ]);
 
     const currentUserId = req.user._id.toString();
 
@@ -119,9 +124,8 @@ export const getPosts = async (req, res) => {
           post: post._id,
         }),
         isVerified: post.isVerified,
-        pointsStatus: post.isVerified
-          ? "verified"
-          : "unverified_self_reported",
+        pointsAwarded: post.pointsAwarded === true,
+        pointsStatus: pointsStatusFor(post),
         createdAt: post.createdAt,
         updatedAt: post.updatedAt,
       }))
@@ -130,12 +134,13 @@ export const getPosts = async (req, res) => {
     res.status(200).json({
       success: true,
       posts: formattedPosts,
+      page,
+      limit,
+      total,
+      hasMore: skip + posts.length < total,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Unable to load posts",
-    });
+    return sendServerError(res, "Unable to load posts");
   }
 };
 
@@ -215,12 +220,28 @@ export const verifyPost = async (req, res) => {
       });
     }
 
-    post.isVerified = true;
+    const result = applyVerifyAward(post);
+    if (!result.ok) {
+      return res.status(400).json({
+        success: false,
+        message: "This activity is already verified",
+      });
+    }
+
+    if (result.award) {
+      await User.findByIdAndUpdate(post.user, {
+        $inc: { ecoPoints: result.points },
+      });
+    }
+
     await post.save();
 
     return res.status(200).json({
       success: true,
       isVerified: true,
+      pointsAwarded: post.pointsAwarded === true,
+      pointsStatus: pointsStatusFor(post),
+      awardedNow: result.award,
     });
   } catch (error) {
     return sendServerError(res, "Unable to verify post");

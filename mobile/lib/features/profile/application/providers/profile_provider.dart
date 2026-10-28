@@ -7,6 +7,7 @@ import '../../data/api/upload_api.dart';
 import '../../data/repository/profile_repository.dart';
 import '../../../../core/services/socket_service.dart';
 import '../../../../core/services/storage_service.dart';
+import '../../../../core/session/session_controller.dart';
 
 
 final profileRepositoryProvider = Provider((ref) {
@@ -204,6 +205,7 @@ Future<void> loadProfile() async {
 Future<void> logout() async {
   SocketService.instance.disconnect();
   await StorageService.clear();
+  SessionController.instance.setHasToken(false);
 }
 }
 final profileProvider =

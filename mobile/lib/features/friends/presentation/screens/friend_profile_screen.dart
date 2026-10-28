@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/media_url.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../../chat/presentation/screens/chat_screen.dart';
 import '../../application/providers/friend_provider.dart';
 import '../../domain/models/friend_model.dart';
@@ -49,31 +50,23 @@ class FriendProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(friend.name),
+        title: Text(friend.name, style: AppTextStyles.title),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            CircleAvatar(
+            UserAvatar(
+              imageUrl: friend.profileImage,
               radius: 55,
-              backgroundImage: friend.profileImage.isNotEmpty
-                  ? NetworkImage(
-                      resolveMediaUrl(friend.profileImage) ?? "",
-                    )
-                  : null,
-              child: friend.profileImage.isEmpty
-                  ? const Icon(Icons.person, size: 55)
-                  : null,
+              semanticLabel: "${friend.name} photo",
             ),
             const SizedBox(height: 20),
             Text(
               friend.name,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: AppTextStyles.title.copyWith(fontSize: 24),
             ),
             const SizedBox(height: 8),
             Text(friend.bio),

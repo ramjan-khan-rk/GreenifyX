@@ -6,6 +6,7 @@ import '../../../../core/services/api_service.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../domain/models/login_response.dart';
 import '../../../../core/services/socket_service.dart';
+import '../../../../core/session/session_controller.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
@@ -118,24 +119,30 @@ class AuthNotifier extends Notifier<AuthState> {
 
   Future<void> _persistSession(LoginResponse result) async {
     await StorageService.saveToken(result.token);
+    SessionController.instance.setHasToken(true);
     await SocketService.instance.connect(result.user.id);
     state = AuthState(user: result.user);
   }
 
   Future<UserModel?> restoreSession() async {
     final token = await StorageService.getToken();
-    if (token == null) return null;
+    if (token == null || token.isEmpty) {
+      SessionController.instance.setHasToken(false);
+      return null;
+    }
 
     try {
       final response = await ApiService.dio.get("/users/me");
       final userJson = response.data["user"] as Map<String, dynamic>;
       final user = UserModel.fromJson(userJson);
+      SessionController.instance.setHasToken(true);
       await SocketService.instance.connect(user.id);
       state = AuthState(user: user);
       return user;
     } catch (_) {
       await StorageService.clear();
       SocketService.instance.disconnect();
+      SessionController.instance.setHasToken(false);
       state = AuthState();
       return null;
     }
@@ -144,6 +151,7 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> logout() async {
     SocketService.instance.disconnect();
     await StorageService.clear();
+    SessionController.instance.setHasToken(false);
     state = AuthState();
   }
 

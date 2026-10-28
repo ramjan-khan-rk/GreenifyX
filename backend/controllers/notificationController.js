@@ -1,24 +1,36 @@
 import Notification from "../models/Notification.js";
+import { parsePagination } from "../utils/pagination.js";
+import { sendServerError } from "../utils/httpError.js";
 
 
 // Get all notifications for logged-in user
 export const getNotifications = async (req, res) => {
   try {
-    const notifications = await Notification.find({
-      receiver: req.user._id,
-    })
-      .populate("sender", "name profileImage")
-      .sort({ createdAt: -1 });
+    const { page, limit, skip } = parsePagination(req.query, {
+      defaultLimit: 30,
+      maxLimit: 50,
+    });
+
+    const filter = { receiver: req.user._id };
+    const [notifications, total] = await Promise.all([
+      Notification.find(filter)
+        .populate("sender", "name profileImage")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Notification.countDocuments(filter),
+    ]);
 
     res.status(200).json({
       success: true,
       notifications,
+      page,
+      limit,
+      total,
+      hasMore: skip + notifications.length < total,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Request failed",
-    });
+    return sendServerError(res, "Request failed");
   }
 };
 

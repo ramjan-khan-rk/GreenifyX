@@ -11,6 +11,7 @@ class FeedModel {
   final int comments;
   final bool isLiked;
   final bool isVerified;
+  final String pointsStatus;
 
   FeedModel({
     required this.id,
@@ -25,6 +26,7 @@ class FeedModel {
     required this.comments,
     required this.isLiked,
     required this.isVerified,
+    this.pointsStatus = "unverified_self_reported",
   });
 
   factory FeedModel.fromJson(Map<String, dynamic> json) {
@@ -43,6 +45,10 @@ class FeedModel {
       comments: json["commentsCount"] ?? 0,
       isLiked: json["isLiked"] ?? false,
       isVerified: json["isVerified"] ?? false,
+      pointsStatus: json["pointsStatus"]?.toString() ??
+          ((json["isVerified"] == true)
+              ? "verified"
+              : "unverified_self_reported"),
     );
   }
 }

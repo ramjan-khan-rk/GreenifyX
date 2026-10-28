@@ -96,7 +96,7 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.public),
-            label: "Feed",
+            label: "Explore",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.people),

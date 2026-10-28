@@ -4,8 +4,8 @@ import '../api/feed_api.dart';
 class FeedRepository {
   final FeedApi _api = FeedApi();
 
-  Future<List<FeedModel>> getPosts() async {
-    final response = await _api.getPosts();
+  Future<List<FeedModel>> getPosts({int page = 1, int limit = 20}) async {
+    final response = await _api.getPosts(page: page, limit: limit);
 
     final List posts = response.data["posts"];
 

@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../session/session_controller.dart';
 import 'app_routes.dart';
 
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
@@ -12,6 +13,13 @@ import '../../features/splash/presentation/screens/splash_screen.dart';
 class AppRouter {
   static final router = GoRouter(
     initialLocation: AppRoutes.splash,
+    refreshListenable: SessionController.instance,
+    redirect: (context, state) {
+      return authRedirect(
+        hasToken: SessionController.instance.hasToken,
+        location: state.matchedLocation,
+      );
+    },
     routes: [
       GoRoute(
         path: AppRoutes.splash,

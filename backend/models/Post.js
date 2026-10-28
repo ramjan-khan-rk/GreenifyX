@@ -40,6 +40,11 @@ const postSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    pointsAwarded: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

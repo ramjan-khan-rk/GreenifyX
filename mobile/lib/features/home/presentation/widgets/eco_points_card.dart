@@ -28,7 +28,7 @@ class EcoPointsCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            "Earned from posts and challenges",
+            "From friend-verified posts and challenge wins",
             style: AppTextStyles.subtitle,
           ),
           const SizedBox(height: 20),

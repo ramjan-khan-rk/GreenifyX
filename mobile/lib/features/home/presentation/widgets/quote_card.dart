@@ -10,7 +10,7 @@ class QuoteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       child: Text(
-        "Every green action earns Eco Points and brings your community with you.",
+        "Every verified green action earns Eco Points and brings your community with you.",
         textAlign: TextAlign.center,
         style: AppTextStyles.body.copyWith(height: 1.4),
       ),

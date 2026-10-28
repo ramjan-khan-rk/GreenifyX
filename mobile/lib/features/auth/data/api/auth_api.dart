@@ -61,7 +61,7 @@ class AuthApi {
     if (trimmed.contains("@")) {
       data["email"] = trimmed;
     } else {
-      data["phone"] = withIndiaCountryCode(trimmed);
+      data["phone"] = withDefaultCountryCode(trimmed);
     }
 
     return ApiService.dio.post("/auth/login", data: data);

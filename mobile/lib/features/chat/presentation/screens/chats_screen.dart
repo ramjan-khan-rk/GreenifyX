@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_status.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../application/providers/chats_provider.dart';
 import 'chat_screen.dart';
 
@@ -37,17 +38,24 @@ class ChatsScreen extends ConsumerWidget {
           return RefreshIndicator(
             color: AppColors.primary,
             onRefresh: () async => ref.invalidate(chatsProvider),
-            child: ListView.builder(
+            child: ListView.separated(
               itemCount: list.length,
+              separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final chat = list[index];
 
                 return ListTile(
-                  leading: const CircleAvatar(
-                    child: Icon(Icons.person),
+                  leading: UserAvatar(
+                    imageUrl: chat.profileImage,
+                    semanticLabel: "${chat.userName} photo",
                   ),
-                  title: Text(chat.userName),
-                  subtitle: Text(chat.lastMessage),
+                  title: Text(chat.userName, style: AppTextStyles.body),
+                  subtitle: Text(
+                    chat.lastMessage.isEmpty ? "Say hello" : chat.lastMessage,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.subtitle,
+                  ),
                   trailing: chat.unread
                       ? const Icon(
                           Icons.mark_chat_unread,

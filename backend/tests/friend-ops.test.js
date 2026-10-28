@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   applyBlock,
+  areFriends,
+  assertCanMessage,
   isBlockedEither,
   rejectPendingRequest,
   unfriendPair,
@@ -59,4 +61,19 @@ test("isBlockedEither is true from either side", () => {
   const right = user("b");
   assert.equal(isBlockedEither(left, right), true);
   assert.equal(isBlockedEither(right, left), true);
+});
+
+test("assertCanMessage allows friends only and blocks the rest", () => {
+  const a = user("a", { friends: ["b"] });
+  const b = user("b", { friends: ["a"] });
+  const stranger = user("c");
+  assert.equal(areFriends(a, b), true);
+  assert.equal(assertCanMessage(a, b).ok, true);
+  assert.equal(assertCanMessage(a, stranger).ok, false);
+  assert.equal(assertCanMessage(a, stranger).reason, "not_friends");
+
+  const blocked = user("d", { friends: ["a"] });
+  a.blockedUsers = ["d"];
+  blocked.friends = ["a"];
+  assert.equal(assertCanMessage(a, blocked).reason, "blocked");
 });

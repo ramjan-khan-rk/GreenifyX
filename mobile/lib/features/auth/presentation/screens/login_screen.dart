@@ -88,7 +88,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 autocorrect: false,
                 decoration: const InputDecoration(
                   labelText: "Email",
-                  helperText: "Existing phone accounts can still sign in with that number",
+                  helperText:
+                      "Existing phone accounts work too (+971 default; +91 still accepted)",
                 ),
               ),
               const SizedBox(height: 16),

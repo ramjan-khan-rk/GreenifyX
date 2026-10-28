@@ -49,3 +49,22 @@ export const applyBlock = (blocker, other) => {
 
 export const isBlockedEither = (left, right) =>
   hasId(left.blockedUsers, right._id) || hasId(right.blockedUsers, left._id);
+
+export const areFriends = (left, right) =>
+  hasId(left?.friends, right?._id) && hasId(right?.friends, left?._id);
+
+export const assertCanMessage = (sender, receiver) => {
+  if (!sender || !receiver) {
+    return { ok: false, status: 404, reason: "not_found" };
+  }
+  if (asId(sender._id) === asId(receiver._id)) {
+    return { ok: false, status: 400, reason: "self" };
+  }
+  if (isBlockedEither(sender, receiver)) {
+    return { ok: false, status: 403, reason: "blocked" };
+  }
+  if (!areFriends(sender, receiver)) {
+    return { ok: false, status: 403, reason: "not_friends" };
+  }
+  return { ok: true };
+};

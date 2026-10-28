@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import { resolveEcoPoints } from "../utils/ecoPoints.js";
 import { escapeRegex } from "../utils/escapeRegex.js";
+import { parsePagination } from "../utils/pagination.js";
 
 // COMPLETE / UPDATE PROFILE
 export const updateProfile = async (req, res) => {
@@ -145,6 +146,10 @@ export const searchUsers = async (req, res) => {
     }
 
     const currentUser = await User.findById(req.user._id);
+    const { limit } = parsePagination(req.query, {
+      defaultLimit: 20,
+      maxLimit: 50,
+    });
 
     const users = await User.find({
       _id: {
@@ -154,9 +159,11 @@ export const searchUsers = async (req, res) => {
         $regex: escapeRegex(keyword),
         $options: "i",
       },
-    }).select(
-      "name profileImage ecoPoints level friends friendRequests sentRequests"
-    );
+    })
+      .select(
+        "name profileImage ecoPoints level friends friendRequests sentRequests"
+      )
+      .limit(limit);
 
     const result = users.map((user) => ({
       _id: user._id,
