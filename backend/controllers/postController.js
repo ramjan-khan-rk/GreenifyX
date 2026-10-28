@@ -4,6 +4,7 @@ import Comment from "../models/Comment.js";
 import Notification from "../models/Notification.js";
 import { emitToUser } from "../socket/socket.js";
 import { uploadBufferToCloudinary } from "../utils/cloudinaryUpload.js";
+import { sendServerError } from "../utils/httpError.js";
 
 const ecoPointsMap = {
   "Tree Plantation": 50,
@@ -180,9 +181,48 @@ export const toggleLike = async (req, res) => {
       liked: !alreadyLiked,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Unable to update like",
+    return sendServerError(res, "Unable to update like");
+  }
+};
+
+export const verifyPost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    if (post.user.toString() === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot verify your own post",
+      });
+    }
+
+    const author = await User.findById(post.user);
+    const isFriend = author?.friends?.some(
+      (id) => id.toString() === req.user._id.toString()
+    );
+
+    if (!isFriend) {
+      return res.status(403).json({
+        success: false,
+        message: "Only friends can verify this activity",
+      });
+    }
+
+    post.isVerified = true;
+    await post.save();
+
+    return res.status(200).json({
+      success: true,
+      isVerified: true,
     });
+  } catch (error) {
+    return sendServerError(res, "Unable to verify post");
   }
 };

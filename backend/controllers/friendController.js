@@ -1,5 +1,12 @@
 import User from "../models/User.js";
 import Notification from "../models/Notification.js";
+import { sendServerError } from "../utils/httpError.js";
+import {
+  applyBlock,
+  isBlockedEither,
+  rejectPendingRequest,
+  unfriendPair,
+} from "../utils/friendOps.js";
 //
 export const sendRequest = async (req, res) => {
   try {
@@ -19,6 +26,13 @@ export const sendRequest = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "User not found",
+      });
+    }
+
+    if (isBlockedEither(sender, receiver)) {
+      return res.status(403).json({
+        success: false,
+        message: "You cannot send a request to this user",
       });
     }
 
@@ -71,7 +85,7 @@ export const sendRequest = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: e.message,
+      message: "Unable to send friend request",
     });
 
   }
@@ -153,14 +167,109 @@ export const acceptRequest = async (req, res) => {
 
   } catch (e) {
 
-    res.status(500).json({
-      success: false,
-      message: e.message,
-    });
+    return sendServerError(res, "Unable to accept request");
 
   }
 };
 
+export const rejectRequest = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const currentUser = await User.findById(req.user._id);
+    const sender = await User.findById(userId);
+
+    if (!sender) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const result = rejectPendingRequest(currentUser, sender);
+    if (!result.ok) {
+      return res.status(400).json({
+        success: false,
+        message: "No pending friend request from this user",
+      });
+    }
+
+    await currentUser.save();
+    await sender.save();
+
+    return res.json({
+      success: true,
+      message: "Friend request declined",
+    });
+  } catch (error) {
+    return sendServerError(res, "Unable to decline request");
+  }
+};
+
+export const unfriend = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const currentUser = await User.findById(req.user._id);
+    const other = await User.findById(userId);
+
+    if (!other) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const result = unfriendPair(currentUser, other);
+    if (!result.ok) {
+      return res.status(400).json({
+        success: false,
+        message: "You are not friends with this user",
+      });
+    }
+
+    await currentUser.save();
+    await other.save();
+
+    return res.json({
+      success: true,
+      message: "Removed from friends",
+    });
+  } catch (error) {
+    return sendServerError(res, "Unable to unfriend");
+  }
+};
+
+export const blockUser = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (userId === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot block yourself",
+      });
+    }
+
+    const currentUser = await User.findById(req.user._id);
+    const other = await User.findById(userId);
+
+    if (!other) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    applyBlock(currentUser, other);
+    await currentUser.save();
+    await other.save();
+
+    return res.json({
+      success: true,
+      message: "User blocked",
+    });
+  } catch (error) {
+    return sendServerError(res, "Unable to block user");
+  }
+};
 
 // GET FRIENDS
 export const getFriends = async (req, res) => {
@@ -186,10 +295,7 @@ export const getFriends = async (req, res) => {
 
   } catch (error) {
 
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return sendServerError(res, "Unable to load friends");
 
   }
 
@@ -219,10 +325,7 @@ export const getRequests = async (req, res) => {
 
   } catch (error) {
 
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return sendServerError(res, "Unable to load requests");
 
   }
 

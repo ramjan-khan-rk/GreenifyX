@@ -196,7 +196,7 @@ APP_NAME=GreenifyX
 ALLOW_DEV_OTP=false
 ```
 
-Copy `backend/.env.example` to `backend/.env` and fill values locally. Production `JWT_SECRET` must be at least 32 characters; do not rotate an existing production secret from this repo. `ALLOW_DEV_OTP=true` is non-production only and may include `devOtp` in the send-otp JSON body; it is ignored when `NODE_ENV=production`. Registration OTP is sent with Resend — see `backend/docs/resend-setup.md`. Use a from-address on a domain you verified in Resend (`EMAIL_FROM`). Do not commit secrets.
+Copy `backend/.env.example` to `backend/.env` and fill values locally. Production `JWT_SECRET` must be at least 32 characters; do not rotate an existing production secret from this repo. `ALLOW_DEV_OTP=true` is non-production only and may include `devOtp` in the send-otp JSON body; it is ignored when `NODE_ENV=production`. Registration OTP is sent with Resend — see `backend/docs/resend-setup.md`. Use a from-address on a domain you verified in Resend (`EMAIL_FROM`). Do not commit secrets. Live Resend sends are not run from this repo; leave keys unset until you are ready to send from your own environment.
 
 > **Note:** Never commit your `.env` file. It is excluded through `.gitignore`.
 

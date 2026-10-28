@@ -130,7 +130,7 @@ export const createChallenge = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
@@ -209,7 +209,7 @@ await Notification.create({
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
@@ -269,7 +269,7 @@ await Notification.create({
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
@@ -296,7 +296,7 @@ export const getChallenges = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
@@ -432,6 +432,6 @@ export const updateProgress = async (req, res) => {try {
 } catch (error) {
   return res.status(500).json({
     success: false,
-    message: error.message,
+    message: "Request failed",
   });
 }};

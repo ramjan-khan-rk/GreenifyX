@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/media_url.dart';
 import '../../../../core/widgets/app_status.dart';
+import '../../../auth/application/providers/auth_provider.dart';
 import '../../../comment/presentation/widgets/comment_bottom_sheet.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../application/providers/feed_provider.dart';
@@ -15,6 +16,7 @@ class FeedScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final feed = ref.watch(feedProvider);
+    final meId = ref.watch(authProvider).user?.id ?? "";
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -184,8 +186,30 @@ TextButton.icon(
     );
   },
   icon: const Icon(Icons.comment),
-  label: Text("${post.comments}"),
-),         ],
+                          label: Text("${post.comments}"),
+                        ),
+                        if (!post.isVerified &&
+                            post.userId.isNotEmpty &&
+                            post.userId != meId)
+                          TextButton.icon(
+                            onPressed: () async {
+                              try {
+                                await ref
+                                    .read(feedRepositoryProvider)
+                                    .verifyPost(post.id);
+                                ref.invalidate(feedProvider);
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(e.toString())),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.verified_outlined),
+                            label: const Text("Verify"),
+                          ),
+                      ],
                     ),
                   ],
                 ),

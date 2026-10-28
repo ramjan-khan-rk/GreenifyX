@@ -16,4 +16,8 @@ class FeedRepository {
   Future<void> toggleLike(String postId) async {
   await _api.toggleLike(postId);
 }
+
+  Future<void> verifyPost(String postId) async {
+    await _api.verifyPost(postId);
+  }
 }

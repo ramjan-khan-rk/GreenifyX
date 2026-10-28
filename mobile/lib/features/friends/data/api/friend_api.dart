@@ -20,6 +20,27 @@ class FriendApi {
     );
   }
 
+  Future<void> rejectRequest(String userId) async {
+    await ApiService.dio.post(
+      "/friends/reject",
+      data: {"userId": userId},
+    );
+  }
+
+  Future<void> unfriend(String userId) async {
+    await ApiService.dio.post(
+      "/friends/unfriend",
+      data: {"userId": userId},
+    );
+  }
+
+  Future<void> blockUser(String userId) async {
+    await ApiService.dio.post(
+      "/friends/block",
+      data: {"userId": userId},
+    );
+  }
+
   Future<List<dynamic>> getFriends() async {
     final response = await ApiService.dio.get(
       "/friends",

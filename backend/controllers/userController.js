@@ -38,7 +38,7 @@ export const updateProfile = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
@@ -69,7 +69,7 @@ export const getMyProfile = async (req, res) => {
   } catch (e) {
     res.status(500).json({
       success: false,
-      message: e.message,
+      message: "Request failed",
     });
   }
 };
@@ -100,7 +100,7 @@ export const getUserById = async (req, res) => {
   } catch (e) {
     res.status(500).json({
       success: false,
-      message: e.message,
+      message: "Request failed",
     });
   }
 };
@@ -127,7 +127,7 @@ export const getLeaderboard = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
@@ -185,7 +185,7 @@ export const searchUsers = async (req, res) => {
   } catch (e) {
     res.status(500).json({
       success: false,
-      message: e.message,
+      message: "Request failed",
     });
   }
 };

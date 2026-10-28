@@ -17,7 +17,7 @@ export const getNotifications = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
@@ -56,7 +56,7 @@ export const markAsRead = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
@@ -82,7 +82,7 @@ export const markAllAsRead = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
@@ -119,7 +119,7 @@ export const deleteNotification = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };

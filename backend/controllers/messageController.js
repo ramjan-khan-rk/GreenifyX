@@ -32,7 +32,7 @@ export const getMessages = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
 
   }
@@ -94,7 +94,7 @@ export const sendMessage = async (req, res) => {try {
 } catch (error) {
   return res.status(500).json({
     success: false,
-    message: error.message,
+    message: "Request failed",
   });
 }};
 
@@ -127,7 +127,7 @@ export const markAsRead = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
 
   }
@@ -180,7 +180,7 @@ export const getChatList = async (req, res) => {
 
     res.status(500).json({
       success:false,
-      message:e.message,
+      message: "Request failed",
     });
 
   }

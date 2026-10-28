@@ -7,6 +7,7 @@ import { initializeSocket } from "./socket/socket.js";
 import connectDB from "./config/db.js";
 import { assertJwtSecret } from "./utils/jwtConfig.js";
 import { corsOriginDelegate } from "./utils/corsConfig.js";
+import { securityHeaders } from "./middleware/securityHeaders.js";
 
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
@@ -28,6 +29,7 @@ const server = http.createServer(app);
 initializeSocket(server);
 
 app.set("trust proxy", 1);
+app.use(securityHeaders);
 app.use(cors({ origin: corsOriginDelegate }));
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));

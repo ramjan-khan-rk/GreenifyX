@@ -120,24 +120,43 @@ class FriendsScreen extends ConsumerWidget {
   title: Text(user.name),
 
   trailing: SizedBox(
-    width: 90,
-    child: ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        minimumSize: const Size(84, 36),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-      ),
-      onPressed: () async {
-        await ref
-            .read(friendRepositoryProvider)
-            .acceptRequest(user.id);
-
-        ref.invalidate(friendsProvider);
-        ref.invalidate(requestsProvider);
-      },
-      child: const Text(
-        "Accept",
-        overflow: TextOverflow.ellipsis,
-      ),
+    width: 168,
+    child: Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(0, 36),
+              padding: EdgeInsets.zero,
+            ),
+            onPressed: () async {
+              await ref
+                  .read(friendRepositoryProvider)
+                  .rejectRequest(user.id);
+              ref.invalidate(friendsProvider);
+              ref.invalidate(requestsProvider);
+            },
+            child: const Text("Decline"),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(0, 36),
+              padding: EdgeInsets.zero,
+            ),
+            onPressed: () async {
+              await ref
+                  .read(friendRepositoryProvider)
+                  .acceptRequest(user.id);
+              ref.invalidate(friendsProvider);
+              ref.invalidate(requestsProvider);
+            },
+            child: const Text("Accept"),
+          ),
+        ),
+      ],
     ),
   ),
 );

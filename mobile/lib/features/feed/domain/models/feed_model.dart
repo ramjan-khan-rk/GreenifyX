@@ -1,5 +1,6 @@
 class FeedModel {
   final String id;
+  final String userId;
   final String name;
   final String? profileImage;
   final String image;
@@ -13,6 +14,7 @@ class FeedModel {
 
   FeedModel({
     required this.id,
+    required this.userId,
     required this.name,
     this.profileImage,
     required this.image,
@@ -30,6 +32,7 @@ class FeedModel {
 
     return FeedModel(
       id: json["_id"] ?? "",
+      userId: user["_id"] ?? "",
       name: user["name"] ?? "Greenify User",
       profileImage: user["profileImage"],
       image: json["image"] ?? "",

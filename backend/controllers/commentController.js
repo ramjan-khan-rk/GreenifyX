@@ -59,7 +59,7 @@ export const addComment = async (req, res) => {try {
 } catch (error) {
   res.status(500).json({
     success: false,
-    message: error.message,
+    message: "Request failed",
   });
 }};
 
@@ -81,7 +81,7 @@ export const getComments = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
