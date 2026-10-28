@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repository/auth_repository.dart';
 import '../../domain/models/user_model.dart';
+import '../../../../core/services/api_service.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../domain/models/login_response.dart';
 import '../../../../core/services/socket_service.dart';
@@ -43,21 +44,21 @@ class AuthNotifier extends Notifier<AuthState> {
     return AuthState();
   }
 
-  Future<bool> sendOtp(
+  Future<String?> sendOtp(
     String phone, {
     String purpose = "register",
   }) async {
     try {
       state = state.copyWith(isLoading: true, error: null);
-      await repository.sendOtp(phone, purpose: purpose);
+      final devOtp = await repository.sendOtp(phone, purpose: purpose);
       state = state.copyWith(isLoading: false);
-      return true;
+      return devOtp;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: _errorMessage(e),
       );
-      return false;
+      return null;
     }
   }
 
@@ -117,11 +118,31 @@ class AuthNotifier extends Notifier<AuthState> {
 
   Future<void> _persistSession(LoginResponse result) async {
     await StorageService.saveToken(result.token);
-    SocketService.instance.connect(result.user.id);
+    await SocketService.instance.connect(result.user.id);
     state = AuthState(user: result.user);
   }
 
+  Future<UserModel?> restoreSession() async {
+    final token = await StorageService.getToken();
+    if (token == null) return null;
+
+    try {
+      final response = await ApiService.dio.get("/users/me");
+      final userJson = response.data["user"] as Map<String, dynamic>;
+      final user = UserModel.fromJson(userJson);
+      await SocketService.instance.connect(user.id);
+      state = AuthState(user: user);
+      return user;
+    } catch (_) {
+      await StorageService.clear();
+      SocketService.instance.disconnect();
+      state = AuthState();
+      return null;
+    }
+  }
+
   Future<void> logout() async {
+    SocketService.instance.disconnect();
     await StorageService.clear();
     state = AuthState();
   }

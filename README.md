@@ -2,7 +2,7 @@
 
 > **A full-stack eco-social platform that transforms real-world environmental actions into a social and rewarding experience.**
 
-**GreenifyX** is an independently developed Flutter & Node.js application where users can share eco-friendly activities, challenge friends, earn **Eco Score**, communicate in real time, and build a community around sustainable living.
+**GreenifyX** is an independently developed Flutter & Node.js application where users can share eco-friendly activities, challenge friends, earn **Eco Points**, communicate in real time, and build a community around sustainable living.
 
 ---
 
@@ -12,7 +12,7 @@
 
 * Secure user registration & login (JWT)
 * Personalized profiles with profile images
-* Eco Score and activity statistics
+* Eco Points and activity statistics
 * Friend-based social network
 
 ### 🌍 Social Feed
@@ -183,15 +183,22 @@ Create a `.env` file inside the backend directory with:
 
 ```env
 PORT=5000
-MONGODB_URI=your_connection_string
-JWT_SECRET=your_secret
-
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+NODE_ENV=development
+MONGO_URI=
+JWT_SECRET=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CORS_ORIGIN=
+SMS_PROVIDER=
+ALLOW_DEV_OTP=false
 ```
 
+Copy `backend/.env.example` to `backend/.env` and fill values locally. Production `JWT_SECRET` must be at least 32 characters; do not rotate an existing production secret from this repo. `ALLOW_DEV_OTP=true` is non-production only and may include `devOtp` in the send-otp JSON body. SMS is not wired until `SMS_PROVIDER` has a real adapter.
+
 > **Note:** Never commit your `.env` file. It is excluded through `.gitignore`.
+
+**JWT rotation (ops, not automated):** set a new `JWT_SECRET` on the host, restart the API, and expect existing sessions to fail until users log in again. This process does not change any current production secret.
 
 ---
 

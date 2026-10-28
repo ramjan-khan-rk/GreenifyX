@@ -5,11 +5,9 @@ import http from "http";
 
 import { initializeSocket } from "./socket/socket.js";
 import connectDB from "./config/db.js";
+import { assertJwtSecret } from "./utils/jwtConfig.js";
+import { corsOriginDelegate } from "./utils/corsConfig.js";
 
-// Models
-
-
-// ROUTES
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -19,23 +17,21 @@ import challengeRoutes from "./routes/challengeRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
-dotenv.config();
 
+dotenv.config();
+assertJwtSecret();
 connectDB();
 
 const app = express();
 const server = http.createServer(app);
 
-// Socket.IO
 initializeSocket(server);
-// Store online users
 
-// Middleware
-app.use(cors());
+app.set("trust proxy", 1);
+app.use(cors({ origin: corsOriginDelegate }));
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/users", userRoutes);
@@ -45,7 +41,7 @@ app.use("/api/challenges", challengeRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/notifications", notificationRoutes);
-// Test Route
+
 app.get("/", (req, res) => {
   res.send("GreenifyX API Running...");
 });

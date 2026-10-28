@@ -1,33 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/services/socket_service.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../friends/presentation/screens/friends_screen.dart';
 import '../../../chat/presentation/screens/chats_screen.dart';
+import '../../../chat/application/providers/chat_provider.dart';
+import '../../../chat/application/providers/chats_provider.dart';
 import '../../../profile/presentation/screens/account_screen.dart';
 import '../../../post/presentation/screens/create_post_screen.dart';
 import '../../../feed/presentation/screens/feed_screen.dart';
-class BottomNavScreen extends StatefulWidget {
+import '../../../challenge/application/providers/challenge_provider.dart';
+
+class BottomNavScreen extends ConsumerStatefulWidget {
   const BottomNavScreen({super.key});
 
   @override
-  State<BottomNavScreen> createState() => _BottomNavScreenState();
+  ConsumerState<BottomNavScreen> createState() => _BottomNavScreenState();
 }
 
-class _BottomNavScreenState extends State<BottomNavScreen> {
+class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
   int currentIndex = 0;
-final pages = const [
-  HomeScreen(),
-  FeedScreen(),
-  FriendsScreen(),
-  ChatsScreen(),
-  AccountScreen(),
-];
+  final pages = const [
+    HomeScreen(),
+    FeedScreen(),
+    FriendsScreen(),
+    ChatsScreen(),
+    AccountScreen(),
+  ];
+
+  void _onRealtimeEvent(dynamic _) {
+    ref.invalidate(chatsProvider);
+    ref.invalidate(chatProvider);
+    ref.invalidate(challengesProvider);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final socket = SocketService.instance;
+    socket.on("receiveMessage", _onRealtimeEvent);
+    socket.on("challengeReceived", _onRealtimeEvent);
+    socket.on("challengeAccepted", _onRealtimeEvent);
+    socket.on("challengeRejected", _onRealtimeEvent);
+    socket.on("challengeCompleted", _onRealtimeEvent);
+    socket.on("newNotification", _onRealtimeEvent);
+  }
+
+  @override
+  void dispose() {
+    final socket = SocketService.instance;
+    socket.off("receiveMessage");
+    socket.off("challengeReceived");
+    socket.off("challengeAccepted");
+    socket.off("challengeRejected");
+    socket.off("challengeCompleted");
+    socket.off("newNotification");
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: pages[currentIndex],
-
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green,
         onPressed: () {
@@ -40,30 +75,24 @@ final pages = const [
         },
         child: const Icon(Icons.add),
       ),
-
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.centerDocked,
-
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-
         onTap: (index) {
           setState(() {
             currentIndex = index;
           });
         },
-
         type: BottomNavigationBarType.fixed,
-
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: "Home",
           ),
           BottomNavigationBarItem(
-    icon: Icon(Icons.public),
-    label: "Feed",
-  ),
+            icon: Icon(Icons.public),
+            label: "Feed",
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.people),
             label: "Friends",

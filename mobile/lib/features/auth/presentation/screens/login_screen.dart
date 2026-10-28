@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/utils/phone.dart';
 import '../../application/providers/auth_provider.dart';
 import 'forgot_password_screen.dart';
 import 'register_screen.dart';
@@ -26,7 +27,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _login() async {
-    final phone = phoneController.text.trim();
+    final phone = withIndiaCountryCode(phoneController.text);
     final password = passwordController.text;
 
     if (phone.isEmpty || password.isEmpty) {

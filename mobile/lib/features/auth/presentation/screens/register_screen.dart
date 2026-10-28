@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/phone.dart';
 import '../../application/providers/auth_provider.dart';
 import 'otp_screen.dart';
 
@@ -21,20 +22,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _sendOtp() async {
-    final phone = phoneController.text.trim();
-    if (phone.isEmpty) {
+    final phone = withIndiaCountryCode(phoneController.text);
+    if (phoneController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Enter your phone number")),
       );
       return;
     }
 
-    final ok = await ref.read(authProvider.notifier).sendOtp(
+    final devOtp = await ref.read(authProvider.notifier).sendOtp(
           phone,
           purpose: "register",
         );
 
-    if (!ok || !mounted) return;
+    if (ref.read(authProvider).error != null || !mounted) return;
 
     Navigator.push(
       context,
@@ -42,6 +43,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         builder: (_) => OtpScreen(
           phone: phone,
           purpose: "register",
+          devOtp: devOtp,
         ),
       ),
     );

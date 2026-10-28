@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/media_url.dart';
 import '../../application/providers/friend_provider.dart';
 import 'friend_profile_screen.dart';
 import 'search_friends_screen.dart';
@@ -106,7 +107,7 @@ class FriendsScreen extends ConsumerWidget {
   leading: CircleAvatar(
     backgroundImage: user.profileImage.isNotEmpty
         ? NetworkImage(
-            "http://10.255.139.39:5000/uploads/${user.profileImage}",
+            resolveMediaUrl(user.profileImage) ?? "",
           )
         : null,
     child: user.profileImage.isEmpty
@@ -196,7 +197,7 @@ class FriendsScreen extends ConsumerWidget {
                         backgroundImage:
                         friend.profileImage.isNotEmpty
                             ? NetworkImage(
-                          "http://10.255.139.39:5000/uploads/${friend.profileImage}",
+                          resolveMediaUrl(friend.profileImage) ?? "",
                         )
                             : null,
 

@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import { resolveEcoPoints } from "../utils/ecoPoints.js";
+import { escapeRegex } from "../utils/escapeRegex.js";
 
 // COMPLETE / UPDATE PROFILE
 export const updateProfile = async (req, res) => {
@@ -46,6 +47,13 @@ export const updateProfile = async (req, res) => {
 export const getMyProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized",
+      });
+    }
 
     const obj = user.toObject();
     obj.ecoPoints = resolveEcoPoints(user);
@@ -127,7 +135,14 @@ export const getLeaderboard = async (req, res) => {
 // SEARCH USERS
 export const searchUsers = async (req, res) => {
   try {
-    const keyword = req.query.q || "";
+    const keyword = String(req.query.q || "").trim();
+
+    if (!keyword) {
+      return res.status(200).json({
+        success: true,
+        users: [],
+      });
+    }
 
     const currentUser = await User.findById(req.user._id);
 
@@ -136,7 +151,7 @@ export const searchUsers = async (req, res) => {
         $ne: req.user._id,
       },
       name: {
-        $regex: keyword,
+        $regex: escapeRegex(keyword),
         $options: "i",
       },
     }).select(

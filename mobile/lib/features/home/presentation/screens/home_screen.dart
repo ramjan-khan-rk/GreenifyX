@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../profile/application/providers/my_profile_provider.dart';
 import '../../../challenge/presentation/screens/create_challenge_screen.dart';
 import '../../../challenge/presentation/screens/challenge_screen.dart';
+import '../../../../core/utils/media_url.dart';
 import '../widgets/eco_points_card.dart';
 import '../widgets/quote_card.dart';
 
@@ -60,7 +61,7 @@ class HomeScreen extends ConsumerWidget {
                         backgroundImage:
                             user.profileImage.isNotEmpty
                                 ? NetworkImage(
-                                    "http://10.255.139.39:5000/uploads/${user.profileImage}",
+                                    resolveMediaUrl(user.profileImage) ?? "",
                                   )
                                 : null,
 

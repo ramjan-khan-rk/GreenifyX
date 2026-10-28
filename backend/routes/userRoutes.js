@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.put("/profile", protect, updateProfile);
 router.get("/me", protect, getMyProfile);
-router.get("/leaderboard", getLeaderboard);
+router.get("/leaderboard", protect, getLeaderboard);
 router.get("/search", protect, searchUsers);
 router.get("/:id", protect, getUserById);
 export default router;

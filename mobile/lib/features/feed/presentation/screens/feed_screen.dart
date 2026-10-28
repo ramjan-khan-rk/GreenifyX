@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/media_url.dart';
 import '../../application/providers/feed_provider.dart';
 import '../../../comment/presentation/widgets/comment_bottom_sheet.dart';
 
@@ -46,7 +47,7 @@ class FeedScreen extends ConsumerWidget {
                         backgroundImage: post.profileImage != null &&
                                 post.profileImage!.isNotEmpty
                             ? NetworkImage(
-                                "http://10.255.139.39:5000/uploads/${post.profileImage}",
+                                resolveMediaUrl(post.profileImage) ?? "",
                               )
                             : null,
                         child: post.profileImage == null ||
@@ -78,7 +79,7 @@ class FeedScreen extends ConsumerWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.network(
-                        "http://10.255.139.39:5000/uploads/${post.image}",
+                        resolveMediaUrl(post.image) ?? "",
                         width: double.infinity,
                         height: 280,
                         fit: BoxFit.cover,
@@ -102,7 +103,9 @@ class FeedScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          "🌱 ${post.ecoPoints} Eco Points",
+                          post.isVerified
+                              ? "🌱 ${post.ecoPoints} Eco Points"
+                              : "🌱 ${post.ecoPoints} Eco Points (unverified)",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,

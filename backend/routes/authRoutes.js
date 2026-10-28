@@ -5,8 +5,11 @@ import {
   setPassword,
   login,
 } from "../controllers/authController.js";
+import { limitAuthRequests } from "../utils/rateLimit.js";
 
 const router = express.Router();
+
+router.use(limitAuthRequests);
 
 router.post("/send-otp", sendOTP);
 router.post("/verify-otp", verifyOTP);

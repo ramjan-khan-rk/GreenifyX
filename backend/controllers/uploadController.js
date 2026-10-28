@@ -1,5 +1,4 @@
-import cloudinary from "../config/cloudinary.js";
-import streamifier from "streamifier";
+import { uploadBufferToCloudinary } from "../utils/cloudinaryUpload.js";
 
 export const uploadImage = async (req, res) => {
   try {
@@ -10,31 +9,16 @@ export const uploadImage = async (req, res) => {
       });
     }
 
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder: "GreenifyX",
-      },
-      (error, result) => {
-        if (error) {
-          return res.status(500).json({
-            success: false,
-            message: error.message,
-          });
-        }
+    const imageUrl = await uploadBufferToCloudinary(req.file.buffer);
 
-        return res.status(200).json({
-          success: true,
-          imageUrl: result.secure_url,
-        });
-      }
-    );
-
-    streamifier.createReadStream(req.file.buffer).pipe(stream);
-
+    return res.status(200).json({
+      success: true,
+      imageUrl,
+    });
   } catch (e) {
     res.status(500).json({
       success: false,
-      message: e.message,
+      message: "Image upload failed",
     });
   }
 };

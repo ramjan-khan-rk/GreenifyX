@@ -1,7 +1,7 @@
 import Comment from "../models/Comment.js";
 import Post from "../models/Post.js";
 import Notification from "../models/Notification.js";
-import { getIo, getUserSocket } from "../socket/socket.js";
+import { emitToUser } from "../socket/socket.js";
 // ADD COMMENT
 export const addComment = async (req, res) => {try {
   const { text } = req.body;
@@ -49,15 +49,7 @@ export const addComment = async (req, res) => {try {
       referenceId: comment._id,
     });
 
-    const receiverSocket = getUserSocket(
-      post.user.toString()
-    );
-
-    if (receiverSocket) {
-      getIo()
-        .to(receiverSocket)
-        .emit("newNotification", notification);
-    }
+    emitToUser(post.user, "newNotification", notification);
   }
 
   res.status(201).json({

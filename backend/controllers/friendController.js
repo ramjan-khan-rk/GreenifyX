@@ -87,6 +87,35 @@ export const acceptRequest = async (req, res) => {
     const sender =
       await User.findById(userId);
 
+    if (!sender) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const pending = currentUser.friendRequests.some(
+      (id) => id.toString() === userId
+    );
+
+    if (!pending) {
+      return res.status(400).json({
+        success: false,
+        message: "No pending friend request from this user",
+      });
+    }
+
+    const alreadyFriends = currentUser.friends.some(
+      (id) => id.toString() === userId
+    );
+
+    if (alreadyFriends) {
+      return res.status(400).json({
+        success: false,
+        message: "Already friends",
+      });
+    }
+
     currentUser.friendRequests =
       currentUser.friendRequests.filter(
         (id) => id.toString() !== userId

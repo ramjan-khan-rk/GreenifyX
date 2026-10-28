@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/media_url.dart';
 import '../../application/providers/comment_provider.dart';
 
 class CommentBottomSheet extends ConsumerStatefulWidget {
@@ -69,7 +70,8 @@ class _CommentBottomSheetState
                               comment.profileImage != null &&
                                       comment.profileImage!.isNotEmpty
                                   ? NetworkImage(
-                                      "http://10.255.139.39:5000/uploads/${comment.profileImage}",
+                                      resolveMediaUrl(comment.profileImage) ??
+                                          "",
                                     )
                                   : null,
                           child: comment.profileImage == null ||

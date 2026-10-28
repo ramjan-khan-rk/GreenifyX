@@ -4,7 +4,10 @@ import '../../application/providers/profile_provider.dart';
 import '../../application/providers/my_profile_provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../friends/application/providers/friend_provider.dart';
+import '../../../friends/presentation/screens/friends_screen.dart';
 import '../../../chat/application/providers/chats_provider.dart';
+import 'complete_profile_screen.dart';
+import '../../../../core/utils/media_url.dart';
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
 
@@ -55,7 +58,7 @@ class AccountScreen extends ConsumerWidget {
                     user.profileImage.isNotEmpty
 
                     ? NetworkImage(
-                      "http://10.255.139.39:5000/uploads/${user.profileImage}",
+                      resolveMediaUrl(user.profileImage) ?? "",
                     )
 
                     :null,
@@ -151,9 +154,12 @@ class AccountScreen extends ConsumerWidget {
                 ElevatedButton.icon(
 
                   onPressed:(){
-
-                    // next
-
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CompleteProfileScreen(),
+                      ),
+                    );
                   },
 
                   icon:const Icon(Icons.edit),
@@ -167,9 +173,12 @@ class AccountScreen extends ConsumerWidget {
                 ElevatedButton.icon(
 
                   onPressed:(){
-
-                    // next
-
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const FriendsScreen(),
+                      ),
+                    );
                   },
 
                   icon:const Icon(Icons.people),

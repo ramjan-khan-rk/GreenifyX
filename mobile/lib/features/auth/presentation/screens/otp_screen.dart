@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,11 +8,13 @@ import 'set_password_screen.dart';
 class OtpScreen extends ConsumerStatefulWidget {
   final String phone;
   final String purpose;
+  final String? devOtp;
 
   const OtpScreen({
     super.key,
     required this.phone,
     this.purpose = "register",
+    this.devOtp,
   });
 
   @override
@@ -20,6 +23,14 @@ class OtpScreen extends ConsumerStatefulWidget {
 
 class _OtpScreenState extends ConsumerState<OtpScreen> {
   final otpController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (kDebugMode && widget.devOtp != null && widget.devOtp!.isNotEmpty) {
+      otpController.text = widget.devOtp!;
+    }
+  }
 
   @override
   void dispose() {
@@ -75,11 +86,18 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text("OTP sent to ${widget.phone}"),
+            if (kDebugMode && widget.devOtp != null) ...[
+              const SizedBox(height: 12),
+              const Text(
+                "Development shortcut is enabled on this non-production API.",
+                textAlign: TextAlign.center,
+              ),
+            ],
             const SizedBox(height: 30),
             TextField(
               controller: otpController,
               keyboardType: TextInputType.number,
-              maxLength: 4,
+              maxLength: 6,
               decoration: const InputDecoration(
                 labelText: "Enter OTP",
                 border: OutlineInputBorder(),

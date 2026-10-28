@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/media_url.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../friends/application/providers/friend_provider.dart';
@@ -171,11 +172,10 @@ class _ChooseFriendScreenState extends ConsumerState<ChooseFriendScreen> {
                                       backgroundImage:
                                           friend.profileImage.isNotEmpty
                                               ? NetworkImage(
-                                                  friend.profileImage.startsWith(
-                                                          "http",
-                                                        )
-                                                      ? friend.profileImage
-                                                      : "https://greenifyx.onrender.com/uploads/${friend.profileImage}",
+                                                  resolveMediaUrl(
+                                                        friend.profileImage,
+                                                      ) ??
+                                                      "",
                                                 )
                                               : null,
                                       child: friend.profileImage.isEmpty

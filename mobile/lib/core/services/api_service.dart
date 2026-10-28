@@ -1,15 +1,14 @@
 import 'package:dio/dio.dart';
 
+import '../config/app_config.dart';
 import 'storage_service.dart';
 
 class ApiService {
   static final Dio dio = Dio(
     BaseOptions(
-      baseUrl: "http://10.238.223.39:5000/api",
-
+      baseUrl: AppConfig.apiBaseUrl,
       connectTimeout: const Duration(seconds: 100),
       receiveTimeout: const Duration(seconds: 10),
-
       headers: {
         "Content-Type": "application/json",
       },

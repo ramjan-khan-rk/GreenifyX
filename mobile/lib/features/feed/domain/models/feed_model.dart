@@ -9,6 +9,7 @@ class FeedModel {
   final int likes;
   final int comments;
   final bool isLiked;
+  final bool isVerified;
 
   FeedModel({
     required this.id,
@@ -21,6 +22,7 @@ class FeedModel {
     required this.likes,
     required this.comments,
     required this.isLiked,
+    required this.isVerified,
   });
 
   factory FeedModel.fromJson(Map<String, dynamic> json) {
@@ -37,6 +39,7 @@ class FeedModel {
       likes: json["likesCount"] ?? 0,
       comments: json["commentsCount"] ?? 0,
       isLiked: json["isLiked"] ?? false,
+      isVerified: json["isVerified"] ?? false,
     );
   }
 }

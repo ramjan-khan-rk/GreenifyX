@@ -1,32 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class SplashScreen extends StatefulWidget {
+import '../../../auth/application/providers/auth_provider.dart';
+
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() =>
-      _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
-void initState() {
-  super.initState();
+  void initState() {
+    super.initState();
+    Future.microtask(_restore);
+  }
 
-  print("Splash Started");
+  Future<void> _restore() async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
 
-  Future.delayed(const Duration(seconds: 2), () {
-    print("Going to Login");
+    final user = await ref.read(authProvider.notifier).restoreSession();
+    if (!mounted) return;
 
-    if (!mounted) {
-      print("Widget not mounted");
+    if (user == null) {
+      context.go("/login");
       return;
     }
 
-    context.go("/login");
-  });
-}
+    if (!user.isProfileCompleted) {
+      context.go("/complete-profile");
+      return;
+    }
+
+    context.go("/home");
+  }
+
   @override
   Widget build(BuildContext context) {
     return const Scaffold(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/media_url.dart';
 import '../../domain/models/friend_model.dart';
 import '../../../chat/presentation/screens/chat_screen.dart';
 class FriendProfileScreen extends StatelessWidget {
@@ -25,7 +26,7 @@ class FriendProfileScreen extends StatelessWidget {
               radius: 55,
               backgroundImage: friend.profileImage.isNotEmpty
                   ? NetworkImage(
-                      "http://10.255.139.39:5000/uploads/${friend.profileImage}",
+                      resolveMediaUrl(friend.profileImage) ?? "",
                     )
                   : null,
               child: friend.profileImage.isEmpty

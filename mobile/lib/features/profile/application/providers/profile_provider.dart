@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../data/api/upload_api.dart';
 import '../../data/repository/profile_repository.dart';
+import '../../../../core/services/socket_service.dart';
 import '../../../../core/services/storage_service.dart';
 
 
@@ -201,9 +202,8 @@ Future<void> loadProfile() async {
 
 }
 Future<void> logout() async {
-
+  SocketService.instance.disconnect();
   await StorageService.clear();
-
 }
 }
 final profileProvider =

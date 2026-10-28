@@ -1,3 +1,5 @@
+import '../config/app_config.dart';
+
 class ApiConstants {
-  static const String baseUrl = "http://192.168.1.2:5000/api";
+  static const String baseUrl = AppConfig.apiBaseUrl;
 }

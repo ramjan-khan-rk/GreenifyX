@@ -1,5 +1,5 @@
 import Message from "../models/Message.js";
-import { getIo, getUserSocket } from "../socket/socket.js";
+import { emitToUser } from "../socket/socket.js";
 import Notification from "../models/Notification.js";
 
 // GET CHAT
@@ -83,22 +83,8 @@ export const sendMessage = async (req, res) => {try {
     referenceId: message._id,
   });
 
-  // Receiver socket
-  const receiverSocket = getUserSocket(receiverId);
-
-  if (receiverSocket) {
-    // Real-time message
-    getIo().to(receiverSocket).emit(
-      "receiveMessage",
-      populatedMessage,
-    );
-
-    // Real-time notification
-    getIo().to(receiverSocket).emit(
-      "newNotification",
-      notification,
-    );
-  }
+  emitToUser(receiverId, "receiveMessage", populatedMessage);
+  emitToUser(receiverId, "newNotification", notification);
 
   return res.status(201).json({
     success: true,

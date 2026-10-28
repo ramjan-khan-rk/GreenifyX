@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/media_url.dart';
 import '../../application/providers/friend_provider.dart';
 import '../../application/providers/search_user_provider.dart';
 
@@ -167,7 +168,7 @@ for (final u in list) {
                           backgroundImage:
                               user.profileImage.isNotEmpty
                                   ? NetworkImage(
-                                      "http://10.255.139.39:5000/uploads/${user.profileImage}",
+                                      resolveMediaUrl(user.profileImage) ?? "",
                                     )
                                   : null,
 

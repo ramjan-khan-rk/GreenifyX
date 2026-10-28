@@ -5,11 +5,16 @@ import '../api/auth_api.dart';
 class AuthRepository {
   final AuthApi _api = AuthApi();
 
-  Future<void> sendOtp(
+  Future<String?> sendOtp(
     String phone, {
     String purpose = "register",
   }) async {
-    await _api.sendOtp(phone, purpose: purpose);
+    final response = await _api.sendOtp(phone, purpose: purpose);
+    final data = response.data;
+    if (data is Map && data["devOtp"] != null) {
+      return data["devOtp"].toString();
+    }
+    return null;
   }
 
   Future<void> verifyOtp(

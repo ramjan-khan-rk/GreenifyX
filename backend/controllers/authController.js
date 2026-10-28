@@ -1,17 +1,20 @@
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
-
-// Temporary OTP storage (Development only)
-// phone -> { code, purpose, verifiedAt }
-const otpStore = {};
+import OtpChallenge from "../models/OtpChallenge.js";
+import { getJwtSecret } from "../utils/jwtConfig.js";
+import { allowDevOtpShortcut, deliverOtp } from "../utils/otpDelivery.js";
+import { hitRateLimit } from "../utils/rateLimit.js";
+import { normalizePhone, phoneCandidates } from "../utils/phone.js";
 
 const OTP_TTL_MS = 10 * 60 * 1000;
 const VERIFIED_TTL_MS = 15 * 60 * 1000;
 const MIN_PASSWORD_LENGTH = 6;
+const MAX_OTP_ATTEMPTS = 5;
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+  return jwt.sign({ id }, getJwtSecret(), {
     expiresIn: "7d",
   });
 };
@@ -26,29 +29,52 @@ const sanitizeUser = (user) => {
   return obj;
 };
 
-const getOtpEntry = (phone) => otpStore[phone];
+const hashOtp = (phone, purpose, code) =>
+  crypto
+    .createHmac("sha256", getJwtSecret())
+    .update(`${phone}:${purpose}:${code}`)
+    .digest("hex");
 
-const clearOtp = (phone) => {
-  delete otpStore[phone];
+const hashesMatch = (a, b) => {
+  if (!a || !b) return false;
+  const left = Buffer.from(String(a));
+  const right = Buffer.from(String(b));
+  if (left.length !== right.length) return false;
+  return crypto.timingSafeEqual(left, right);
 };
 
-const isVerifiedForPurpose = (phone, purpose) => {
-  const entry = getOtpEntry(phone);
-  if (!entry || entry.purpose !== purpose || !entry.verifiedAt) {
+const findUserByPhone = async (phone, extra = "") => {
+  const candidates = phoneCandidates(phone);
+  if (!candidates.length) return null;
+  return User.findOne({ phone: { $in: candidates } }).select(extra);
+};
+
+const getActiveOtp = async (phone, purpose) => {
+  return OtpChallenge.findOne({
+    phone,
+    purpose,
+  }).sort({ createdAt: -1 });
+};
+
+const isVerifiedForPurpose = async (phone, purpose) => {
+  const entry = await getActiveOtp(phone, purpose);
+  if (!entry || !entry.verifiedAt || entry.codeHash) {
     return false;
   }
-  if (Date.now() - entry.verifiedAt > VERIFIED_TTL_MS) {
-    clearOtp(phone);
+  if (Date.now() - entry.verifiedAt.getTime() > VERIFIED_TTL_MS) {
+    await OtpChallenge.deleteMany({ phone, purpose });
     return false;
   }
   return true;
 };
 
-// SEND OTP (registration or password reset)
+const generateOtpCode = () =>
+  crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");
+
 export const sendOTP = async (req, res) => {
   try {
-    const { phone } = req.body;
     const purpose = normalizePurpose(req.body.purpose);
+    const phone = normalizePhone(req.body.phone);
 
     if (!phone) {
       return res.status(400).json({
@@ -57,7 +83,20 @@ export const sendOTP = async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne({ phone }).select("+password");
+    if (
+      hitRateLimit({
+        key: `otp-phone:${phone}:${purpose}`,
+        max: 5,
+        windowMs: 15 * 60 * 1000,
+      })
+    ) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many OTP requests for this number. Try again later.",
+      });
+    }
+
+    const existingUser = await findUserByPhone(phone, "+password");
 
     if (purpose === "register" && existingUser?.password) {
       return res.status(400).json({
@@ -73,36 +112,49 @@ export const sendOTP = async (req, res) => {
       });
     }
 
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    const otp = generateOtpCode();
 
-    otpStore[phone] = {
-      code: otp,
+    await OtpChallenge.deleteMany({ phone, purpose });
+    await OtpChallenge.create({
+      phone,
       purpose,
-      createdAt: Date.now(),
+      codeHash: hashOtp(phone, purpose, otp),
+      attempts: 0,
       verifiedAt: null,
+    });
+
+    const delivery = await deliverOtp({ phone, otp });
+    const devShortcut = allowDevOtpShortcut();
+
+    const payload = {
+      success: true,
+      purpose,
+      delivery: delivery.delivered ? "sent" : "not_sent",
+      message: delivery.delivered
+        ? "OTP sent successfully"
+        : devShortcut
+          ? "OTP generated. SMS is not configured; use the development shortcut."
+          : "OTP could not be delivered. Configure SMS_PROVIDER before production use.",
     };
 
-    console.log(`📱 OTP (${purpose}) for ${phone}: ${otp}`);
+    if (devShortcut) {
+      payload.devOtp = otp;
+    }
 
-    res.status(200).json({
-      success: true,
-      message: "OTP sent successfully",
-      purpose,
-      otp, // Remove this in production
-    });
+    return res.status(200).json(payload);
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to send OTP",
     });
   }
 };
 
-// VERIFY OTP — does not log the user in; unlocks set-password
 export const verifyOTP = async (req, res) => {
   try {
-    const { phone, otp } = req.body;
     const purpose = normalizePurpose(req.body.purpose);
+    const phone = normalizePhone(req.body.phone);
+    const otp = String(req.body.otp ?? "").trim();
 
     if (!phone || !otp) {
       return res.status(400).json({
@@ -111,22 +163,45 @@ export const verifyOTP = async (req, res) => {
       });
     }
 
-    const entry = getOtpEntry(phone);
+    const entry = await getActiveOtp(phone, purpose);
 
-    if (
-      !entry ||
-      entry.purpose !== purpose ||
-      entry.code !== otp ||
-      Date.now() - entry.createdAt > OTP_TTL_MS
-    ) {
+    if (!entry || !entry.codeHash) {
       return res.status(400).json({
         success: false,
         message: "Invalid or expired OTP",
       });
     }
 
-    entry.verifiedAt = Date.now();
-    entry.code = null;
+    if (Date.now() - entry.createdAt.getTime() > OTP_TTL_MS) {
+      await OtpChallenge.deleteMany({ phone, purpose });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    if (entry.attempts >= MAX_OTP_ATTEMPTS) {
+      await OtpChallenge.deleteMany({ phone, purpose });
+      return res.status(429).json({
+        success: false,
+        message: "Too many incorrect attempts. Request a new OTP.",
+      });
+    }
+
+    const expected = hashOtp(phone, purpose, otp);
+    if (!hashesMatch(entry.codeHash, expected)) {
+      entry.attempts += 1;
+      await entry.save();
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    entry.verifiedAt = new Date();
+    entry.codeHash = null;
+    entry.attempts = 0;
+    await entry.save();
 
     res.status(200).json({
       success: true,
@@ -136,19 +211,18 @@ export const verifyOTP = async (req, res) => {
       phone,
     });
   } catch (error) {
-    console.log("VERIFY OTP ERROR:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to verify OTP",
     });
   }
 };
 
-// SET / RESET PASSWORD after OTP verification
 export const setPassword = async (req, res) => {
   try {
-    const { phone, password } = req.body;
     const purpose = normalizePurpose(req.body.purpose);
+    const phone = normalizePhone(req.body.phone);
+    const password = req.body.password;
 
     if (!phone || !password) {
       return res.status(400).json({
@@ -164,7 +238,7 @@ export const setPassword = async (req, res) => {
       });
     }
 
-    if (!isVerifiedForPurpose(phone, purpose)) {
+    if (!(await isVerifiedForPurpose(phone, purpose))) {
       return res.status(400).json({
         success: false,
         message: "Please verify OTP before setting a password",
@@ -172,12 +246,12 @@ export const setPassword = async (req, res) => {
     }
 
     const hashed = await bcrypt.hash(password, 10);
-    let user = await User.findOne({ phone }).select("+password");
+    let user = await findUserByPhone(phone, "+password");
     let isNewUser = false;
 
     if (purpose === "register") {
       if (user?.password) {
-        clearOtp(phone);
+        await OtpChallenge.deleteMany({ phone, purpose });
         return res.status(400).json({
           success: false,
           message: "Account already exists. Please log in.",
@@ -194,7 +268,7 @@ export const setPassword = async (req, res) => {
       }
     } else {
       if (!user) {
-        clearOtp(phone);
+        await OtpChallenge.deleteMany({ phone, purpose });
         return res.status(404).json({
           success: false,
           message: "No account found for this phone number.",
@@ -206,7 +280,7 @@ export const setPassword = async (req, res) => {
       isNewUser = !user.isProfileCompleted;
     }
 
-    clearOtp(phone);
+    await OtpChallenge.deleteMany({ phone, purpose });
 
     const token = generateToken(user._id);
 
@@ -221,18 +295,17 @@ export const setPassword = async (req, res) => {
       user: sanitizeUser(user),
     });
   } catch (error) {
-    console.log("SET PASSWORD ERROR:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to set password",
     });
   }
 };
 
-// PASSWORD LOGIN
 export const login = async (req, res) => {
   try {
-    const { phone, password } = req.body;
+    const phone = normalizePhone(req.body.phone);
+    const password = req.body.password;
 
     if (!phone || !password) {
       return res.status(400).json({
@@ -241,7 +314,7 @@ export const login = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ phone }).select("+password");
+    const user = await findUserByPhone(phone, "+password");
 
     if (!user || !user.password) {
       return res.status(401).json({
@@ -270,10 +343,9 @@ export const login = async (req, res) => {
       user: sanitizeUser(user),
     });
   } catch (error) {
-    console.log("LOGIN ERROR:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to log in",
     });
   }
 };

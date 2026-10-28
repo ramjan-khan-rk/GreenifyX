@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../auth/application/providers/auth_provider.dart';
 import '../../application/providers/challenge_provider.dart';
 import '../../domain/models/challenge_model.dart';
 
@@ -102,6 +103,10 @@ class ChallengeCard extends ConsumerWidget {
                 icon: Icons.eco_outlined,
                 label: "+${challenge.ecoReward} Eco Points",
                 emphasize: true,
+              ),
+              const _MetaChip(
+                icon: Icons.info_outline,
+                label: "Self-reported (no evidence yet)",
               ),
             ],
           ),
@@ -310,7 +315,13 @@ class _ActionRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentUserId = ref.watch(authProvider).user?.id;
+
     if (challenge.status == "pending") {
+      if (currentUserId != null && currentUserId != challenge.friendId) {
+        return const Text("Waiting for your friend to respond");
+      }
+
       return Row(
         children: [
           Expanded(
@@ -383,7 +394,7 @@ class _ActionRow extends ConsumerWidget {
             ),
           ),
           icon: const Icon(Icons.add_rounded),
-          label: const Text("Log progress"),
+          label: const Text("Log progress (self-reported)"),
         ),
       );
     }
