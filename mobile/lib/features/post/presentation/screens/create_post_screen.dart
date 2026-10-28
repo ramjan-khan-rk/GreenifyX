@@ -98,7 +98,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text("Share activity", style: AppTextStyles.title),
+        title: Text("Post", style: AppTextStyles.title),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
@@ -125,7 +125,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.add_a_photo_outlined,
+                            Icons.add_box_rounded,
                             size: 48,
                             color: AppColors.primary,
                           ),

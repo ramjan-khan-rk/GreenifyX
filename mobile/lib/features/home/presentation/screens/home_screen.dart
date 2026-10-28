@@ -4,15 +4,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_status.dart';
+import '../../../../core/widgets/brand_icons.dart';
 import '../../../../core/widgets/count_badge.dart';
 import '../../../../core/widgets/user_avatar.dart';
+import '../../../chat/presentation/screens/chats_screen.dart';
+import '../../../feed/presentation/screens/feed_screen.dart';
+import '../../../friends/presentation/screens/friends_screen.dart';
 import '../../../notifications/application/providers/notification_provider.dart';
-import '../../../challenge/presentation/screens/challenge_screen.dart';
-import '../../../challenge/presentation/screens/create_challenge_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
+import '../../../post/presentation/screens/create_post_screen.dart';
 import '../../../profile/application/providers/my_profile_provider.dart';
+import '../../../profile/presentation/screens/complete_profile_screen.dart';
 import '../widgets/eco_points_card.dart';
 import '../widgets/quote_card.dart';
+import '../../../challenge/presentation/screens/challenge_screen.dart';
 import 'leaderboard_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -37,25 +42,21 @@ class HomeScreen extends ConsumerWidget {
               color: AppColors.primary,
               onRefresh: () async => ref.invalidate(myProfileProvider),
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
                 children: [
                   Row(
                     children: [
-                      UserAvatar(
-                        imageUrl: user.profileImage,
-                        radius: 28,
-                        semanticLabel: "${user.name} photo",
-                      ),
+                      const BrandMark(size: 48),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Welcome back", style: AppTextStyles.subtitle),
                             Text(
-                              user.name.isEmpty ? "GreenifyX member" : user.name,
+                              BrandCopy.name,
                               style: AppTextStyles.title.copyWith(fontSize: 22),
                             ),
+                            Text(BrandCopy.tagline, style: AppTextStyles.tagline),
                           ],
                         ),
                       ),
@@ -71,74 +72,180 @@ class HomeScreen extends ConsumerWidget {
                         },
                         icon: CountBadge(
                           count: unread,
-                          child: const Icon(Icons.notifications_none_outlined),
+                          child: const Icon(
+                            BrandGlyph.updates,
+                            color: AppColors.navy,
+                          ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      UserAvatar(
+                        imageUrl: user.profileImage,
+                        radius: 26,
+                        semanticLabel: "${user.name} photo",
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Welcome back", style: AppTextStyles.subtitle),
+                            Text(
+                              user.name.isEmpty ? "GreenifyX member" : user.name,
+                              style: AppTextStyles.title.copyWith(fontSize: 20),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
                   EcoPointsCard(
                     ecoPoints: user.ecoPoints,
                     level: user.level,
                     streak: user.streak,
                   ),
+                  const SizedBox(height: 20),
+                  Text("Your journey", style: AppTextStyles.title.copyWith(fontSize: 18)),
                   const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: AppColors.card,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.border),
+                  SizedBox(
+                    height: 188,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        BrandJourneyCard(
+                          title: "Take Action",
+                          body:
+                              "Plant trees, recycle, save water and make a difference — every day.",
+                          icon: BrandGlyph.recycle,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const CreatePostScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 12),
+                        BrandJourneyCard(
+                          title: "Earn Eco Points",
+                          body:
+                              "Complete verified actions and earn Eco Points. Be a greener hero!",
+                          icon: BrandGlyph.ecoPoints,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const FeedScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 12),
+                        BrandJourneyCard(
+                          title: "Connect & Grow",
+                          body:
+                              "Make friends, join challenges and climb the leaderboard together.",
+                          icon: BrandGlyph.friends,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const FriendsScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                    child: Text(
-                      "Community-verified Eco Points. English UI for this UAE pilot. Arabic and RTL are not included yet — they would need mirrored layouts, not a language toggle.",
-                      style: AppTextStyles.subtitle.copyWith(height: 1.4),
-                    ),
                   ),
-                  const SizedBox(height: 16),
-                  Text("Jump in", style: AppTextStyles.title.copyWith(fontSize: 18)),
-                  const SizedBox(height: 10),
-                  _HomeAction(
-                    icon: Icons.emoji_events_outlined,
-                    title: "Leaderboard",
-                    subtitle: "See who leads in verified Eco Points",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const LeaderboardScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  _HomeAction(
-                    icon: Icons.flag_outlined,
-                    title: "Open challenges",
-                    subtitle: "Compete with friends on shared goals",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ChallengeScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  _HomeAction(
-                    icon: Icons.add_circle_outline,
-                    title: "Start a new challenge",
-                    subtitle: "Invite a friend and earn Eco Points",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const CreateChallengeScreen(),
-                        ),
-                      );
-                    },
+                  const SizedBox(height: 22),
+                  Text("Quick actions", style: AppTextStyles.title.copyWith(fontSize: 18)),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 12,
+                    children: [
+                      BrandIconBadge(
+                        icon: BrandGlyph.post,
+                        label: "Post",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const CreatePostScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      BrandIconBadge(
+                        icon: BrandGlyph.verified,
+                        label: "Verified",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const FeedScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      BrandIconBadge(
+                        icon: BrandGlyph.ecoPoints,
+                        label: "Eco Points",
+                        color: AppColors.accent,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const LeaderboardScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      BrandIconBadge(
+                        icon: BrandGlyph.recycle,
+                        label: "Recycle",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ChallengeScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      BrandIconBadge(
+                        icon: BrandGlyph.settings,
+                        label: "Settings",
+                        color: AppColors.navy,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const CompleteProfileScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      BrandIconBadge(
+                        icon: BrandGlyph.chat,
+                        label: "Chat",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ChatsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
                   const QuoteCard(),
@@ -147,38 +254,6 @@ class HomeScreen extends ConsumerWidget {
             );
           },
         ),
-      ),
-    );
-  }
-}
-
-class _HomeAction extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _HomeAction({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.card,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: AppColors.border),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: AppColors.primary),
-        title: Text(title, style: AppTextStyles.body),
-        subtitle: Text(subtitle, style: AppTextStyles.subtitle),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
       ),
     );
   }

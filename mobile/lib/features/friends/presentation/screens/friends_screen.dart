@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_status.dart';
+import '../../../../core/widgets/brand_icons.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../application/providers/friend_provider.dart';
 import 'friend_profile_screen.dart';
@@ -20,11 +21,17 @@ class FriendsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text("Friends", style: AppTextStyles.title),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Friends", style: AppTextStyles.title),
+            Text("Connect & Grow", style: AppTextStyles.tagline),
+          ],
+        ),
         actions: [
           IconButton(
             tooltip: "Find friends",
-            icon: const Icon(Icons.person_add_alt_1_outlined),
+            icon: const Icon(BrandGlyph.friends, color: AppColors.primary),
             onPressed: () {
               Navigator.push(
                 context,

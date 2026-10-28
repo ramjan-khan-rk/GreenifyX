@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_status.dart';
+import '../../../../core/widgets/brand_icons.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../application/providers/leaderboard_provider.dart';
 
@@ -17,7 +18,13 @@ class LeaderboardScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text("Leaderboard", style: AppTextStyles.title),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Leaderboard", style: AppTextStyles.title),
+            Text("Verified Eco Points", style: AppTextStyles.tagline),
+          ],
+        ),
       ),
       body: board.when(
         loading: () => const AppLoading(),
@@ -28,7 +35,7 @@ class LeaderboardScreen extends ConsumerWidget {
         data: (list) {
           if (list.isEmpty) {
             return const AppEmptyState(
-              icon: Icons.emoji_events_outlined,
+              icon: BrandGlyph.leaderboard,
               title: "No rankings yet",
               message:
                   "Verified Eco Points will show here once friends confirm activities.",
@@ -55,12 +62,16 @@ class LeaderboardScreen extends ConsumerWidget {
                       side: const BorderSide(color: AppColors.border),
                     ),
                     leading: CircleAvatar(
-                      backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                      backgroundColor: rank == 1
+                          ? AppColors.accent.withValues(alpha: 0.28)
+                          : AppColors.mint,
                       child: Text(
                         "$rank",
                         style: AppTextStyles.body.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
+                          color: rank == 1
+                              ? AppColors.forest
+                              : AppColors.primary,
                         ),
                       ),
                     ),

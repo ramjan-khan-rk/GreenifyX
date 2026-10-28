@@ -128,7 +128,7 @@ class ChallengeCard extends ConsumerWidget {
             progress: challenge.friendProgress,
             target: challenge.target,
             ratio: challenge.friendRatio,
-            color: const Color(0xFF00897B),
+            color: AppColors.navy,
           ),
           const SizedBox(height: 18),
           _ActionRow(challenge: challenge),
@@ -150,7 +150,7 @@ class _StatusBadge extends StatelessWidget {
 
     switch (status) {
       case "pending":
-        color = const Color(0xFFF59E0B);
+        color = AppColors.accent;
         label = "Pending";
         break;
       case "ongoing":
@@ -158,7 +158,7 @@ class _StatusBadge extends StatelessWidget {
         label = "Active";
         break;
       case "completed":
-        color = const Color(0xFF1565C0);
+        color = AppColors.sky;
         label = "Completed";
         break;
       case "rejected":
@@ -211,7 +211,7 @@ class _MetaChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: emphasize
             ? AppColors.primary.withValues(alpha: 0.08)
-            : const Color(0xFFF3F4F6),
+            : AppColors.mint.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -422,7 +422,7 @@ class _ActionRow extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: AppColors.mint.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Text(

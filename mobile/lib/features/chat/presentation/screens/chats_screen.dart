@@ -18,7 +18,13 @@ class ChatsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text("Chat", style: AppTextStyles.title),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Chat", style: AppTextStyles.title),
+            Text("Friends only", style: AppTextStyles.tagline),
+          ],
+        ),
       ),
       body: chats.when(
         loading: () => const AppLoading(),
@@ -29,7 +35,7 @@ class ChatsScreen extends ConsumerWidget {
         data: (list) {
           if (list.isEmpty) {
             return const AppEmptyState(
-              icon: Icons.chat_bubble_outline,
+              icon: Icons.chat_bubble_rounded,
               title: "No conversations yet",
               message: "Open a friend profile and start a chat.",
             );

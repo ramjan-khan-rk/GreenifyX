@@ -117,7 +117,7 @@ class ChallengeScreen extends ConsumerWidget {
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
-                            Icons.flag_outlined,
+                            Icons.emoji_events_rounded,
                             size: 36,
                             color: AppColors.primary,
                           ),

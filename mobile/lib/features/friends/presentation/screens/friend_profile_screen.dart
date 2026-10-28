@@ -77,7 +77,7 @@ class FriendProfileScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.eco),
+                      leading: const Icon(Icons.monetization_on_rounded, color: AppColors.accent),
                       title: const Text("Eco Points"),
                       trailing: Text(friend.ecoPoints.toString()),
                     ),

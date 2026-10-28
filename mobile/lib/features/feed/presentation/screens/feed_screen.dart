@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/media_url.dart';
 import '../../../../core/widgets/app_status.dart';
+import '../../../../core/widgets/brand_icons.dart';
 import '../../../../core/widgets/count_badge.dart';
 import '../../../../core/widgets/points_status_chip.dart';
 import '../../../../core/widgets/user_avatar.dart';
@@ -28,7 +29,7 @@ class FeedScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text("Explore", style: AppTextStyles.title),
+        title: Text("Posts", style: AppTextStyles.title),
         actions: [
           IconButton(
             tooltip: "Updates",
@@ -42,7 +43,7 @@ class FeedScreen extends ConsumerWidget {
             },
             icon: CountBadge(
               count: unread,
-              child: const Icon(Icons.notifications_none_outlined),
+              child: const Icon(BrandGlyph.updates),
             ),
           ),
         ],
@@ -52,10 +53,10 @@ class FeedScreen extends ConsumerWidget {
           final posts = page.posts;
           if (posts.isEmpty) {
             return const AppEmptyState(
-              icon: Icons.public_outlined,
+              icon: BrandGlyph.post,
               title: "No posts yet",
               message:
-                  "Share a green action from the + button. Eco Points land after a friend verifies it.",
+                  "Share a green action from Post on Home. Eco Points land after a friend verifies it.",
             );
           }
 
@@ -214,7 +215,7 @@ class FeedScreen extends ConsumerWidget {
                                   }
                                 }
                               },
-                              icon: const Icon(Icons.verified_outlined),
+                              icon: const Icon(BrandGlyph.verified),
                               label: const Text("Verify"),
                             ),
                         ],

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../application/providers/auth_provider.dart';
 
 class SetPasswordScreen extends ConsumerStatefulWidget {
@@ -89,8 +91,12 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
     });
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(isReset ? "Set new password" : "Create password"),
+        title: Text(
+          isReset ? "Set new password" : "Create password",
+          style: AppTextStyles.title,
+        ),
       ),
       body: SafeArea(
         child: Padding(
@@ -103,7 +109,7 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
                     ? "Choose a new password for ${widget.email}"
                     : "Set a password to finish signing up",
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16),
+                style: AppTextStyles.body,
               ),
               const SizedBox(height: 24),
               TextField(
@@ -111,7 +117,6 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
                 obscureText: obscurePassword,
                 decoration: InputDecoration(
                   labelText: "Password",
-                  border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
                       obscurePassword
@@ -132,7 +137,6 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
                 obscureText: obscureConfirm,
                 decoration: InputDecoration(
                   labelText: "Confirm password",
-                  border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
                       obscureConfirm
@@ -154,7 +158,14 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
                 child: ElevatedButton(
                   onPressed: authState.isLoading ? null : _submit,
                   child: authState.isLoading
-                      ? const CircularProgressIndicator()
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
                       : Text(isReset ? "Reset password" : "Create account"),
                 ),
               ),

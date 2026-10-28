@@ -16,6 +16,7 @@ class NotificationsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Updates", style: AppTextStyles.title),
+        backgroundColor: AppColors.background,
         actions: [
           TextButton(
             onPressed: () async {

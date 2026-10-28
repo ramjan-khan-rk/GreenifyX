@@ -71,17 +71,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              const SizedBox(height: 32),
-              const BrandMark(),
-              const SizedBox(height: 16),
-              Text("Welcome to GreenifyX", style: AppTextStyles.heading.copyWith(fontSize: 24)),
-              const SizedBox(height: 8),
+              const SizedBox(height: 24),
+              const BrandLockup(markSize: 88),
+              const SizedBox(height: 28),
               Text(
                 "Sign in to track Eco Points, challenges, and your community.",
                 style: AppTextStyles.subtitle,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 36),
+              const SizedBox(height: 32),
               TextField(
                 controller: identifierController,
                 keyboardType: TextInputType.emailAddress,
@@ -103,6 +101,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       obscurePassword
                           ? Icons.visibility_off
                           : Icons.visibility,
+                      color: AppColors.navy,
                     ),
                     onPressed: () {
                       setState(() {

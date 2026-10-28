@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_status.dart';
 import '../../../auth/application/providers/auth_provider.dart';
 
@@ -43,20 +42,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: AppColors.background,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const BrandMark(size: 88),
-            const SizedBox(height: 20),
-            Text("GreenifyX", style: AppTextStyles.heading),
-            const SizedBox(height: 8),
-            Text("Earn Eco Points for real-world green actions",
-                style: AppTextStyles.subtitle),
-            const SizedBox(height: 28),
-            const SizedBox(
+            BrandLockup(markSize: 96),
+            SizedBox(height: 28),
+            SizedBox(
               width: 28,
               height: 28,
               child: CircularProgressIndicator(

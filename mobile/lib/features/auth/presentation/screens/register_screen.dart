@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_status.dart';
+import '../../../../core/widgets/brand_icons.dart';
 import '../../application/providers/auth_provider.dart';
 import 'otp_screen.dart';
 
@@ -70,13 +72,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              Text(
-                "Register with email",
-                style: AppTextStyles.title,
-              ),
+              const BrandMark(size: 64),
+              const SizedBox(height: 16),
+              Text("Register with email", style: AppTextStyles.title),
               const SizedBox(height: 8),
               Text(
-                "We'll email a 6-digit code. No SMS is used.",
+                "We'll email a 6-digit code. ${BrandCopy.tagline}.",
                 style: AppTextStyles.subtitle,
                 textAlign: TextAlign.center,
               ),
@@ -87,15 +88,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 autocorrect: false,
                 decoration: const InputDecoration(
                   labelText: "Email",
+                  prefixIcon: Icon(Icons.mail_outline, color: AppColors.primary),
                 ),
               ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 height: 52,
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   onPressed: authState.isLoading ? null : _sendOtp,
-                  child: authState.isLoading
+                  icon: const Icon(BrandGlyph.verified),
+                  label: authState.isLoading
                       ? const SizedBox(
                           width: 22,
                           height: 22,

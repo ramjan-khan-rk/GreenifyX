@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/brand_icons.dart';
 import '../../application/providers/auth_provider.dart';
 import 'set_password_screen.dart';
 
@@ -79,18 +82,26 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         : "Verify your email";
 
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(title: Text(title, style: AppTextStyles.title)),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("We emailed a 6-digit code to ${widget.email}"),
+            const Icon(BrandGlyph.verified, size: 48, color: AppColors.primary),
+            const SizedBox(height: 16),
+            Text(
+              "We emailed a 6-digit code to ${widget.email}",
+              textAlign: TextAlign.center,
+              style: AppTextStyles.body,
+            ),
             if (kDebugMode && widget.devOtp != null) ...[
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 "Development shortcut is enabled on this non-production API.",
                 textAlign: TextAlign.center,
+                style: AppTextStyles.subtitle,
               ),
             ],
             const SizedBox(height: 30),
@@ -100,7 +111,6 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               maxLength: 6,
               decoration: const InputDecoration(
                 labelText: "Verification code",
-                border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20),
@@ -110,7 +120,14 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               child: ElevatedButton(
                 onPressed: authState.isLoading ? null : _verify,
                 child: authState.isLoading
-                    ? const CircularProgressIndicator()
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
                     : const Text("Verify code"),
               ),
             ),

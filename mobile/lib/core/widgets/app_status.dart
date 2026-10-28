@@ -93,14 +93,42 @@ class BrandMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.12),
-        shape: BoxShape.circle,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(size * 0.22),
+      child: Image.asset(
+        "assets/brand/app_icon.png",
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        semanticLabel: "GreenifyX",
       ),
-      child: Icon(Icons.eco, size: size * 0.55, color: AppColors.primary),
     );
+  }
+}
+
+class BrandLockup extends StatelessWidget {
+  final double markSize;
+  final bool centered;
+
+  const BrandLockup({
+    super.key,
+    this.markSize = 72,
+    this.centered = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final column = Column(
+      crossAxisAlignment:
+          centered ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      children: [
+        BrandMark(size: markSize),
+        const SizedBox(height: 12),
+        Text("GreenifyX", style: AppTextStyles.heading.copyWith(fontSize: 26)),
+        const SizedBox(height: 4),
+        Text("Small Actions Big Impact", style: AppTextStyles.tagline),
+      ],
+    );
+    return centered ? Center(child: column) : column;
   }
 }

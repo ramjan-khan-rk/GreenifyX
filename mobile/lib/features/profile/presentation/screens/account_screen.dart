@@ -6,9 +6,12 @@ import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_status.dart';
+import '../../../../core/widgets/brand_icons.dart';
 import '../../../../core/widgets/user_avatar.dart';
-import '../../../chat/application/providers/chats_provider.dart';
 import '../../../auth/application/providers/auth_provider.dart';
+import '../../../chat/application/providers/chats_provider.dart';
+import '../../../chat/presentation/screens/chats_screen.dart';
+import '../../../feed/presentation/screens/feed_screen.dart';
 import '../../../friends/application/providers/friend_provider.dart';
 import '../../../friends/presentation/screens/friends_screen.dart';
 import '../../../home/presentation/screens/leaderboard_screen.dart';
@@ -27,7 +30,13 @@ class AccountScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text("Profile", style: AppTextStyles.title),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Profile", style: AppTextStyles.title),
+            Text(BrandCopy.tagline, style: AppTextStyles.tagline),
+          ],
+        ),
       ),
       body: profile.when(
         loading: () => const AppLoading(),
@@ -81,7 +90,7 @@ class AccountScreen extends ConsumerWidget {
                           (badge) => Chip(
                             label: Text(_badgeLabel(badge)),
                             backgroundColor:
-                                AppColors.primary.withValues(alpha: 0.12),
+                                AppColors.mint.withValues(alpha: 0.7),
                             side: const BorderSide(color: AppColors.border),
                           ),
                         )
@@ -89,11 +98,10 @@ class AccountScreen extends ConsumerWidget {
                   ),
                 ],
                 const SizedBox(height: 8),
-                ListTile(
-                  leading: const Icon(Icons.edit_outlined),
-                  title: const Text("Edit profile"),
-                  subtitle: const Text("Name, photo, and bio"),
-                  trailing: const Icon(Icons.chevron_right),
+                _ProfileLink(
+                  icon: BrandGlyph.settings,
+                  title: "Settings",
+                  subtitle: "Name, photo, and bio",
                   onTap: () {
                     Navigator.push(
                       context,
@@ -103,11 +111,10 @@ class AccountScreen extends ConsumerWidget {
                     );
                   },
                 ),
-                ListTile(
-                  leading: const Icon(Icons.people_outline),
-                  title: const Text("Friends"),
-                  subtitle: Text("${user.friendsCount} connections"),
-                  trailing: const Icon(Icons.chevron_right),
+                _ProfileLink(
+                  icon: BrandGlyph.friends,
+                  title: "Friends",
+                  subtitle: "${user.friendsCount} connections",
                   onTap: () {
                     Navigator.push(
                       context,
@@ -117,16 +124,41 @@ class AccountScreen extends ConsumerWidget {
                     );
                   },
                 ),
-                ListTile(
-                  leading: const Icon(Icons.emoji_events_outlined),
-                  title: const Text("Leaderboard"),
-                  subtitle: const Text("Verified Eco Points ranking"),
-                  trailing: const Icon(Icons.chevron_right),
+                _ProfileLink(
+                  icon: BrandGlyph.leaderboard,
+                  title: "Leaderboard",
+                  subtitle: "Verified Eco Points ranking",
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => const LeaderboardScreen(),
+                      ),
+                    );
+                  },
+                ),
+                _ProfileLink(
+                  icon: BrandGlyph.post,
+                  title: "Posts",
+                  subtitle: "Community feed and verify",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const FeedScreen(),
+                      ),
+                    );
+                  },
+                ),
+                _ProfileLink(
+                  icon: BrandGlyph.chat,
+                  title: "Chat",
+                  subtitle: "Friends-only messages",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ChatsScreen(),
                       ),
                     );
                   },
@@ -159,6 +191,34 @@ class AccountScreen extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _ProfileLink extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _ProfileLink({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: Icon(icon, color: AppColors.primary),
+        title: Text(title, style: AppTextStyles.body),
+        subtitle: Text(subtitle, style: AppTextStyles.subtitle),
+        trailing: const Icon(Icons.chevron_right, color: AppColors.navy),
+        onTap: onTap,
       ),
     );
   }

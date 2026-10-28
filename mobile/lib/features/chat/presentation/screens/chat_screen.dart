@@ -160,7 +160,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       textDirection: TextDirection.ltr,
                       decoration: const InputDecoration(
                         hintText: "Message a friend...",
-                        border: OutlineInputBorder(),
                       ),
                     ),
                   ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_status.dart';
 import '../../application/providers/auth_provider.dart';
 import 'otp_screen.dart';
 
@@ -72,10 +73,9 @@ class _ForgotPasswordScreenState
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              Text(
-                "Reset with email",
-                style: AppTextStyles.title,
-              ),
+              const BrandMark(size: 64),
+              const SizedBox(height: 16),
+              Text("Reset with email", style: AppTextStyles.title),
               const SizedBox(height: 8),
               Text(
                 "We'll email a verification code so you can set a new password.",
@@ -89,6 +89,7 @@ class _ForgotPasswordScreenState
                 autocorrect: false,
                 decoration: const InputDecoration(
                   labelText: "Email",
+                  prefixIcon: Icon(Icons.mail_outline, color: AppColors.primary),
                 ),
               ),
               const SizedBox(height: 20),
