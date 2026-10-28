@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import { resolveEcoPoints } from "../utils/ecoPoints.js";
 
 // COMPLETE / UPDATE PROFILE
 export const updateProfile = async (req, res) => {
@@ -22,10 +23,16 @@ export const updateProfile = async (req, res) => {
 
     await user.save();
 
+    const obj = user.toObject();
+    obj.ecoPoints = resolveEcoPoints(user);
+    delete obj.password;
+    delete obj.karamCount;
+    delete obj.ecoScore;
+
     res.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      user,
+      user: obj,
     });
   } catch (error) {
     res.status(500).json({
@@ -37,39 +44,30 @@ export const updateProfile = async (req, res) => {
 
 // GET MY PROFILE
 export const getMyProfile = async (req, res) => {
-
   try {
-
     const user = await User.findById(req.user._id);
 
+    const obj = user.toObject();
+    obj.ecoPoints = resolveEcoPoints(user);
+    obj.friendsCount = user.friends.length;
+    delete obj.password;
+    delete obj.karamCount;
+    delete obj.ecoScore;
+
     res.json({
-
       success: true,
-
-      user: {
-
-        ...user.toObject(),
-
-        friendsCount: user.friends.length,
-
-      },
-
+      user: obj,
     });
-
   } catch (e) {
-
     res.status(500).json({
-      success:false,
-      message:e.message,
+      success: false,
+      message: e.message,
     });
-
   }
-
 };
 
 export const getUserById = async (req, res) => {
   try {
-
     const user = await User.findById(req.params.id);
 
     if (!user) {
@@ -86,20 +84,16 @@ export const getUserById = async (req, res) => {
         name: user.name,
         bio: user.bio,
         profileImage: user.profileImage,
-        ecoScore: user.ecoScore,
-        karamCount: user.karamCount,
+        ecoPoints: resolveEcoPoints(user),
         level: user.level,
         streak: user.streak,
       },
     });
-
   } catch (e) {
-
     res.status(500).json({
       success: false,
       message: e.message,
     });
-
   }
 };
 
@@ -107,13 +101,20 @@ export const getUserById = async (req, res) => {
 export const getLeaderboard = async (req, res) => {
   try {
     const users = await User.find()
-      .select("name profileImage ecoScore level streak")
-      .sort({ ecoScore: -1 })
+      .select("name profileImage ecoPoints level streak")
+      .sort({ ecoPoints: -1 })
       .limit(10);
 
     res.status(200).json({
       success: true,
-      users,
+      users: users.map((u) => ({
+        _id: u._id,
+        name: u.name,
+        profileImage: u.profileImage,
+        ecoPoints: resolveEcoPoints(u),
+        level: u.level,
+        streak: u.streak,
+      })),
     });
   } catch (error) {
     res.status(500).json({
@@ -122,30 +123,14 @@ export const getLeaderboard = async (req, res) => {
     });
   }
 };
+
 // SEARCH USERS
 export const searchUsers = async (req, res) => {
   try {
-    console.log("=================================");
-    console.log("SEARCH ROUTE HIT");
-    console.log("Keyword:", req.query.q);
-    console.log("Logged In User:", req.user);
-    console.log("=================================");
-
     const keyword = req.query.q || "";
 
     const currentUser = await User.findById(req.user._id);
 
-    console.log("CURRENT USER:");
-    console.log(currentUser);
-
-    // SHOW EVERY USER IN DATABASE
-    const allUsers = await User.find().select("name phone");
-
-    console.log("========== ALL USERS ==========");
-    console.log(allUsers);
-    console.log("===============================");
-
-    // SEARCH USERS
     const users = await User.find({
       _id: {
         $ne: req.user._id,
@@ -155,18 +140,14 @@ export const searchUsers = async (req, res) => {
         $options: "i",
       },
     }).select(
-      "name profileImage ecoScore level friends friendRequests sentRequests"
+      "name profileImage ecoPoints level friends friendRequests sentRequests"
     );
-
-    console.log("========== MATCHED USERS ==========");
-    console.log(users);
-    console.log("===================================");
 
     const result = users.map((user) => ({
       _id: user._id,
       name: user.name,
       profileImage: user.profileImage,
-      ecoScore: user.ecoScore,
+      ecoPoints: resolveEcoPoints(user),
       level: user.level,
 
       isFriend: currentUser.friends.some(
@@ -182,25 +163,14 @@ export const searchUsers = async (req, res) => {
       ),
     }));
 
-    console.log("========== FINAL RESPONSE ==========");
-    console.log(result);
-    console.log("====================================");
-
     res.status(200).json({
       success: true,
       users: result,
     });
-
   } catch (e) {
-
-    console.log("========== SEARCH ERROR ==========");
-    console.log(e);
-    console.log("==================================");
-
     res.status(500).json({
       success: false,
       message: e.message,
     });
-
   }
 };

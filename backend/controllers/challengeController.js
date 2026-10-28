@@ -71,22 +71,18 @@ export const createChallenge = async (req, res) => {
     }
 
     let ecoReward = 20;
-    let karmaReward = 10;
 
     switch (difficulty) {
       case "Medium":
         ecoReward = 50;
-        karmaReward = 25;
         break;
 
       case "Hard":
         ecoReward = 100;
-        karmaReward = 50;
         break;
 
       default:
         ecoReward = 20;
-        karmaReward = 10;
     }
 
     const challenge = await Challenge.create({
@@ -99,14 +95,13 @@ export const createChallenge = async (req, res) => {
       category,
       difficulty,
       ecoReward,
-      karmaReward,
       deadline,
       status: "pending",
     });
 
     const populatedChallenge = await Challenge.findById(challenge._id)
-      .populate("creator", "name profileImage ecoScore")
-      .populate("friend", "name profileImage ecoScore");
+      .populate("creator", "name profileImage ecoPoints")
+      .populate("friend", "name profileImage ecoPoints");
       
       
 
@@ -185,8 +180,8 @@ export const acceptChallenge = async (req, res) => {
     await challenge.save();
 
     const populated = await Challenge.findById(challenge._id)
-      .populate("creator", "name profileImage ecoScore")
-      .populate("friend", "name profileImage ecoScore");
+      .populate("creator", "name profileImage ecoPoints")
+      .populate("friend", "name profileImage ecoPoints");
       
       
 
@@ -312,8 +307,8 @@ export const getChallenges = async (req, res) => {
         { friend: req.user._id },
       ],
     })
-      .populate("creator", "name profileImage ecoScore")
-      .populate("friend", "name profileImage ecoScore")
+      .populate("creator", "name profileImage ecoPoints")
+      .populate("friend", "name profileImage ecoPoints")
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -414,8 +409,7 @@ export const updateProgress = async (req, res) => {try {
         challenge.winner,
         {
           $inc: {
-            ecoScore: challenge.ecoReward,
-            karmaCount: challenge.karmaReward, // <-- change if your schema uses karamCount
+            ecoPoints: challenge.ecoReward,
           },
         }
       );
@@ -469,8 +463,8 @@ export const updateProgress = async (req, res) => {try {
   const populatedChallenge = await Challenge.findById(
     challenge._id
   )
-    .populate("creator", "name profileImage ecoScore")
-    .populate("friend", "name profileImage ecoScore");
+    .populate("creator", "name profileImage ecoPoints")
+    .populate("friend", "name profileImage ecoPoints");
 
   return res.status(200).json({
     success: true,

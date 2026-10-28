@@ -32,9 +32,20 @@ const userSchema = new mongoose.Schema(
       maxlength: 150,
     },
 
-    karamCount: {
+    // Single points currency used app-wide (Eco Points)
+    ecoPoints: {
       type: Number,
       default: 0,
+      min: 0,
+    },
+
+    // Legacy fields — read for migration only; prefer ecoPoints
+    ecoScore: {
+      type: Number,
+    },
+
+    karamCount: {
+      type: Number,
     },
 
     level: {

@@ -1,3 +1,5 @@
+import '../../../../core/utils/eco_points.dart';
+
 class UserModel {
   final String id;
   final String phone;
@@ -5,7 +7,7 @@ class UserModel {
   final String profileImage;
   final String bio;
 
-  final int karamCount;
+  final int ecoPoints;
   final int level;
   final int streak;
 
@@ -17,7 +19,7 @@ class UserModel {
     required this.name,
     required this.profileImage,
     required this.bio,
-    required this.karamCount,
+    required this.ecoPoints,
     required this.level,
     required this.streak,
     required this.isProfileCompleted,
@@ -30,7 +32,7 @@ class UserModel {
       name: json["name"] ?? "",
       profileImage: json["profileImage"] ?? "",
       bio: json["bio"] ?? "",
-      karamCount: json["karamCount"] ?? 0,
+      ecoPoints: parseEcoPoints(json),
       level: json["level"] ?? 1,
       streak: json["streak"] ?? 0,
       isProfileCompleted: json["isProfileCompleted"] ?? false,

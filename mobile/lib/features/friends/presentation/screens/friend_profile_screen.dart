@@ -57,14 +57,8 @@ class FriendProfileScreen extends StatelessWidget {
 
                     ListTile(
                       leading: const Icon(Icons.eco),
-                      title: const Text("Eco Score"),
-                      trailing: Text(friend.ecoScore.toString()),
-                    ),
-
-                    ListTile(
-                      leading: const Icon(Icons.favorite),
-                      title: const Text("Karam"),
-                      trailing: Text(friend.karamCount.toString()),
+                      title: const Text("Eco Points"),
+                      trailing: Text(friend.ecoPoints.toString()),
                     ),
 
                     ListTile(

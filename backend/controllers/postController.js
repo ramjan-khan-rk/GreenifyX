@@ -43,7 +43,7 @@ export const createPost = async (req, res) => {try {
 
   await User.findByIdAndUpdate(req.user._id, {
     $inc: {
-      ecoScore: ecoPoints,
+      ecoPoints: ecoPoints,
     },
   });
 
@@ -101,7 +101,7 @@ const posts = await Post.find({
     $in: [...user.friends, req.user._id],
   },
 })
-.populate("user", "name profileImage ecoScore level")
+.populate("user", "name profileImage ecoPoints level")
 .sort({ createdAt: -1 });
 
     const currentUserId = req.user._id.toString();

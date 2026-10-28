@@ -189,7 +189,7 @@ for (final u in list) {
                           children: [
 
                             Text(
-                              "🌱 ${user.ecoScore} Eco Points",
+                              "${user.ecoPoints} Eco Points",
                             ),
 
                             Text(

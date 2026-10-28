@@ -100,32 +100,11 @@ class AccountScreen extends ConsumerWidget {
 
                 const SizedBox(height:30),
 
-                Row(
-
-                  children:[
-
-                    Expanded(
-                      child:_card(
-                        "Eco",
-                        user.ecoScore.toString(),
-                        Icons.eco,
-                        Colors.green,
-                      ),
-                    ),
-
-                    const SizedBox(width:12),
-
-                    Expanded(
-                      child:_card(
-                        "Karma",
-                        user.karamCount.toString(),
-                        Icons.favorite,
-                        Colors.red,
-                      ),
-                    ),
-
-                  ],
-
+                _card(
+                  "Eco Points",
+                  user.ecoPoints.toString(),
+                  Icons.eco,
+                  Colors.green,
                 ),
 
                 const SizedBox(height:12),

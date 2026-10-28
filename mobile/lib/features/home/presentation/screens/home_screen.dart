@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../profile/application/providers/my_profile_provider.dart';
 import '../../../challenge/presentation/screens/create_challenge_screen.dart';
 import '../../../challenge/presentation/screens/challenge_screen.dart';
-import '../widgets/karma_card.dart';
+import '../widgets/eco_points_card.dart';
 import '../widgets/quote_card.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -101,7 +101,11 @@ class HomeScreen extends ConsumerWidget {
 
                   const SizedBox(height: 25),
 
-                  const KarmaCard(),
+                  EcoPointsCard(
+                    ecoPoints: user.ecoPoints,
+                    level: user.level,
+                    streak: user.streak,
+                  ),
 
                   const SizedBox(height: 20),
 

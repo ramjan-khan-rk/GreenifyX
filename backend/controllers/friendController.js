@@ -141,12 +141,18 @@ export const getFriends = async (req, res) => {
     const user = await User.findById(req.user._id)
       .populate(
         "friends",
-        "name bio profileImage ecoScore karamCount level streak"
+        "name bio profileImage ecoPoints level streak"
       );
 
     res.status(200).json({
       success: true,
-      friends: user.friends,
+      friends: user.friends.map((f) => {
+        const obj = f.toObject ? f.toObject() : f;
+        return {
+          ...obj,
+          ecoPoints: obj.ecoPoints ?? obj.ecoScore ?? obj.karamCount ?? 0,
+        };
+      }),
     });
 
   } catch (error) {
@@ -168,12 +174,18 @@ export const getRequests = async (req, res) => {
     const user = await User.findById(req.user._id)
       .populate(
         "friendRequests",
-        "name bio profileImage ecoScore karamCount level streak"
+        "name bio profileImage ecoPoints level streak"
       );
 
     res.status(200).json({
       success: true,
-      requests: user.friendRequests,
+      requests: user.friendRequests.map((f) => {
+        const obj = f.toObject ? f.toObject() : f;
+        return {
+          ...obj,
+          ecoPoints: obj.ecoPoints ?? obj.ecoScore ?? obj.karamCount ?? 0,
+        };
+      }),
     });
 
   } catch (error) {

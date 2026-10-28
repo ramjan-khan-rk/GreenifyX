@@ -27,9 +27,7 @@ class ProfileState {
 
   final String bio;
 
-  final int ecoScore;
-
-  final int karamCount;
+  final int ecoPoints;
 
   final int streak;
 
@@ -45,8 +43,7 @@ class ProfileState {
     this.profileImage = "",
     this.name = "",
     this.bio = "",
-    this.ecoScore = 0,
-    this.karamCount = 0,
+    this.ecoPoints = 0,
     this.streak = 0,
     this.level = 1,
     this.friendsCount = 0,
@@ -59,8 +56,7 @@ class ProfileState {
     String? profileImage,
     String? name,
     String? bio,
-    int? ecoScore,
-    int? karamCount,
+    int? ecoPoints,
     int? streak,
     int? level,
     int? friendsCount,
@@ -72,8 +68,7 @@ class ProfileState {
       profileImage: profileImage ?? this.profileImage,
       name: name ?? this.name,
       bio: bio ?? this.bio,
-      ecoScore: ecoScore ?? this.ecoScore,
-      karamCount: karamCount ?? this.karamCount,
+      ecoPoints: ecoPoints ?? this.ecoPoints,
       streak: streak ?? this.streak,
       level: level ?? this.level,
       friendsCount: friendsCount ?? this.friendsCount,
@@ -182,9 +177,7 @@ Future<void> loadProfile() async {
 
       profileImage: profile.profileImage,
 
-      ecoScore: profile.ecoScore,
-
-      karamCount: profile.karamCount,
+      ecoPoints: profile.ecoPoints,
 
       streak: profile.streak,
 
