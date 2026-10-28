@@ -1,6 +1,6 @@
-# Resend email OTP
+# Resend email OTP (fallback)
 
-GreenifyX sends registration and verification OTPs through [Resend](https://resend.com). No sender domain is hardcoded.
+Prefer [Brevo](./brevo-setup.md) (`BREVO_API_KEY`). Resend remains a leftover fallback when `BREVO_API_KEY` is empty.
 
 This change set does **not** send live mail, create a Resend account, or invent API keys. Configure `RESEND_API_KEY` and `EMAIL_FROM` in local/host env only.
 

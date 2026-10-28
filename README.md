@@ -10,7 +10,7 @@
 
 ### 👤 Authentication & Profiles
 
-* Secure user registration & login (JWT, email OTP via Resend)
+* Secure user registration & login (JWT, email OTP via Brevo)
 * Personalized profiles with profile images
 * Eco Points and activity statistics
 * Friend-based social network
@@ -192,13 +192,13 @@ CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 CORS_ORIGIN=
-RESEND_API_KEY=
+BREVO_API_KEY=
 EMAIL_FROM=
 APP_NAME=GreenifyX
 ALLOW_DEV_OTP=false
 ```
 
-Copy `backend/.env.example` to `backend/.env` and fill values locally. Production `JWT_SECRET` must be at least 32 characters; do not rotate an existing production secret from this repo. `ALLOW_DEV_OTP=true` is non-production only and may include `devOtp` in the send-otp JSON body; it is ignored when `NODE_ENV=production`. Registration OTP is sent with Resend — see `backend/docs/resend-setup.md`. Use a from-address on a domain you verified in Resend (`EMAIL_FROM`). Do not commit secrets. Live Resend sends are not run from this repo; leave keys unset until you are ready to send from your own environment.
+Copy `backend/.env.example` to `backend/.env` and fill values locally. Production `JWT_SECRET` must be at least 32 characters; do not rotate an existing production secret from this repo. `ALLOW_DEV_OTP=true` is non-production only and may include `devOtp` in the send-otp JSON body; it is ignored when `NODE_ENV=production`. Registration OTP is sent with **Brevo** when `BREVO_API_KEY` is set — see `backend/docs/brevo-setup.md`. Use a from-address you verified in Brevo (`EMAIL_FROM`). Do not commit secrets. Live Brevo sends are not run from this repo; leave keys unset until you are ready to send from your own environment.
 
 > **Note:** Never commit your `.env` file. It is excluded through `.gitignore`.
 
@@ -249,7 +249,7 @@ Copy `backend/.env.example` to `backend/.env` and fill values locally. Productio
 
 ### UAE pilot notes
 
-UI copy is **English only**. Arabic and RTL are not implemented; adding them later means localizing strings and mirroring layouts, not flipping a toggle. Phone helpers default to **+971**. Streaks use the **Asia/Dubai** calendar day. Eco Points are **community-verified** (a friend confirms a post), not GPS or government MRV. Challenge progress remains self-reported. Do not treat this README as a live ops report — Resend, JWT length, Atlas indexes, and Render must still be set on the host.
+UI copy is **English only**. Arabic and RTL are not implemented; adding them later means localizing strings and mirroring layouts, not flipping a toggle. Phone helpers default to **+971**. Streaks use the **Asia/Dubai** calendar day. Eco Points are **community-verified** (a friend confirms a post), not GPS or government MRV. Challenge progress remains self-reported. Do not treat this README as a live ops report — Brevo (`BREVO_API_KEY`), JWT length, Atlas indexes, and Render must still be set on the host.
 
 ---
 
