@@ -11,6 +11,8 @@ import '../../../profile/presentation/screens/account_screen.dart';
 import '../../../post/presentation/screens/create_post_screen.dart';
 import '../../../feed/presentation/screens/feed_screen.dart';
 import '../../../challenge/application/providers/challenge_provider.dart';
+import '../../../notifications/application/providers/notification_provider.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class BottomNavScreen extends ConsumerStatefulWidget {
   const BottomNavScreen({super.key});
@@ -33,6 +35,7 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
     ref.invalidate(chatsProvider);
     ref.invalidate(chatProvider);
     ref.invalidate(challengesProvider);
+    ref.invalidate(notificationsProvider);
   }
 
   @override
@@ -64,7 +67,9 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
     return Scaffold(
       body: pages[currentIndex],
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.green,
+        heroTag: "create_post",
+        tooltip: "Share an eco activity",
+        backgroundColor: AppColors.primary,
         onPressed: () {
           Navigator.push(
             context,

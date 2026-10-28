@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../application/providers/auth_provider.dart';
 import 'otp_screen.dart';
 
@@ -63,16 +65,21 @@ class _ForgotPasswordScreenState
     });
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text("Forgot password")),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                "We'll email an OTP so you can set a new password",
-                style: TextStyle(fontSize: 16),
+              Text(
+                "Reset with email",
+                style: AppTextStyles.title,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "We'll email a verification code so you can set a new password.",
+                style: AppTextStyles.subtitle,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -82,18 +89,24 @@ class _ForgotPasswordScreenState
                 autocorrect: false,
                 decoration: const InputDecoration(
                   labelText: "Email",
-                  border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 52,
                 child: ElevatedButton(
                   onPressed: authState.isLoading ? null : _sendOtp,
                   child: authState.isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text("Send OTP"),
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text("Email verification code"),
                 ),
               ),
             ],

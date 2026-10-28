@@ -28,7 +28,7 @@ class EcoPointsCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            "One score for every green action",
+            "Earned from posts and challenges",
             style: AppTextStyles.subtitle,
           ),
           const SizedBox(height: 20),

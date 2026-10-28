@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/media_url.dart';
-import '../../application/providers/feed_provider.dart';
+import '../../../../core/widgets/app_status.dart';
 import '../../../comment/presentation/widgets/comment_bottom_sheet.dart';
+import '../../../notifications/presentation/screens/notifications_screen.dart';
+import '../../application/providers/feed_provider.dart';
 
 class FeedScreen extends ConsumerWidget {
   const FeedScreen({super.key});
@@ -13,24 +17,45 @@ class FeedScreen extends ConsumerWidget {
     final feed = ref.watch(feedProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text("Community Feed 🌱"),
+        title: Text("Community", style: AppTextStyles.title),
+        actions: [
+          IconButton(
+            tooltip: "Updates",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const NotificationsScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.notifications_none_outlined),
+          ),
+        ],
       ),
       body: feed.when(
         data: (posts) {
           if (posts.isEmpty) {
-            return const Center(
-              child: Text("No posts yet"),
+            return AppEmptyState(
+              icon: Icons.public_outlined,
+              title: "No posts yet",
+              message:
+                  "Share a green action from the + button. You'll earn Eco Points when you post.",
             );
           }
 
-          return ListView.builder(
+          return RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: () async => ref.invalidate(feedProvider),
+            child: ListView.builder(
             itemCount: posts.length,
             itemBuilder: (context, index) {
               final post = posts[index];
 
               return Card(
-                elevation: 4,
+                elevation: 0,
                 margin: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 8,
@@ -166,13 +191,13 @@ TextButton.icon(
                 ),
               );
             },
+          ),
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        error: (e, s) => Center(
-          child: Text(e.toString()),
+        loading: () => const AppLoading(),
+        error: (e, _) => AppErrorState(
+          message: e.toString(),
+          onRetry: () => ref.invalidate(feedProvider),
         ),
       ),
     );

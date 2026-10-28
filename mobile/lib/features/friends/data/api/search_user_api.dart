@@ -1,5 +1,3 @@
-import 'package:dio/dio.dart';
-
 import '../../../../core/services/api_service.dart';
 
 class SearchUserApi {
@@ -10,9 +8,6 @@ class SearchUserApi {
       "q": keyword,
     },
   );
-
-  print("STATUS: ${response.statusCode}");
-  print("BODY: ${response.data}");
 
   return response.data["users"];
 }

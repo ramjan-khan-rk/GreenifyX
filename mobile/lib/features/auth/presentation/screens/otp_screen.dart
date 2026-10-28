@@ -48,7 +48,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     if (!ok || !mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("OTP verified")),
+      const SnackBar(content: Text("Email verified")),
     );
 
     Navigator.pushReplacement(
@@ -75,8 +75,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     });
 
     final title = widget.purpose == "reset"
-        ? "Verify reset OTP"
-        : "Verify OTP";
+        ? "Verify reset code"
+        : "Verify your email";
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),
@@ -85,7 +85,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("OTP sent to ${widget.email}"),
+            Text("We emailed a 6-digit code to ${widget.email}"),
             if (kDebugMode && widget.devOtp != null) ...[
               const SizedBox(height: 12),
               const Text(
@@ -99,7 +99,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               keyboardType: TextInputType.number,
               maxLength: 6,
               decoration: const InputDecoration(
-                labelText: "Enter OTP",
+                labelText: "Verification code",
                 border: OutlineInputBorder(),
               ),
             ),
@@ -111,7 +111,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 onPressed: authState.isLoading ? null : _verify,
                 child: authState.isLoading
                     ? const CircularProgressIndicator()
-                    : const Text("Verify OTP"),
+                    : const Text("Verify code"),
               ),
             ),
           ],

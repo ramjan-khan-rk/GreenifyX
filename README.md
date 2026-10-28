@@ -118,9 +118,9 @@ The Flutter application follows a **feature-first architecture** with clear sepa
 
 ---
 
-## 🌱 Eco Score System
+## 🌱 Eco Points
 
-GreenifyX rewards genuine environmental actions through **Eco Score**.
+GreenifyX rewards genuine environmental actions through **Eco Points**.
 
 Examples include:
 
@@ -238,7 +238,7 @@ Copy `backend/.env.example` to `backend/.env` and fill values locally. Productio
 * GPS-based eco verification
 * Nearby user verification
 * Leaderboards
-* Advanced Eco Score algorithm
+* Stronger Eco Points verification
 * Enhanced notification UI
 * Production optimization
 

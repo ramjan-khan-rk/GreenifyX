@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/routes/app_routes.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_status.dart';
 import '../../application/providers/auth_provider.dart';
-import 'forgot_password_screen.dart';
-import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -31,7 +33,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (identifier.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enter email or phone and password")),
+        const SnackBar(content: Text("Enter your email and password")),
       );
       return;
     }
@@ -43,14 +45,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (!mounted || result == null) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Login Successful 🌱")),
-    );
-
     if (result.isNewUser || !result.user.isProfileCompleted) {
-      context.go("/complete-profile");
+      context.go(AppRoutes.completeProfile);
     } else {
-      context.go("/home");
+      context.go(AppRoutes.home);
     }
   }
 
@@ -67,38 +65,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.eco,
-                size: 90,
-                color: Color(0xFF2E7D32),
+              const SizedBox(height: 32),
+              const BrandMark(),
+              const SizedBox(height: 16),
+              Text("Welcome to GreenifyX", style: AppTextStyles.heading.copyWith(fontSize: 24)),
+              const SizedBox(height: 8),
+              Text(
+                "Sign in to track Eco Points, challenges, and your community.",
+                style: AppTextStyles.subtitle,
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
-              const Text(
-                "Welcome to GreenifyX",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "Make every action count 🌱",
-                style: TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 36),
               TextField(
                 controller: identifierController,
                 keyboardType: TextInputType.emailAddress,
                 autocorrect: false,
                 decoration: const InputDecoration(
-                  labelText: "Email or phone",
-                  border: OutlineInputBorder(),
+                  labelText: "Email",
+                  helperText: "Existing phone accounts can still sign in with that number",
                 ),
               ),
               const SizedBox(height: 16),
@@ -107,7 +97,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 obscureText: obscurePassword,
                 decoration: InputDecoration(
                   labelText: "Password",
-                  border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
                       obscurePassword
@@ -125,39 +114,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ForgotPasswordScreen(),
-                      ),
-                    );
-                  },
+                  onPressed: () => context.push(AppRoutes.forgotPassword),
                   child: const Text("Forgot password?"),
                 ),
               ),
               const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 52,
                 child: ElevatedButton(
                   onPressed: authState.isLoading ? null : _login,
                   child: authState.isLoading
-                      ? const CircularProgressIndicator()
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
                       : const Text("Log in"),
                 ),
               ),
               const SizedBox(height: 16),
               TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const RegisterScreen(),
-                    ),
-                  );
-                },
-                child: const Text("Create account"),
+                onPressed: () => context.push(AppRoutes.register),
+                child: const Text("Create an account with email"),
               ),
             ],
           ),

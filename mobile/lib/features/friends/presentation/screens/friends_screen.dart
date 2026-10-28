@@ -80,8 +80,10 @@ class FriendsScreen extends ConsumerWidget {
                     child: CircularProgressIndicator(),
                   ),
 
-              error: (e,s)=>
-                  const SizedBox(),
+              error: (e, s) => Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text("Couldn't load requests. Pull to retry."),
+              ),
 
               data: (list){
 
@@ -92,7 +94,7 @@ class FriendsScreen extends ConsumerWidget {
                     padding: EdgeInsets.all(16),
 
                     child: Text(
-                      "No Friend Requests",
+                      "No pending requests. Find people with the add icon.",
                     ),
 
                   );
@@ -120,6 +122,10 @@ class FriendsScreen extends ConsumerWidget {
   trailing: SizedBox(
     width: 90,
     child: ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(84, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+      ),
       onPressed: () async {
         await ref
             .read(friendRepositoryProvider)
@@ -166,8 +172,9 @@ class FriendsScreen extends ConsumerWidget {
                 child: CircularProgressIndicator(),
               ),
 
-              error:(e,s)=>Center(
-                child: Text(e.toString()),
+              error: (e, s) => Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text("Couldn't load friends. Pull to retry."),
               ),
 
               data:(list){
@@ -179,7 +186,7 @@ class FriendsScreen extends ConsumerWidget {
                     padding: EdgeInsets.all(16),
 
                     child: Text(
-                      "No Friends Yet",
+                      "No friends yet. Search and send a request to get started.",
                     ),
 
                   );

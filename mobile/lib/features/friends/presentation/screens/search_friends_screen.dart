@@ -71,13 +71,6 @@ class _SearchFriendsScreenState
 
               data: (list) {
 
-print("LIST LENGTH: ${list.length}");
-
-for (final u in list) {
-  print("UI USER: ${u.name}");
-}
-
-
                 if (list.isEmpty) {
                   return const Center(
                     child: Text("No users found"),
