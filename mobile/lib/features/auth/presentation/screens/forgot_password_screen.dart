@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/utils/phone.dart';
 import '../../application/providers/auth_provider.dart';
 import 'otp_screen.dart';
 
@@ -15,25 +14,25 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
 
 class _ForgotPasswordScreenState
     extends ConsumerState<ForgotPasswordScreen> {
-  final phoneController = TextEditingController();
+  final emailController = TextEditingController();
 
   @override
   void dispose() {
-    phoneController.dispose();
+    emailController.dispose();
     super.dispose();
   }
 
   Future<void> _sendOtp() async {
-    final phone = withIndiaCountryCode(phoneController.text);
-    if (phoneController.text.trim().isEmpty) {
+    final email = emailController.text.trim();
+    if (email.isEmpty || !email.contains("@")) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enter your phone number")),
+        const SnackBar(content: Text("Enter a valid email")),
       );
       return;
     }
 
     final devOtp = await ref.read(authProvider.notifier).sendOtp(
-          phone,
+          email,
           purpose: "reset",
         );
 
@@ -43,7 +42,7 @@ class _ForgotPasswordScreenState
       context,
       MaterialPageRoute(
         builder: (_) => OtpScreen(
-          phone: phone,
+          email: email,
           purpose: "reset",
           devOtp: devOtp,
         ),
@@ -72,17 +71,17 @@ class _ForgotPasswordScreenState
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                "We'll send an OTP so you can set a new password",
+                "We'll email an OTP so you can set a new password",
                 style: TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               TextField(
-                controller: phoneController,
-                keyboardType: TextInputType.phone,
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                autocorrect: false,
                 decoration: const InputDecoration(
-                  prefixText: "+91 ",
-                  labelText: "Phone Number",
+                  labelText: "Email",
                   border: OutlineInputBorder(),
                 ),
               ),

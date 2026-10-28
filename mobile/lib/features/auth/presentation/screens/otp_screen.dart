@@ -6,13 +6,13 @@ import '../../application/providers/auth_provider.dart';
 import 'set_password_screen.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
-  final String phone;
+  final String email;
   final String purpose;
   final String? devOtp;
 
   const OtpScreen({
     super.key,
-    required this.phone,
+    required this.email,
     this.purpose = "register",
     this.devOtp,
   });
@@ -40,7 +40,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   Future<void> _verify() async {
     final ok = await ref.read(authProvider.notifier).verifyOtp(
-          widget.phone,
+          widget.email,
           otpController.text.trim(),
           purpose: widget.purpose,
         );
@@ -55,7 +55,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => SetPasswordScreen(
-          phone: widget.phone,
+          email: widget.email,
           purpose: widget.purpose,
         ),
       ),
@@ -85,7 +85,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("OTP sent to ${widget.phone}"),
+            Text("OTP sent to ${widget.email}"),
             if (kDebugMode && widget.devOtp != null) ...[
               const SizedBox(height: 12),
               const Text(

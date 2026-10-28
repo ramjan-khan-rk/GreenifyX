@@ -10,7 +10,7 @@
 
 ### 👤 Authentication & Profiles
 
-* Secure user registration & login (JWT)
+* Secure user registration & login (JWT, email OTP via Resend)
 * Personalized profiles with profile images
 * Eco Points and activity statistics
 * Friend-based social network
@@ -190,11 +190,13 @@ CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 CORS_ORIGIN=
-SMS_PROVIDER=
+RESEND_API_KEY=
+EMAIL_FROM=
+APP_NAME=GreenifyX
 ALLOW_DEV_OTP=false
 ```
 
-Copy `backend/.env.example` to `backend/.env` and fill values locally. Production `JWT_SECRET` must be at least 32 characters; do not rotate an existing production secret from this repo. `ALLOW_DEV_OTP=true` is non-production only and may include `devOtp` in the send-otp JSON body. SMS is not wired until `SMS_PROVIDER` has a real adapter.
+Copy `backend/.env.example` to `backend/.env` and fill values locally. Production `JWT_SECRET` must be at least 32 characters; do not rotate an existing production secret from this repo. `ALLOW_DEV_OTP=true` is non-production only and may include `devOtp` in the send-otp JSON body; it is ignored when `NODE_ENV=production`. Registration OTP is sent with Resend — see `backend/docs/resend-setup.md`. Use a from-address on a domain you verified in Resend (`EMAIL_FROM`). Do not commit secrets.
 
 > **Note:** Never commit your `.env` file. It is excluded through `.gitignore`.
 

@@ -1,61 +1,69 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/services/api_service.dart';
+import '../../../../core/utils/phone.dart';
 
 class AuthApi {
+  Map<String, dynamic> _otpPayload(
+    String email, {
+    required String purpose,
+    String? otp,
+    String? password,
+  }) {
+    final data = <String, dynamic>{
+      "email": email,
+      "purpose": purpose,
+    };
+    if (otp != null) {
+      data["otp"] = otp;
+    }
+    if (password != null) {
+      data["password"] = password;
+    }
+    return data;
+  }
+
   Future<Response> sendOtp(
-    String phone, {
+    String email, {
     String purpose = "register",
-  }) async {
-    return await ApiService.dio.post(
+  }) {
+    return ApiService.dio.post(
       "/auth/send-otp",
-      data: {
-        "phone": phone,
-        "purpose": purpose,
-      },
+      data: _otpPayload(email, purpose: purpose),
     );
   }
 
   Future<Response> verifyOtp(
-    String phone,
+    String email,
     String otp, {
     String purpose = "register",
-  }) async {
-    return await ApiService.dio.post(
+  }) {
+    return ApiService.dio.post(
       "/auth/verify-otp",
-      data: {
-        "phone": phone,
-        "otp": otp,
-        "purpose": purpose,
-      },
+      data: _otpPayload(email, purpose: purpose, otp: otp),
     );
   }
 
   Future<Response> setPassword(
-    String phone,
+    String email,
     String password, {
     String purpose = "register",
-  }) async {
-    return await ApiService.dio.post(
+  }) {
+    return ApiService.dio.post(
       "/auth/set-password",
-      data: {
-        "phone": phone,
-        "password": password,
-        "purpose": purpose,
-      },
+      data: _otpPayload(email, purpose: purpose, password: password),
     );
   }
 
-  Future<Response> login(
-    String phone,
-    String password,
-  ) async {
-    return await ApiService.dio.post(
-      "/auth/login",
-      data: {
-        "phone": phone,
-        "password": password,
-      },
-    );
+  Future<Response> login(String identifier, String password) {
+    final trimmed = identifier.trim();
+    final data = <String, dynamic>{"password": password};
+    if (trimmed.contains("@")) {
+      data["email"] = trimmed;
+    } else {
+      data["phone"] = withIndiaCountryCode(trimmed);
+    }
+
+    return ApiService.dio.post("/auth/login", data: data);
   }
 }

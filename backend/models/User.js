@@ -4,9 +4,22 @@ const userSchema = new mongoose.Schema(
   {
     phone: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true,
       trim: true,
+    },
+
+    email: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    emailVerified: {
+      type: Boolean,
+      default: false,
     },
 
     password: {

@@ -3,12 +3,19 @@ import mongoose from "mongoose";
 const otpChallengeSchema = new mongoose.Schema({
   phone: {
     type: String,
-    required: true,
+    default: null,
+    index: true,
+  },
+  email: {
+    type: String,
+    default: null,
+    lowercase: true,
+    trim: true,
     index: true,
   },
   purpose: {
     type: String,
-    enum: ["register", "reset"],
+    enum: ["register", "reset", "verify"],
     required: true,
   },
   codeHash: {
@@ -29,6 +36,7 @@ const otpChallengeSchema = new mongoose.Schema({
   },
 });
 
+otpChallengeSchema.index({ email: 1, purpose: 1 });
 otpChallengeSchema.index({ phone: 1, purpose: 1 });
 otpChallengeSchema.index({ createdAt: 1 }, { expireAfterSeconds: 20 * 60 });
 

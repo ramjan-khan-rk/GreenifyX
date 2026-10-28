@@ -45,12 +45,12 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<String?> sendOtp(
-    String phone, {
+    String email, {
     String purpose = "register",
   }) async {
     try {
       state = state.copyWith(isLoading: true, error: null);
-      final devOtp = await repository.sendOtp(phone, purpose: purpose);
+      final devOtp = await repository.sendOtp(email, purpose: purpose);
       state = state.copyWith(isLoading: false);
       return devOtp;
     } catch (e) {
@@ -63,13 +63,13 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<bool> verifyOtp(
-    String phone,
+    String email,
     String otp, {
     String purpose = "register",
   }) async {
     try {
       state = state.copyWith(isLoading: true, error: null);
-      await repository.verifyOtp(phone, otp, purpose: purpose);
+      await repository.verifyOtp(email, otp, purpose: purpose);
       state = state.copyWith(isLoading: false);
       return true;
     } catch (e) {
@@ -79,7 +79,7 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<LoginResponse?> setPassword(
-    String phone,
+    String email,
     String password, {
     String purpose = "register",
   }) async {
@@ -87,7 +87,7 @@ class AuthNotifier extends Notifier<AuthState> {
       state = state.copyWith(isLoading: true, error: null);
 
       final result = await repository.setPassword(
-        phone,
+        email,
         password,
         purpose: purpose,
       );
@@ -101,13 +101,13 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<LoginResponse?> login(
-    String phone,
+    String identifier,
     String password,
   ) async {
     try {
       state = state.copyWith(isLoading: true, error: null);
 
-      final result = await repository.login(phone, password);
+      final result = await repository.login(identifier, password);
       await _persistSession(result);
       return result;
     } catch (e) {

@@ -1,4 +1,3 @@
-import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
@@ -7,6 +6,8 @@ import { getJwtSecret } from "../utils/jwtConfig.js";
 import { allowDevOtpShortcut, deliverOtp } from "../utils/otpDelivery.js";
 import { hitRateLimit } from "../utils/rateLimit.js";
 import { normalizePhone, phoneCandidates } from "../utils/phone.js";
+import { looksLikeEmail, normalizeEmail } from "../utils/email.js";
+import { generateOtpCode, hashOtp, hashesMatch } from "../utils/otpCrypto.js";
 
 const OTP_TTL_MS = 10 * 60 * 1000;
 const VERIFIED_TTL_MS = 15 * 60 * 1000;
@@ -20,7 +21,9 @@ const generateToken = (id) => {
 };
 
 const normalizePurpose = (purpose) => {
-  return purpose === "reset" ? "reset" : "register";
+  if (purpose === "reset") return "reset";
+  if (purpose === "verify") return "verify";
+  return "register";
 };
 
 const sanitizeUser = (user) => {
@@ -29,74 +32,82 @@ const sanitizeUser = (user) => {
   return obj;
 };
 
-const hashOtp = (phone, purpose, code) =>
-  crypto
-    .createHmac("sha256", getJwtSecret())
-    .update(`${phone}:${purpose}:${code}`)
-    .digest("hex");
-
-const hashesMatch = (a, b) => {
-  if (!a || !b) return false;
-  const left = Buffer.from(String(a));
-  const right = Buffer.from(String(b));
-  if (left.length !== right.length) return false;
-  return crypto.timingSafeEqual(left, right);
-};
-
 const findUserByPhone = async (phone, extra = "") => {
   const candidates = phoneCandidates(phone);
   if (!candidates.length) return null;
   return User.findOne({ phone: { $in: candidates } }).select(extra);
 };
 
-const getActiveOtp = async (phone, purpose) => {
+const findUserByEmail = async (email, extra = "") => {
+  if (!email) return null;
+  return User.findOne({ email }).select(extra);
+};
+
+const findUserForLogin = async (reqBody) => {
+  const email = normalizeEmail(reqBody.email);
+  if (email) {
+    return findUserByEmail(email, "+password");
+  }
+
+  const raw = String(reqBody.email || reqBody.phone || "").trim();
+  if (looksLikeEmail(raw)) {
+    return findUserByEmail(normalizeEmail(raw), "+password");
+  }
+
+  if (raw || reqBody.phone) {
+    return findUserByPhone(reqBody.phone || raw, "+password");
+  }
+
+  return null;
+};
+
+const getActiveOtp = async (email, purpose) => {
   return OtpChallenge.findOne({
-    phone,
+    email,
     purpose,
   }).sort({ createdAt: -1 });
 };
 
-const isVerifiedForPurpose = async (phone, purpose) => {
-  const entry = await getActiveOtp(phone, purpose);
+const isVerifiedForPurpose = async (email, purpose) => {
+  const entry = await getActiveOtp(email, purpose);
   if (!entry || !entry.verifiedAt || entry.codeHash) {
     return false;
   }
   if (Date.now() - entry.verifiedAt.getTime() > VERIFIED_TTL_MS) {
-    await OtpChallenge.deleteMany({ phone, purpose });
+    await OtpChallenge.deleteMany({ email, purpose });
     return false;
   }
   return true;
 };
 
-const generateOtpCode = () =>
-  crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");
+const requireEmail = (req) => normalizeEmail(req.body.email);
 
 export const sendOTP = async (req, res) => {
   try {
     const purpose = normalizePurpose(req.body.purpose);
-    const phone = normalizePhone(req.body.phone);
+    const email = requireEmail(req);
 
-    if (!phone) {
+    if (!email) {
       return res.status(400).json({
         success: false,
-        message: "Phone number is required",
+        message: "Email is required",
       });
     }
 
     if (
       hitRateLimit({
-        key: `otp-phone:${phone}:${purpose}`,
+        key: `otp-email:${email}:${purpose}`,
         max: 5,
         windowMs: 15 * 60 * 1000,
       })
     ) {
       return res.status(429).json({
         success: false,
-        message: "Too many OTP requests for this number. Try again later.",
+        message: "Too many OTP requests for this email. Try again later.",
       });
     }
 
-    const existingUser = await findUserByPhone(phone, "+password");
+    const existingUser = await findUserByEmail(email, "+password");
 
     if (purpose === "register" && existingUser?.password) {
       return res.status(400).json({
@@ -108,23 +119,37 @@ export const sendOTP = async (req, res) => {
     if (purpose === "reset" && !existingUser) {
       return res.status(404).json({
         success: false,
-        message: "No account found for this phone number.",
+        message: "No account found for this email.",
+      });
+    }
+
+    if (purpose === "verify" && !existingUser) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found for this email.",
       });
     }
 
     const otp = generateOtpCode();
 
-    await OtpChallenge.deleteMany({ phone, purpose });
+    await OtpChallenge.deleteMany({ email, purpose });
     await OtpChallenge.create({
-      phone,
+      email,
       purpose,
-      codeHash: hashOtp(phone, purpose, otp),
+      codeHash: hashOtp(email, purpose, otp),
       attempts: 0,
       verifiedAt: null,
     });
 
-    const delivery = await deliverOtp({ phone, otp });
+    const delivery = await deliverOtp({ email, otp });
     const devShortcut = allowDevOtpShortcut();
+
+    if (!delivery.delivered && !devShortcut) {
+      return res.status(503).json({
+        success: false,
+        message: "Unable to send verification email. Try again later.",
+      });
+    }
 
     const payload = {
       success: true,
@@ -132,9 +157,7 @@ export const sendOTP = async (req, res) => {
       delivery: delivery.delivered ? "sent" : "not_sent",
       message: delivery.delivered
         ? "OTP sent successfully"
-        : devShortcut
-          ? "OTP generated. SMS is not configured; use the development shortcut."
-          : "OTP could not be delivered. Configure SMS_PROVIDER before production use.",
+        : "OTP generated. Email delivery is not configured; use the development shortcut.",
     };
 
     if (devShortcut) {
@@ -153,17 +176,17 @@ export const sendOTP = async (req, res) => {
 export const verifyOTP = async (req, res) => {
   try {
     const purpose = normalizePurpose(req.body.purpose);
-    const phone = normalizePhone(req.body.phone);
+    const email = requireEmail(req);
     const otp = String(req.body.otp ?? "").trim();
 
-    if (!phone || !otp) {
+    if (!email || !otp) {
       return res.status(400).json({
         success: false,
-        message: "Phone and OTP are required",
+        message: "Email and OTP are required",
       });
     }
 
-    const entry = await getActiveOtp(phone, purpose);
+    const entry = await getActiveOtp(email, purpose);
 
     if (!entry || !entry.codeHash) {
       return res.status(400).json({
@@ -173,7 +196,7 @@ export const verifyOTP = async (req, res) => {
     }
 
     if (Date.now() - entry.createdAt.getTime() > OTP_TTL_MS) {
-      await OtpChallenge.deleteMany({ phone, purpose });
+      await OtpChallenge.deleteMany({ email, purpose });
       return res.status(400).json({
         success: false,
         message: "Invalid or expired OTP",
@@ -181,14 +204,14 @@ export const verifyOTP = async (req, res) => {
     }
 
     if (entry.attempts >= MAX_OTP_ATTEMPTS) {
-      await OtpChallenge.deleteMany({ phone, purpose });
+      await OtpChallenge.deleteMany({ email, purpose });
       return res.status(429).json({
         success: false,
         message: "Too many incorrect attempts. Request a new OTP.",
       });
     }
 
-    const expected = hashOtp(phone, purpose, otp);
+    const expected = hashOtp(email, purpose, otp);
     if (!hashesMatch(entry.codeHash, expected)) {
       entry.attempts += 1;
       await entry.save();
@@ -203,12 +226,20 @@ export const verifyOTP = async (req, res) => {
     entry.attempts = 0;
     await entry.save();
 
+    if (purpose === "verify") {
+      const user = await findUserByEmail(email);
+      if (user && !user.emailVerified) {
+        user.emailVerified = true;
+        await user.save();
+      }
+    }
+
     res.status(200).json({
       success: true,
       message: "OTP verified successfully",
       verified: true,
       purpose,
-      phone,
+      email,
     });
   } catch (error) {
     res.status(500).json({
@@ -221,13 +252,13 @@ export const verifyOTP = async (req, res) => {
 export const setPassword = async (req, res) => {
   try {
     const purpose = normalizePurpose(req.body.purpose);
-    const phone = normalizePhone(req.body.phone);
+    const email = requireEmail(req);
     const password = req.body.password;
 
-    if (!phone || !password) {
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Phone and password are required",
+        message: "Email and password are required",
       });
     }
 
@@ -238,7 +269,7 @@ export const setPassword = async (req, res) => {
       });
     }
 
-    if (!(await isVerifiedForPurpose(phone, purpose))) {
+    if (!(await isVerifiedForPurpose(email, purpose))) {
       return res.status(400).json({
         success: false,
         message: "Please verify OTP before setting a password",
@@ -246,12 +277,12 @@ export const setPassword = async (req, res) => {
     }
 
     const hashed = await bcrypt.hash(password, 10);
-    let user = await findUserByPhone(phone, "+password");
+    let user = await findUserByEmail(email, "+password");
     let isNewUser = false;
 
     if (purpose === "register") {
       if (user?.password) {
-        await OtpChallenge.deleteMany({ phone, purpose });
+        await OtpChallenge.deleteMany({ email, purpose });
         return res.status(400).json({
           success: false,
           message: "Account already exists. Please log in.",
@@ -260,27 +291,38 @@ export const setPassword = async (req, res) => {
 
       if (!user) {
         isNewUser = true;
-        user = await User.create({ phone, password: hashed });
+        user = await User.create({
+          email,
+          password: hashed,
+          emailVerified: true,
+        });
       } else {
         user.password = hashed;
+        user.emailVerified = true;
         await user.save();
         isNewUser = !user.isProfileCompleted;
       }
-    } else {
+    } else if (purpose === "reset") {
       if (!user) {
-        await OtpChallenge.deleteMany({ phone, purpose });
+        await OtpChallenge.deleteMany({ email, purpose });
         return res.status(404).json({
           success: false,
-          message: "No account found for this phone number.",
+          message: "No account found for this email.",
         });
       }
 
       user.password = hashed;
+      user.emailVerified = true;
       await user.save();
       isNewUser = !user.isProfileCompleted;
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid purpose",
+      });
     }
 
-    await OtpChallenge.deleteMany({ phone, purpose });
+    await OtpChallenge.deleteMany({ email, purpose });
 
     const token = generateToken(user._id);
 
@@ -304,17 +346,16 @@ export const setPassword = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const phone = normalizePhone(req.body.phone);
     const password = req.body.password;
 
-    if (!phone || !password) {
+    if (!password || (!req.body.email && !req.body.phone)) {
       return res.status(400).json({
         success: false,
-        message: "Phone and password are required",
+        message: "Email or phone and password are required",
       });
     }
 
-    const user = await findUserByPhone(phone, "+password");
+    const user = await findUserForLogin(req.body);
 
     if (!user || !user.password) {
       return res.status(401).json({
@@ -329,7 +370,7 @@ export const login = async (req, res) => {
     if (!match) {
       return res.status(401).json({
         success: false,
-        message: "Invalid phone or password",
+        message: "Invalid email, phone, or password",
       });
     }
 

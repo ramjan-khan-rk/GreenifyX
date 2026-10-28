@@ -3,6 +3,8 @@ import '../../../../core/utils/eco_points.dart';
 class UserModel {
   final String id;
   final String phone;
+  final String email;
+  final bool emailVerified;
   final String name;
   final String profileImage;
   final String bio;
@@ -16,6 +18,8 @@ class UserModel {
   const UserModel({
     required this.id,
     required this.phone,
+    required this.email,
+    required this.emailVerified,
     required this.name,
     required this.profileImage,
     required this.bio,
@@ -29,6 +33,8 @@ class UserModel {
     return UserModel(
       id: json["_id"] ?? "",
       phone: json["phone"] ?? "",
+      email: json["email"] ?? "",
+      emailVerified: json["emailVerified"] ?? false,
       name: json["name"] ?? "",
       profileImage: json["profileImage"] ?? "",
       bio: json["bio"] ?? "",

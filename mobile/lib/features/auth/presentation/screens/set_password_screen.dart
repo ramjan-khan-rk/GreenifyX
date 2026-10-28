@@ -5,12 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../../application/providers/auth_provider.dart';
 
 class SetPasswordScreen extends ConsumerStatefulWidget {
-  final String phone;
+  final String email;
   final String purpose;
 
   const SetPasswordScreen({
     super.key,
-    required this.phone,
+    required this.email,
     this.purpose = "register",
   });
 
@@ -53,7 +53,7 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
     }
 
     final result = await ref.read(authProvider.notifier).setPassword(
-          widget.phone,
+          widget.email,
           password,
           purpose: widget.purpose,
         );
@@ -100,7 +100,7 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
             children: [
               Text(
                 isReset
-                    ? "Choose a new password for ${widget.phone}"
+                    ? "Choose a new password for ${widget.email}"
                     : "Set a password to finish signing up",
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 16),

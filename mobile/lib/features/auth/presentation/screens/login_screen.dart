@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/utils/phone.dart';
 import '../../application/providers/auth_provider.dart';
 import 'forgot_password_screen.dart';
 import 'register_screen.dart';
@@ -15,30 +14,30 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final phoneController = TextEditingController();
+  final identifierController = TextEditingController();
   final passwordController = TextEditingController();
   bool obscurePassword = true;
 
   @override
   void dispose() {
-    phoneController.dispose();
+    identifierController.dispose();
     passwordController.dispose();
     super.dispose();
   }
 
   Future<void> _login() async {
-    final phone = withIndiaCountryCode(phoneController.text);
+    final identifier = identifierController.text.trim();
     final password = passwordController.text;
 
-    if (phone.isEmpty || password.isEmpty) {
+    if (identifier.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enter phone and password")),
+        const SnackBar(content: Text("Enter email or phone and password")),
       );
       return;
     }
 
     final result = await ref.read(authProvider.notifier).login(
-          phone,
+          identifier,
           password,
         );
 
@@ -94,11 +93,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 40),
               TextField(
-                controller: phoneController,
-                keyboardType: TextInputType.phone,
+                controller: identifierController,
+                keyboardType: TextInputType.emailAddress,
+                autocorrect: false,
                 decoration: const InputDecoration(
-                  prefixText: "+91 ",
-                  labelText: "Phone Number",
+                  labelText: "Email or phone",
                   border: OutlineInputBorder(),
                 ),
               ),
