@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   applyBlock,
   areFriends,
+  assertCanComment,
   assertCanMessage,
   isBlockedEither,
   rejectPendingRequest,
@@ -76,4 +77,14 @@ test("assertCanMessage allows friends only and blocks the rest", () => {
   a.blockedUsers = ["d"];
   blocked.friends = ["a"];
   assert.equal(assertCanMessage(a, blocked).reason, "blocked");
+});
+
+test("assertCanComment allows the author and friends", () => {
+  const author = user("a", { friends: ["b"] });
+  const friend = user("b", { friends: ["a"] });
+  const stranger = user("c");
+  assert.equal(assertCanComment(author, author).ok, true);
+  assert.equal(assertCanComment(friend, author).ok, true);
+  assert.equal(assertCanComment(stranger, author).ok, false);
+  assert.equal(assertCanComment(stranger, author).reason, "not_friends");
 });

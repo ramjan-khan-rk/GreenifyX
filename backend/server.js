@@ -8,6 +8,7 @@ import connectDB from "./config/db.js";
 import { assertJwtSecret } from "./utils/jwtConfig.js";
 import { corsOriginDelegate } from "./utils/corsConfig.js";
 import { securityHeaders } from "./middleware/securityHeaders.js";
+import { healthPayload } from "./utils/health.js";
 
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
@@ -46,6 +47,10 @@ app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (req, res) => {
   res.send("GreenifyX API Running...");
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json(healthPayload());
 });
 
 const PORT = process.env.PORT || 5000;

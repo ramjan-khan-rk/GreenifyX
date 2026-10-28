@@ -169,10 +169,16 @@ class ChallengeScreen extends ConsumerWidget {
             return ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-              itemCount: list.length,
+              itemCount: list.length + 1,
               separatorBuilder: (_, _) => const SizedBox(height: 14),
               itemBuilder: (_, index) {
-                return ChallengeCard(challenge: list[index]);
+                if (index == 0) {
+                  return Text(
+                    "Progress is self-reported. GPS evidence is not in this pilot.",
+                    style: AppTextStyles.subtitle.copyWith(height: 1.35),
+                  );
+                }
+                return ChallengeCard(challenge: list[index - 1]);
               },
             );
           },

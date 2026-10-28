@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,11 +6,14 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/media_url.dart';
 import '../../../../core/widgets/app_status.dart';
+import '../../../../core/widgets/count_badge.dart';
 import '../../../../core/widgets/points_status_chip.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../auth/application/providers/auth_provider.dart';
 import '../../../comment/presentation/widgets/comment_bottom_sheet.dart';
+import '../../../notifications/application/providers/notification_provider.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
+import '../../../profile/application/providers/my_profile_provider.dart';
 import '../../application/providers/feed_provider.dart';
 
 class FeedScreen extends ConsumerWidget {
@@ -19,6 +23,7 @@ class FeedScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final feed = ref.watch(feedProvider);
     final meId = ref.watch(authProvider).user?.id ?? "";
+    final unread = ref.watch(unreadNotificationCountProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -35,12 +40,16 @@ class FeedScreen extends ConsumerWidget {
                 ),
               );
             },
-            icon: const Icon(Icons.notifications_none_outlined),
+            icon: CountBadge(
+              count: unread,
+              child: const Icon(Icons.notifications_none_outlined),
+            ),
           ),
         ],
       ),
       body: feed.when(
-        data: (posts) {
+        data: (page) {
+          final posts = page.posts;
           if (posts.isEmpty) {
             return const AppEmptyState(
               icon: Icons.public_outlined,
@@ -52,10 +61,20 @@ class FeedScreen extends ConsumerWidget {
 
           return RefreshIndicator(
             color: AppColors.primary,
-            onRefresh: () async => ref.invalidate(feedProvider),
+            onRefresh: () => ref.read(feedProvider.notifier).refresh(),
             child: ListView.builder(
-              itemCount: posts.length,
+              itemCount: posts.length + (page.hasMore ? 1 : 0),
               itemBuilder: (context, index) {
+                if (index >= posts.length) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                    child: TextButton(
+                      onPressed: () =>
+                          ref.read(feedProvider.notifier).loadMore(),
+                      child: const Text("Load more"),
+                    ),
+                  );
+                }
                 final post = posts[index];
 
                 return Card(
@@ -98,12 +117,21 @@ class FeedScreen extends ConsumerWidget {
                       ),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          resolveMediaUrl(post.image) ?? "",
+                        child: CachedNetworkImage(
+                          imageUrl: resolveMediaUrl(post.image) ?? "",
                           width: double.infinity,
                           height: 280,
                           fit: BoxFit.cover,
-                          semanticLabel: "${post.activity} photo",
+                          placeholder: (_, _) => Container(
+                            height: 280,
+                            color: AppColors.border,
+                          ),
+                          errorWidget: (_, _, _) => Container(
+                            height: 280,
+                            alignment: Alignment.center,
+                            color: AppColors.border,
+                            child: const Icon(Icons.broken_image_outlined),
+                          ),
                         ),
                       ),
                       if (post.description.isNotEmpty)
@@ -128,7 +156,7 @@ class FeedScreen extends ConsumerWidget {
                                 await ref
                                     .read(feedRepositoryProvider)
                                     .toggleLike(post.id);
-                                ref.invalidate(feedProvider);
+                                await ref.read(feedProvider.notifier).refresh();
                               } catch (e) {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -167,7 +195,8 @@ class FeedScreen extends ConsumerWidget {
                                   await ref
                                       .read(feedRepositoryProvider)
                                       .verifyPost(post.id);
-                                  ref.invalidate(feedProvider);
+                                  await ref.read(feedProvider.notifier).refresh();
+                                  ref.invalidate(myProfileProvider);
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(

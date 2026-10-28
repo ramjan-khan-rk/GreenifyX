@@ -4,7 +4,12 @@ import User from "../models/User.js";
 import OtpChallenge from "../models/OtpChallenge.js";
 import { getJwtSecret } from "../utils/jwtConfig.js";
 import { allowDevOtpShortcut, deliverOtp } from "../utils/otpDelivery.js";
-import { hitRateLimit } from "../utils/rateLimit.js";
+import {
+  clearRateLimit,
+  hitRateLimit,
+  isRateLimited,
+  recordHit,
+} from "../utils/rateLimit.js";
 import { normalizePhone, phoneCandidates } from "../utils/phone.js";
 import { looksLikeEmail, normalizeEmail } from "../utils/email.js";
 import { generateOtpCode, hashOtp, hashesMatch } from "../utils/otpCrypto.js";
@@ -355,9 +360,25 @@ export const login = async (req, res) => {
       });
     }
 
+    const loginKey =
+      normalizeEmail(req.body.email) ||
+      String(req.body.phone || req.body.email || "")
+        .trim()
+        .toLowerCase();
+    const failKey = loginKey ? `login-fail:${loginKey}` : "";
+    const failWindow = 15 * 60 * 1000;
+
+    if (failKey && isRateLimited({ key: failKey, max: 8, windowMs: failWindow })) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many sign-in attempts. Try again later.",
+      });
+    }
+
     const user = await findUserForLogin(req.body);
 
     if (!user || !user.password) {
+      if (failKey) recordHit({ key: failKey, windowMs: failWindow });
       return res.status(401).json({
         success: false,
         message:
@@ -368,11 +389,14 @@ export const login = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
+      if (failKey) recordHit({ key: failKey, windowMs: failWindow });
       return res.status(401).json({
         success: false,
         message: "Invalid email, phone, or password",
       });
     }
+
+    if (failKey) clearRateLimit(failKey);
 
     const token = generateToken(user._id);
 

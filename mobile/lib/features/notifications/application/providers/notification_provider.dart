@@ -8,3 +8,10 @@ final notificationApiProvider = Provider((ref) => NotificationApi());
 final notificationsProvider = FutureProvider<List<AppNotification>>((ref) {
   return ref.read(notificationApiProvider).list();
 });
+
+final unreadNotificationCountProvider = Provider<int>((ref) {
+  return ref.watch(notificationsProvider).maybeWhen(
+        data: (list) => list.where((item) => !item.isRead).length,
+        orElse: () => 0,
+      );
+});

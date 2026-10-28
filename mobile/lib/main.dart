@@ -35,6 +35,9 @@ class GreenifyX extends StatelessWidget {
 
       theme: AppTheme.lightTheme,
 
+      locale: const Locale("en"),
+      supportedLocales: const [Locale("en")],
+
       routerConfig: AppRouter.router,
 
     );

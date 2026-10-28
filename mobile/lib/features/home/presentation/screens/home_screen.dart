@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_status.dart';
+import '../../../../core/widgets/count_badge.dart';
 import '../../../../core/widgets/user_avatar.dart';
+import '../../../notifications/application/providers/notification_provider.dart';
 import '../../../challenge/presentation/screens/challenge_screen.dart';
 import '../../../challenge/presentation/screens/create_challenge_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
@@ -19,6 +21,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(myProfileProvider);
+    final unread = ref.watch(unreadNotificationCountProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -66,7 +69,10 @@ class HomeScreen extends ConsumerWidget {
                             ),
                           );
                         },
-                        icon: const Icon(Icons.notifications_none_outlined),
+                        icon: CountBadge(
+                          count: unread,
+                          child: const Icon(Icons.notifications_none_outlined),
+                        ),
                       ),
                     ],
                   ),
@@ -75,6 +81,20 @@ class HomeScreen extends ConsumerWidget {
                     ecoPoints: user.ecoPoints,
                     level: user.level,
                     streak: user.streak,
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.card,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Text(
+                      "Community-verified Eco Points. English UI for this UAE pilot. Arabic and RTL are not included yet — they would need mirrored layouts, not a language toggle.",
+                      style: AppTextStyles.subtitle.copyWith(height: 1.4),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text("Jump in", style: AppTextStyles.title.copyWith(fontSize: 18)),

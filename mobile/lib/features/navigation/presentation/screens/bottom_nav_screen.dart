@@ -13,6 +13,8 @@ import '../../../feed/presentation/screens/feed_screen.dart';
 import '../../../challenge/application/providers/challenge_provider.dart';
 import '../../../notifications/application/providers/notification_provider.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/count_badge.dart';
+import '../../../friends/application/providers/friend_provider.dart';
 
 class BottomNavScreen extends ConsumerStatefulWidget {
   const BottomNavScreen({super.key});
@@ -64,6 +66,16 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final unreadNotes = ref.watch(unreadNotificationCountProvider);
+    final unreadChats = ref.watch(chatsProvider).maybeWhen(
+          data: (list) => list.where((chat) => chat.unread).length,
+          orElse: () => 0,
+        );
+    final pendingFriends = ref.watch(requestsProvider).maybeWhen(
+          data: (list) => list.length,
+          orElse: () => 0,
+        );
+
     return Scaffold(
       body: pages[currentIndex],
       floatingActionButton: FloatingActionButton(
@@ -89,24 +101,33 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
           });
         },
         type: BottomNavigationBarType.fixed,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: CountBadge(
+              count: unreadNotes,
+              child: const Icon(Icons.home),
+            ),
             label: "Home",
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.public),
             label: "Explore",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.people),
+            icon: CountBadge(
+              count: pendingFriends,
+              child: const Icon(Icons.people),
+            ),
             label: "Friends",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
+            icon: CountBadge(
+              count: unreadChats,
+              child: const Icon(Icons.chat),
+            ),
             label: "Chat",
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: "Profile",
           ),

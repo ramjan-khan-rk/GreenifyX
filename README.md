@@ -21,6 +21,8 @@
 * Like and comment on posts
 * Activity categories (Tree Plantation, Recycling, Cycling, Water Conservation, etc.)
 * Community-driven engagement
+* Friend verification before Eco Points are awarded
+* Authenticated leaderboard of verified Eco Points
 
 ### 🤝 Friends & Challenges
 
@@ -229,18 +231,25 @@ Copy `backend/.env.example` to `backend/.env` and fill values locally. Productio
 * Likes
 * Challenge System
 * Real-Time Chat
-* Notification Backend
+* Notification inbox (Updates)
 * Socket.IO Integration
 * Cloudinary Uploads
+* Leaderboard (authenticated, verified Eco Points)
+* GoRouter session guards
+* Friend verify → Eco Points (not on upload)
+* Friends reject / unfriend / block
+* Friends-only chat and comments
 
 ### 🔜 Planned
 
 * GPS-based eco verification
 * Nearby user verification
-* Leaderboards
-* Stronger Eco Points verification
-* Enhanced notification UI
+* Arabic / RTL (English-only for this UAE pilot)
 * Production optimization
+
+### UAE pilot notes
+
+UI copy is **English only**. Arabic and RTL are not implemented; adding them later means localizing strings and mirroring layouts, not flipping a toggle. Phone helpers default to **+971**. Streaks use the **Asia/Dubai** calendar day. Eco Points are **community-verified** (a friend confirms a post), not GPS or government MRV. Challenge progress remains self-reported. Do not treat this README as a live ops report — Resend, JWT length, Atlas indexes, and Render must still be set on the host.
 
 ---
 

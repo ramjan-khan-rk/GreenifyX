@@ -2,6 +2,8 @@ import Challenge from "../models/Challenge.js";
 import User from "../models/User.js";
 import { emitToUser } from "../socket/socket.js";
 import Notification from "../models/Notification.js";
+import { applyEcoAward } from "../utils/verifiedProgress.js";
+import { sendServerError } from "../utils/httpError.js";
 // ======================================================
 // CREATE CHALLENGE
 // ======================================================
@@ -383,14 +385,11 @@ export const updateProgress = async (req, res) => {try {
 
     // Rewards
     if (challenge.winner) {
-      await User.findByIdAndUpdate(
-        challenge.winner,
-        {
-          $inc: {
-            ecoPoints: challenge.ecoReward,
-          },
-        }
-      );
+      const winner = await User.findById(challenge.winner);
+      if (winner) {
+        applyEcoAward(winner, challenge.ecoReward);
+        await winner.save();
+      }
     }
 
     // Create notifications
@@ -430,8 +429,5 @@ export const updateProgress = async (req, res) => {try {
     progressEvidence: "self_reported",
   });
 } catch (error) {
-  return res.status(500).json({
-    success: false,
-    message: "Request failed",
-  });
+  return sendServerError(res, "Unable to update progress");
 }};

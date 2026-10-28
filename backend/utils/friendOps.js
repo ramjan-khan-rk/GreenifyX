@@ -68,3 +68,19 @@ export const assertCanMessage = (sender, receiver) => {
   }
   return { ok: true };
 };
+
+export const assertCanComment = (viewer, author) => {
+  if (!viewer || !author) {
+    return { ok: false, status: 404, reason: "not_found" };
+  }
+  if (asId(viewer._id) === asId(author._id)) {
+    return { ok: true };
+  }
+  if (isBlockedEither(viewer, author)) {
+    return { ok: false, status: 403, reason: "blocked" };
+  }
+  if (!areFriends(viewer, author)) {
+    return { ok: false, status: 403, reason: "not_friends" };
+  }
+  return { ok: true };
+};

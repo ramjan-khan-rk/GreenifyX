@@ -7,6 +7,7 @@ import { uploadBufferToCloudinary } from "../utils/cloudinaryUpload.js";
 import { sendServerError } from "../utils/httpError.js";
 import { parsePagination } from "../utils/pagination.js";
 import { applyVerifyAward, pointsStatusFor } from "../utils/postPoints.js";
+import { applyEcoAward } from "../utils/verifiedProgress.js";
 
 const ecoPointsMap = {
   "Tree Plantation": 50,
@@ -228,13 +229,28 @@ export const verifyPost = async (req, res) => {
       });
     }
 
-    if (result.award) {
-      await User.findByIdAndUpdate(post.user, {
-        $inc: { ecoPoints: result.points },
-      });
+    if (result.award && author) {
+      applyEcoAward(author, result.points);
+      await author.save();
     }
 
     await post.save();
+
+    try {
+      const notification = await Notification.create({
+        receiver: post.user,
+        sender: req.user._id,
+        type: "verification",
+        title: "Activity verified",
+        message: result.award
+          ? `${req.user.name} verified your activity. Eco Points were added.`
+          : `${req.user.name} verified your activity.`,
+        referenceId: post._id,
+      });
+      emitToUser(post.user, "newNotification", notification);
+    } catch (notifyError) {
+      console.error("Post verified but notification failed");
+    }
 
     return res.status(200).json({
       success: true,

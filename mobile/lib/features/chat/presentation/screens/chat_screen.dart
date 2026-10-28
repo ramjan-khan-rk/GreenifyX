@@ -157,8 +157,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       maxLines: 5,
                       textCapitalization:
                           TextCapitalization.sentences,
+                      textDirection: TextDirection.ltr,
                       decoration: const InputDecoration(
-                        hintText: "Type a message...",
+                        hintText: "Message a friend...",
                         border: OutlineInputBorder(),
                       ),
                     ),

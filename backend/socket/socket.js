@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 import { getJwtSecret } from "../utils/jwtConfig.js";
 import { corsOriginDelegate } from "../utils/corsConfig.js";
 
@@ -28,7 +29,7 @@ export const initializeSocket = (server) => {
     },
   });
 
-  io.use((socket, next) => {
+  io.use(async (socket, next) => {
     try {
       const token = readHandshakeToken(socket);
       if (!token) {
@@ -42,7 +43,13 @@ export const initializeSocket = (server) => {
         return;
       }
 
-      socket.userId = decoded.id.toString();
+      const user = await User.findById(decoded.id).select("_id");
+      if (!user) {
+        next(new Error("Authentication failed"));
+        return;
+      }
+
+      socket.userId = user._id.toString();
       next();
     } catch (error) {
       next(new Error("Authentication failed"));

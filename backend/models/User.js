@@ -73,6 +73,10 @@ const userSchema = new mongoose.Schema(
       default: 0,
     },
 
+    lastVerifiedAt: {
+      type: Date,
+    },
+
     badges: [
       {
         type: String,

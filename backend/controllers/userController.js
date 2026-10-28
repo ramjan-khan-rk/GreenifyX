@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import { resolveEcoPoints } from "../utils/ecoPoints.js";
 import { escapeRegex } from "../utils/escapeRegex.js";
 import { parsePagination } from "../utils/pagination.js";
+import { sendServerError } from "../utils/httpError.js";
 
 // COMPLETE / UPDATE PROFILE
 export const updateProfile = async (req, res) => {
@@ -37,10 +38,7 @@ export const updateProfile = async (req, res) => {
       user: obj,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Request failed",
-    });
+    return sendServerError(res, "Unable to update profile");
   }
 };
 
@@ -68,10 +66,7 @@ export const getMyProfile = async (req, res) => {
       user: obj,
     });
   } catch (e) {
-    res.status(500).json({
-      success: false,
-      message: "Request failed",
-    });
+    return sendServerError(res, "Unable to load profile");
   }
 };
 
@@ -96,13 +91,11 @@ export const getUserById = async (req, res) => {
         ecoPoints: resolveEcoPoints(user),
         level: user.level,
         streak: user.streak,
+        badges: user.badges || [],
       },
     });
   } catch (e) {
-    res.status(500).json({
-      success: false,
-      message: "Request failed",
-    });
+    return sendServerError(res, "Unable to load user");
   }
 };
 
@@ -126,10 +119,7 @@ export const getLeaderboard = async (req, res) => {
       })),
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Request failed",
-    });
+    return sendServerError(res, "Unable to load leaderboard");
   }
 };
 
@@ -190,9 +180,6 @@ export const searchUsers = async (req, res) => {
       users: result,
     });
   } catch (e) {
-    res.status(500).json({
-      success: false,
-      message: "Request failed",
-    });
+    return sendServerError(res, "Unable to search users");
   }
 };

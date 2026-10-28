@@ -70,6 +70,24 @@ class AccountScreen extends ConsumerWidget {
                   level: user.level,
                   streak: user.streak,
                 ),
+                if (user.badges.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: user.badges
+                        .map(
+                          (badge) => Chip(
+                            label: Text(_badgeLabel(badge)),
+                            backgroundColor:
+                                AppColors.primary.withValues(alpha: 0.12),
+                            side: const BorderSide(color: AppColors.border),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 ListTile(
                   leading: const Icon(Icons.edit_outlined),
@@ -143,5 +161,20 @@ class AccountScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+}
+
+String _badgeLabel(String badge) {
+  switch (badge) {
+    case "first_verified":
+      return "First verified";
+    case "century":
+      return "100 Eco Points";
+    case "streak_3":
+      return "3-day streak";
+    case "week_streak":
+      return "7-day streak";
+    default:
+      return badge;
   }
 }

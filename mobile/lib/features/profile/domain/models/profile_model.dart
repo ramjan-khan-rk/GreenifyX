@@ -11,6 +11,7 @@ class ProfileModel {
   final int streak;
   final int level;
   final int friendsCount;
+  final List<String> badges;
 
   ProfileModel({
     required this.id,
@@ -22,6 +23,7 @@ class ProfileModel {
     required this.streak,
     required this.level,
     required this.friendsCount,
+    this.badges = const [],
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,10 @@ class ProfileModel {
       streak: json["streak"] ?? 0,
       level: json["level"] ?? 1,
       friendsCount: json["friendsCount"] ?? 0,
+      badges: (json["badges"] as List?)
+              ?.map((item) => item.toString())
+              .toList() ??
+          const [],
     );
   }
 }
