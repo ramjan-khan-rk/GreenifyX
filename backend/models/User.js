@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
       trim: true,
+      required: false,
     },
     // Existing deployments may still have a non-sparse unique phone index.
     // Recreate it as sparse before adding a second email-only user.

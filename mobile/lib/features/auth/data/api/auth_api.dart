@@ -11,7 +11,7 @@ class AuthApi {
     String? password,
   }) {
     final data = <String, dynamic>{
-      "email": email,
+      "email": email.trim().toLowerCase(),
       "purpose": purpose,
     };
     if (otp != null) {

@@ -11,7 +11,7 @@ import {
   recordHit,
 } from "../utils/rateLimit.js";
 import { normalizePhone, phoneCandidates } from "../utils/phone.js";
-import { looksLikeEmail, normalizeEmail } from "../utils/email.js";
+import { looksLikeEmail, normalizeEmail, resolveOtpEmail } from "../utils/email.js";
 import { generateOtpCode, hashOtp, hashesMatch } from "../utils/otpCrypto.js";
 
 const OTP_TTL_MS = 10 * 60 * 1000;
@@ -85,7 +85,7 @@ const isVerifiedForPurpose = async (email, purpose) => {
   return true;
 };
 
-const requireEmail = (req) => normalizeEmail(req.body.email);
+const requireEmail = (req) => resolveOtpEmail(req.body || {});
 
 export const sendOTP = async (req, res) => {
   try {
