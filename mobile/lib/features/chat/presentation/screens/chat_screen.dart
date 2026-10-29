@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_status.dart';
 import '../../application/providers/chat_provider.dart';
 import '../../data/repository/message_repository.dart';
 import '../widgets/message_bubble.dart';
@@ -89,23 +92,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(widget.userName),
+        title: Text(widget.userName, style: AppTextStyles.title),
       ),
       body: Column(
         children: [
           Expanded(
             child: messages.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              error: (e, s) => Center(
-                child: Text(e.toString()),
-              ),
+              loading: () => const AppLoading(),
+              error: (e, s) => AppErrorState(message: e.toString()),
               data: (list) {
                 if (list.isEmpty) {
-                  return const Center(
-                    child: Text("Start your conversation 👋"),
+                  return const AppEmptyState(
+                    icon: Icons.chat_bubble_outline,
+                    title: "Say hello",
+                    message: "Friends-only chat. Keep it kind.",
                   );
                 }
 
@@ -140,12 +142,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             top: false,
             child: Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
+              decoration: const BoxDecoration(
+                color: AppColors.card,
                 border: Border(
-                  top: BorderSide(
-                    color: Colors.grey.shade300,
-                  ),
+                  top: BorderSide(color: AppColors.border),
                 ),
               ),
               child: Row(
@@ -157,9 +157,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       maxLines: 5,
                       textCapitalization:
                           TextCapitalization.sentences,
+                      textDirection: TextDirection.ltr,
                       decoration: const InputDecoration(
-                        hintText: "Type a message...",
-                        border: OutlineInputBorder(),
+                        hintText: "Message a friend...",
                       ),
                     ),
                   ),

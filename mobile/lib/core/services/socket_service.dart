@@ -1,56 +1,71 @@
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as io;
+
+import '../config/app_config.dart';
+import 'storage_service.dart';
 
 class SocketService {
   SocketService._();
 
   static final SocketService instance = SocketService._();
 
-  late IO.Socket socket;
+  io.Socket? socket;
 
   bool _connected = false;
+  bool _connecting = false;
 
-  void connect(String userId) {
-    if (_connected) return;
+  Future<void> connect(String userId) async {
+    if (_connected || _connecting) return;
+    _connecting = true;
 
-    socket = IO.io(
-      "http://10.238.223.39:5000",
-      IO.OptionBuilder()
+    final token = await StorageService.getToken();
+    if (token == null) {
+      _connecting = false;
+      return;
+    }
+
+    socket = io.io(
+      AppConfig.socketUrl,
+      io.OptionBuilder()
           .setTransports(["websocket"])
+          .setAuth({"token": token})
           .disableAutoConnect()
           .build(),
     );
 
-    socket.connect();
+    socket!.connect();
 
-    socket.onConnect((_) {
+    socket!.onConnect((_) {
       _connected = true;
-
-      print("🟢 Socket Connected");
-
-      socket.emit("join", userId);
+      _connecting = false;
+      socket!.emit("join", userId);
     });
 
-    socket.onDisconnect((_) {
+    socket!.onDisconnect((_) {
       _connected = false;
+      _connecting = false;
+    });
 
-      print("🔴 Socket Disconnected");
+    socket!.onConnectError((_) {
+      _connecting = false;
     });
   }
 
   void on(String event, Function(dynamic) callback) {
-    socket.on(event, callback);
+    socket?.on(event, callback);
   }
 
   void off(String event) {
-    socket.off(event);
+    socket?.off(event);
   }
 
   void emit(String event, dynamic data) {
-    socket.emit(event, data);
+    socket?.emit(event, data);
   }
 
   void disconnect() {
     _connected = false;
-    socket.dispose();
+    _connecting = false;
+    socket?.dispose();
+    socket = null;
   }
 }

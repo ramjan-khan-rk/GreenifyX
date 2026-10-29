@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../friends/application/providers/friend_provider.dart';
-import '../../application/providers/challenge_provider.dart';
 import 'choose_friend_screen.dart';
+
 class CreateChallengeScreen extends ConsumerStatefulWidget {
   const CreateChallengeScreen({super.key});
 
@@ -14,628 +16,371 @@ class CreateChallengeScreen extends ConsumerStatefulWidget {
 
 class _CreateChallengeScreenState
     extends ConsumerState<CreateChallengeScreen> {
-
   final _formKey = GlobalKey<FormState>();
-
-  final titleController =
-      TextEditingController();
-
-  final descriptionController =
-      TextEditingController();
-
-  String? selectedFriendId;
+  final titleController = TextEditingController();
+  final descriptionController = TextEditingController();
 
   String activity = "Plant Tree";
-
   String category = "Environment";
-
   String difficulty = "Easy";
-
   int target = 10;
-
-  DateTime deadline =
-      DateTime.now().add(
-    const Duration(days: 7),
-  );
-
-  bool loading = false;
+  DateTime deadline = DateTime.now().add(const Duration(days: 7));
 
   final activities = const [
-
     "Plant Tree",
-
     "Clean Plastic",
-
     "Cycle Ride",
-
     "Save Water",
-
     "Use Public Transport",
-
     "Clean Park",
-
     "Energy Saving",
-
     "Beach Cleanup",
-
     "River Cleanup",
-
   ];
 
   final categories = const [
-
     "Environment",
-
     "Fitness",
-
     "Lifestyle",
-
     "Community",
-
   ];
 
   int get ecoReward {
-
     switch (difficulty) {
-
-      case "Easy":
-        return 20;
-
       case "Medium":
         return 50;
-
       case "Hard":
         return 100;
-
       default:
         return 20;
-
     }
-
-  }
-
-  int get karmaReward {
-
-    switch (difficulty) {
-
-      case "Easy":
-        return 10;
-
-      case "Medium":
-        return 25;
-
-      case "Hard":
-        return 50;
-
-      default:
-        return 10;
-
-    }
-
   }
 
   Future<void> pickDeadline() async {
-
-    final date =
-        await showDatePicker(
-
+    final date = await showDatePicker(
       context: context,
-
       initialDate: deadline,
-
       firstDate: DateTime.now(),
-
-      lastDate:
-      DateTime.now().add(
-        const Duration(days: 365),
-      ),
-
+      lastDate: DateTime.now().add(const Duration(days: 365)),
     );
 
     if (date != null) {
-
-      setState(() {
-
-        deadline = date;
-
-      });
-
+      setState(() => deadline = date);
     }
-
   }
 
   @override
   void dispose() {
-
     titleController.dispose();
-
     descriptionController.dispose();
-
     super.dispose();
+  }
 
+  InputDecoration _decoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AppColors.border),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AppColors.border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AppColors.primary, width: 1.4),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-
-    final friends =
-        ref.watch(friendsProvider);
+    final friends = ref.watch(friendsProvider);
 
     return Scaffold(
-
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-
-        title:
-        const Text(
-          "Create Challenge",
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        title: Text(
+          "New challenge",
+          style: AppTextStyles.title.copyWith(fontSize: 20),
         ),
-
       ),
-
       body: friends.when(
-
-        loading: () =>
-        const Center(
-          child:
-          CircularProgressIndicator(),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
-
-        error: (e, s) =>
-            Center(
-              child:
-              Text(e.toString()),
-            ),
-
+        error: (e, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(e.toString(), textAlign: TextAlign.center),
+          ),
+        ),
         data: (friendList) {
-
           if (friendList.isEmpty) {
-
-            return const Center(
-
-              child: Text(
-                "You need at least one friend to create a challenge.",
+            return Padding(
+              padding: const EdgeInsets.all(28),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.people_outline,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Add a friend first",
+                    style: AppTextStyles.title.copyWith(fontSize: 20),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Challenges are head-to-head. Connect with at least one friend, then come back to create one.",
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.subtitle.copyWith(height: 1.45),
+                  ),
+                ],
               ),
-
             );
-
           }
 
-          selectedFriendId ??=
-              friendList.first.id;
-
           return Form(
-
             key: _formKey,
-
             child: ListView(
-
-              padding:
-              const EdgeInsets.all(20),
-
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
               children: [
-
-                const Text(
-
-                  "Choose Friend",
-
-                  style: TextStyle(
-
-                    fontWeight:
-                    FontWeight.bold,
-
-                    fontSize: 16,
-
+                Text(
+                  "Define the goal",
+                  style: AppTextStyles.subtitle.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.text,
                   ),
-
                 ),
-
-                const SizedBox(height: 10),
-
-                DropdownButtonFormField<String>(
-
-                  value:
-                  selectedFriendId,
-
-                  decoration:
-                  const InputDecoration(
-
-                    border:
-                    OutlineInputBorder(),
-
-                  ),
-
-                  items:
-                  friendList.map((friend) {
-
-                    return DropdownMenuItem(
-
-                      value: friend.id,
-
-                      child: Text(friend.name),
-
-                    );
-
-                  }).toList(),
-
-                  onChanged: (value) {
-
-                    setState(() {
-
-                      selectedFriendId =
-                          value;
-
-                    });
-
-                  },
-
-                ),
-
-                const SizedBox(height: 20),
-
+                const SizedBox(height: 12),
                 TextFormField(
-
-                  controller:
-                  titleController,
-
-                  decoration:
-                  const InputDecoration(
-
-                    labelText:
-                    "Challenge Title",
-
-                    border:
-                    OutlineInputBorder(),
-
-                  ),
-
+                  controller: titleController,
+                  decoration: _decoration("Challenge title"),
                   validator: (value) {
-
-                    if (value == null ||
-                        value.trim().isEmpty) {
-
-                      return "Title required";
-
+                    if (value == null || value.trim().isEmpty) {
+                      return "Title is required";
                     }
-
                     return null;
-
                   },
-
                 ),
-
-                const SizedBox(height: 20),
-
+                const SizedBox(height: 14),
                 TextFormField(
-
-                  controller:
-                  descriptionController,
-
+                  controller: descriptionController,
                   maxLines: 3,
-
-                  decoration:
-                  const InputDecoration(
-
-                    labelText:
-                    "Description",
-
-                    border:
-                    OutlineInputBorder(),
-
-                  ),
-
+                  decoration: _decoration("Description (optional)"),
                 ),
-
-                const SizedBox(height: 20),
-
+                const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
-
-                  value: activity,
-
-                  decoration:
-                  const InputDecoration(
-
-                    labelText: "Activity",
-
-                    border:
-                    OutlineInputBorder(),
-
-                  ),
-
-                  items:
-                  activities.map((item) {
-
-                    return DropdownMenuItem(
-
-                      value: item,
-
-                      child: Text(item),
-
-                    );
-
-                  }).toList(),
-
+                  initialValue: activity,
+                  decoration: _decoration("Activity"),
+                  items: activities
+                      .map(
+                        (item) => DropdownMenuItem(
+                          value: item,
+                          child: Text(item),
+                        ),
+                      )
+                      .toList(),
                   onChanged: (value) {
-
-                    setState(() {
-
-                      activity = value!;
-
-                    });
-
+                    setState(() => activity = value!);
                   },
-
                 ),
-
-                const SizedBox(height: 20),
-
+                const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
-
-                  value: category,
-
-                  decoration:
-                  const InputDecoration(
-
-                    labelText:
-                    "Category",
-
-                    border:
-                    OutlineInputBorder(),
-
-                  ),
-
-                  items:
-                  categories.map((item) {
-
-                    return DropdownMenuItem(
-
-                      value: item,
-
-                      child: Text(item),
-
-                    );
-
-                  }).toList(),
-
+                  initialValue: category,
+                  decoration: _decoration("Category"),
+                  items: categories
+                      .map(
+                        (item) => DropdownMenuItem(
+                          value: item,
+                          child: Text(item),
+                        ),
+                      )
+                      .toList(),
                   onChanged: (value) {
-
-                    setState(() {
-
-                      category = value!;
-
-                    });
-
+                    setState(() => category = value!);
                   },
-
                 ),
-                                const SizedBox(height: 20),
-
-                const Text(
+                const SizedBox(height: 22),
+                Text(
                   "Difficulty",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                  style: AppTextStyles.subtitle.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.text,
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
                 SegmentedButton<String>(
                   segments: const [
-                    ButtonSegment(
-                      value: "Easy",
-                      label: Text("Easy"),
-                    ),
-                    ButtonSegment(
-                      value: "Medium",
-                      label: Text("Medium"),
-                    ),
-                    ButtonSegment(
-                      value: "Hard",
-                      label: Text("Hard"),
-                    ),
+                    ButtonSegment(value: "Easy", label: Text("Easy")),
+                    ButtonSegment(value: "Medium", label: Text("Medium")),
+                    ButtonSegment(value: "Hard", label: Text("Hard")),
                   ],
                   selected: {difficulty},
                   onSelectionChanged: (value) {
-                    setState(() {
-                      difficulty = value.first;
-                    });
+                    setState(() => difficulty = value.first);
                   },
-                ),
-
-                const SizedBox(height: 25),
-
-                const Text(
-                  "Target",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return AppColors.primary.withValues(alpha: 0.12);
+                      }
+                      return Colors.white;
+                    }),
                   ),
                 ),
-
+                const SizedBox(height: 22),
+                Text(
+                  "Target count",
+                  style: AppTextStyles.subtitle.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.text,
+                  ),
+                ),
                 const SizedBox(height: 10),
-
-                Row(
-                  children: [
-
-                    IconButton(
-                      onPressed: () {
-
-                        if (target > 1) {
-
-                          setState(() {
-
-                            target--;
-
-                          });
-
-                        }
-
-                      },
-                      icon: const Icon(
-                        Icons.remove_circle,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          if (target > 1) setState(() => target--);
+                        },
+                        icon: const Icon(Icons.remove_circle_outline),
+                        color: AppColors.primary,
                       ),
-                    ),
-
-                    Expanded(
-                      child: Center(
+                      Expanded(
                         child: Text(
                           "$target",
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.title.copyWith(fontSize: 28),
                         ),
                       ),
-                    ),
-
-                    IconButton(
-                      onPressed: () {
-
-                        setState(() {
-
-                          target++;
-
-                        });
-
-                      },
-                      icon: const Icon(
-                        Icons.add_circle,
+                      IconButton(
+                        onPressed: () => setState(() => target++),
+                        icon: const Icon(Icons.add_circle_outline),
+                        color: AppColors.primary,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-
-                const SizedBox(height: 25),
-
-                ListTile(
-  tileColor: Colors.grey.shade100,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(12),
-  ),
-
-  leading: const Icon(Icons.calendar_month),
-
-  title: const Text("Deadline"),
-
-  subtitle: Text(
-    "${deadline.day}/${deadline.month}/${deadline.year}",
-  ),
-
-  trailing: SizedBox(
-    width: 80,
-    height: 36,
-    child: ElevatedButton(
-      onPressed: pickDeadline,
-      style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.zero,
-      ),
-      child: const Text(
-        "Change",
-        style: TextStyle(fontSize: 12),
-      ),
-    ),
-  ),
-),
-
-                const SizedBox(height: 25),
-
-                Card(
-
-                  child: Padding(
-
-                    padding:
-                        const EdgeInsets.all(18),
-
-                    child: Column(
-
-                      children: [
-
-                        const Text(
-
-                          "Reward Preview",
-
-                          style: TextStyle(
-
-                            fontSize: 18,
-
-                            fontWeight:
-                                FontWeight.bold,
-
-                          ),
-
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        Row(
-
+                const SizedBox(height: 18),
+                Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  child: ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      side: const BorderSide(color: AppColors.border),
+                    ),
+                    leading: const Icon(
+                      Icons.calendar_month_outlined,
+                      color: AppColors.primary,
+                    ),
+                    title: const Text("Deadline"),
+                    subtitle: Text(
+                      "${deadline.day}/${deadline.month}/${deadline.year}",
+                    ),
+                    trailing: TextButton(
+                      onPressed: pickDeadline,
+                      child: const Text("Change"),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primary.withValues(alpha: 0.12),
+                        AppColors.primaryLight.withValues(alpha: 0.08),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.18),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.eco, color: AppColors.primary, size: 28),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-
-                            const Icon(
-                              Icons.eco,
-                              color: Colors.green,
-                            ),
-
-                            const SizedBox(width: 8),
-
                             Text(
-                              "$ecoReward Eco Score",
+                              "Winner reward",
+                              style: AppTextStyles.subtitle.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.text,
+                              ),
                             ),
-
-                            const Spacer(),
-
-                            const Icon(
-                              Icons.favorite,
-                              color: Colors.red,
-                            ),
-
-                            const SizedBox(width: 8),
-
                             Text(
-                              "$karmaReward Karma",
+                              "$ecoReward Eco Points",
+                              style: AppTextStyles.title.copyWith(
+                                fontSize: 22,
+                                color: AppColors.primary,
+                              ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-
-                const SizedBox(height: 35),
-
-               
+                const SizedBox(height: 28),
                 SizedBox(
-  width: double.infinity,
-  height: 55,
-  child: ElevatedButton(
-    onPressed: () {
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (!_formKey.currentState!.validate()) return;
 
-      if (!_formKey.currentState!.validate()) {
-        return;
-      }
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ChooseFriendScreen(
-            title: titleController.text.trim(),
-            description: descriptionController.text.trim(),
-            activity: activity,
-            category: category,
-            difficulty: difficulty,
-            target: target,
-            
-
-            deadline: deadline,
-          ),
-        ),
-      );
-
-    },
-    child: const Text("Continue"),
-  ),
-),
-
-                const SizedBox(height: 30),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ChooseFriendScreen(
+                            title: titleController.text.trim(),
+                            description: descriptionController.text.trim(),
+                            activity: activity,
+                            category: category,
+                            difficulty: difficulty,
+                            target: target,
+                            deadline: deadline,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Text("Choose opponent"),
+                  ),
+                ),
               ],
             ),
           );

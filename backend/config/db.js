@@ -1,11 +1,13 @@
 import mongoose from "mongoose";
+import { ensureUserIndexes } from "../utils/ensureUserIndexes.js";
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI);
     console.log("MongoDB Connected");
+    await ensureUserIndexes();
   } catch (error) {
-    console.log(error);
+    console.log("Database connection failed");
     process.exit(1);
   }
 };

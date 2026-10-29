@@ -1,5 +1,3 @@
-import 'package:dio/dio.dart';
-
 import '../../../../core/services/api_service.dart';
 
 class FriendApi {
@@ -19,6 +17,27 @@ class FriendApi {
       data: {
         "userId": userId,
       },
+    );
+  }
+
+  Future<void> rejectRequest(String userId) async {
+    await ApiService.dio.post(
+      "/friends/reject",
+      data: {"userId": userId},
+    );
+  }
+
+  Future<void> unfriend(String userId) async {
+    await ApiService.dio.post(
+      "/friends/unfriend",
+      data: {"userId": userId},
+    );
+  }
+
+  Future<void> blockUser(String userId) async {
+    await ApiService.dio.post(
+      "/friends/block",
+      data: {"userId": userId},
     );
   }
 

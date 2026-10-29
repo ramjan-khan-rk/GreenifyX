@@ -1,5 +1,3 @@
-import 'package:dio/dio.dart';
-
 import '../../../../core/services/api_service.dart';
 
 class ProfileApi {
@@ -11,6 +9,16 @@ class ProfileApi {
 
     return response.data["user"];
 
+  }
+
+  Future<List<Map<String, dynamic>>> getLeaderboard() async {
+    final response = await ApiService.dio.get("/users/leaderboard");
+    final users = response.data["users"];
+    if (users is! List) return [];
+    return users
+        .whereType<Map>()
+        .map((row) => Map<String, dynamic>.from(row))
+        .toList();
   }
 
   Future<void> updateProfile({

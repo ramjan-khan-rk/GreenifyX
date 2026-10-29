@@ -1,11 +1,11 @@
+import '../../../../core/utils/eco_points.dart';
+
 class FriendModel {
   final String id;
   final String name;
   final String bio;
   final String profileImage;
-
-  final int ecoScore;
-  final int karamCount;
+  final int ecoPoints;
   final int level;
   final int streak;
 
@@ -14,8 +14,7 @@ class FriendModel {
     required this.name,
     required this.bio,
     required this.profileImage,
-    required this.ecoScore,
-    required this.karamCount,
+    required this.ecoPoints,
     required this.level,
     required this.streak,
   });
@@ -26,8 +25,7 @@ class FriendModel {
       name: json["name"] ?? "",
       bio: json["bio"] ?? "",
       profileImage: json["profileImage"] ?? "",
-      ecoScore: json["ecoScore"] ?? 0,
-      karamCount: json["karamCount"] ?? 0,
+      ecoPoints: parseEcoPoints(json),
       level: json["level"] ?? 1,
       streak: json["streak"] ?? 0,
     );

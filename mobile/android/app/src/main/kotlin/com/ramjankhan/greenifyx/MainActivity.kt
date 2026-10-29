@@ -1,4 +1,4 @@
-package com.example.mobile
+package com.ramjankhan.greenifyx
 
 import io.flutter.embedding.android.FlutterActivity
 

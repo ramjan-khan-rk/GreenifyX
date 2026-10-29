@@ -13,6 +13,18 @@ class FriendRepository {
     return api.acceptRequest(userId);
   }
 
+  Future<void> rejectRequest(String userId) {
+    return api.rejectRequest(userId);
+  }
+
+  Future<void> unfriend(String userId) {
+    return api.unfriend(userId);
+  }
+
+  Future<void> blockUser(String userId) {
+    return api.blockUser(userId);
+  }
+
   Future<List<FriendModel>> getFriends() async {
 
     final data = await api.getFriends();

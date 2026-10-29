@@ -4,9 +4,31 @@ const userSchema = new mongoose.Schema(
   {
     phone: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true,
       trim: true,
+      required: false,
+    },
+    // Existing deployments may still have a non-sparse unique phone index.
+    // Recreate it as sparse before adding a second email-only user.
+
+    email: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    password: {
+      type: String,
+      select: false,
+      minlength: 6,
     },
 
     name: {
@@ -26,9 +48,20 @@ const userSchema = new mongoose.Schema(
       maxlength: 150,
     },
 
-    karamCount: {
+    // Single points currency used app-wide (Eco Points)
+    ecoPoints: {
       type: Number,
       default: 0,
+      min: 0,
+    },
+
+    // Legacy fields — read for migration only; prefer ecoPoints
+    ecoScore: {
+      type: Number,
+    },
+
+    karamCount: {
+      type: Number,
     },
 
     level: {
@@ -39,6 +72,10 @@ const userSchema = new mongoose.Schema(
     streak: {
       type: Number,
       default: 0,
+    },
+
+    lastVerifiedAt: {
+      type: Date,
     },
 
     badges: [
@@ -60,12 +97,19 @@ const userSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-     sentRequests: [
-  {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  },
-],
+    sentRequests: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    blockedUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     isProfileCompleted: {
       type: Boolean,
       default: false,

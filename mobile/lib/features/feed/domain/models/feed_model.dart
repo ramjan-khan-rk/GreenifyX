@@ -1,5 +1,6 @@
 class FeedModel {
   final String id;
+  final String userId;
   final String name;
   final String? profileImage;
   final String image;
@@ -9,9 +10,12 @@ class FeedModel {
   final int likes;
   final int comments;
   final bool isLiked;
+  final bool isVerified;
+  final String pointsStatus;
 
   FeedModel({
     required this.id,
+    required this.userId,
     required this.name,
     this.profileImage,
     required this.image,
@@ -21,6 +25,8 @@ class FeedModel {
     required this.likes,
     required this.comments,
     required this.isLiked,
+    required this.isVerified,
+    this.pointsStatus = "unverified_self_reported",
   });
 
   factory FeedModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +34,7 @@ class FeedModel {
 
     return FeedModel(
       id: json["_id"] ?? "",
+      userId: user["_id"] ?? "",
       name: user["name"] ?? "Greenify User",
       profileImage: user["profileImage"],
       image: json["image"] ?? "",
@@ -37,6 +44,11 @@ class FeedModel {
       likes: json["likesCount"] ?? 0,
       comments: json["commentsCount"] ?? 0,
       isLiked: json["isLiked"] ?? false,
+      isVerified: json["isVerified"] ?? false,
+      pointsStatus: json["pointsStatus"]?.toString() ??
+          ((json["isVerified"] == true)
+              ? "verified"
+              : "unverified_self_reported"),
     );
   }
 }

@@ -30,16 +30,8 @@ const challengeSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      enum: [
-        "Planting",
-        "Cleaning",
-        "Recycling",
-        "Cycling",
-        "Water Saving",
-        "Energy Saving",
-        "Custom",
-      ],
-      default: "Custom",
+      default: "Environment",
+      trim: true,
     },
 
     difficulty: {
@@ -72,27 +64,10 @@ const challengeSchema = new mongoose.Schema(
       min: 0,
     },
 
-    
-    category: {
-  type: String,
-  default: "Environment",
-},
-
-difficulty: {
-  type: String,
-  enum: ["Easy", "Medium", "Hard"],
-  default: "Easy",
-},
-
+    // Eco Points awarded to the winner
     ecoReward: {
       type: Number,
-      default: 100,
-      min: 0,
-    },
-
-    karmaReward: {
-      type: Number,
-      default: 50,
+      default: 20,
       min: 0,
     },
 

@@ -1,11 +1,11 @@
 {
-    "name": "mobile",
-    "short_name": "mobile",
+    "name": "GreenifyX",
+    "short_name": "GreenifyX",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Earn Eco Points for real-world green actions.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

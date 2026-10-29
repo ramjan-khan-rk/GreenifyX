@@ -1,7 +1,9 @@
 import Challenge from "../models/Challenge.js";
 import User from "../models/User.js";
-import { getIo, getUserSocket } from "../socket/socket.js";
+import { emitToUser } from "../socket/socket.js";
 import Notification from "../models/Notification.js";
+import { applyEcoAward } from "../utils/verifiedProgress.js";
+import { sendServerError } from "../utils/httpError.js";
 // ======================================================
 // CREATE CHALLENGE
 // ======================================================
@@ -71,22 +73,18 @@ export const createChallenge = async (req, res) => {
     }
 
     let ecoReward = 20;
-    let karmaReward = 10;
 
     switch (difficulty) {
       case "Medium":
         ecoReward = 50;
-        karmaReward = 25;
         break;
 
       case "Hard":
         ecoReward = 100;
-        karmaReward = 50;
         break;
 
       default:
         ecoReward = 20;
-        karmaReward = 10;
     }
 
     const challenge = await Challenge.create({
@@ -99,14 +97,13 @@ export const createChallenge = async (req, res) => {
       category,
       difficulty,
       ecoReward,
-      karmaReward,
       deadline,
       status: "pending",
     });
 
     const populatedChallenge = await Challenge.findById(challenge._id)
-      .populate("creator", "name profileImage ecoScore")
-      .populate("friend", "name profileImage ecoScore");
+      .populate("creator", "name profileImage ecoPoints")
+      .populate("friend", "name profileImage ecoPoints");
       
       
 
@@ -125,13 +122,7 @@ export const createChallenge = async (req, res) => {
 
 
 
-    const receiverSocket = getUserSocket(friendId);
-
-    if (receiverSocket) {
-      getIo()
-        .to(receiverSocket)
-        .emit("challengeReceived", populatedChallenge);
-    }
+    emitToUser(friendId, "challengeReceived", populatedChallenge);
 
     return res.status(201).json({
       success: true,
@@ -141,7 +132,7 @@ export const createChallenge = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
@@ -185,8 +176,8 @@ export const acceptChallenge = async (req, res) => {
     await challenge.save();
 
     const populated = await Challenge.findById(challenge._id)
-      .populate("creator", "name profileImage ecoScore")
-      .populate("friend", "name profileImage ecoScore");
+      .populate("creator", "name profileImage ecoPoints")
+      .populate("friend", "name profileImage ecoPoints");
       
       
 
@@ -210,15 +201,7 @@ await Notification.create({
 
 
 
-    const creatorSocket = getUserSocket(
-      challenge.creator.toString()
-    );
-
-    if (creatorSocket) {
-      getIo()
-        .to(creatorSocket)
-        .emit("challengeAccepted", populated);
-    }
+    emitToUser(challenge.creator, "challengeAccepted", populated);
 
     return res.status(200).json({
       success: true,
@@ -228,7 +211,7 @@ await Notification.create({
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
@@ -279,15 +262,7 @@ await Notification.create({
 });
 
 
-    const creatorSocket = getUserSocket(
-      challenge.creator.toString()
-    );
-
-    if (creatorSocket) {
-      getIo()
-        .to(creatorSocket)
-        .emit("challengeRejected", challenge);
-    }
+    emitToUser(challenge.creator, "challengeRejected", challenge);
 
     return res.status(200).json({
       success: true,
@@ -296,7 +271,7 @@ await Notification.create({
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
@@ -312,8 +287,8 @@ export const getChallenges = async (req, res) => {
         { friend: req.user._id },
       ],
     })
-      .populate("creator", "name profileImage ecoScore")
-      .populate("friend", "name profileImage ecoScore")
+      .populate("creator", "name profileImage ecoPoints")
+      .populate("friend", "name profileImage ecoPoints")
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -323,7 +298,7 @@ export const getChallenges = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Request failed",
     });
   }
 };
@@ -410,22 +385,18 @@ export const updateProgress = async (req, res) => {try {
 
     // Rewards
     if (challenge.winner) {
-      await User.findByIdAndUpdate(
-        challenge.winner,
-        {
-          $inc: {
-            ecoScore: challenge.ecoReward,
-            karmaCount: challenge.karmaReward, // <-- change if your schema uses karamCount
-          },
-        }
-      );
+      const winner = await User.findById(challenge.winner);
+      if (winner) {
+        applyEcoAward(winner, challenge.ecoReward);
+        await winner.save();
+      }
     }
 
     // Create notifications
     await Notification.create({
       receiver: challenge.creator,
       sender: req.user._id,
-      type: "challenge_completed",
+      type: "challenge_complete",
       title: "Challenge Completed",
       message: `${req.user.name} completed "${challenge.title}".`,
       referenceId: challenge._id,
@@ -434,34 +405,14 @@ export const updateProgress = async (req, res) => {try {
     await Notification.create({
       receiver: challenge.friend,
       sender: req.user._id,
-      type: "challenge_completed",
+      type: "challenge_complete",
       title: "Challenge Completed",
       message: `${req.user.name} completed "${challenge.title}".`,
       referenceId: challenge._id,
     });
 
-    // Notify both users in real time
-    const creatorSocket = getUserSocket(
-      challenge.creator.toString()
-    );
-
-    const friendSocket = getUserSocket(
-      challenge.friend.toString()
-    );
-
-    if (creatorSocket) {
-      getIo().to(creatorSocket).emit(
-        "challengeCompleted",
-        challenge
-      );
-    }
-
-    if (friendSocket) {
-      getIo().to(friendSocket).emit(
-        "challengeCompleted",
-        challenge
-      );
-    }
+    emitToUser(challenge.creator, "challengeCompleted", challenge);
+    emitToUser(challenge.friend, "challengeCompleted", challenge);
   }
 
   await challenge.save();
@@ -469,16 +420,14 @@ export const updateProgress = async (req, res) => {try {
   const populatedChallenge = await Challenge.findById(
     challenge._id
   )
-    .populate("creator", "name profileImage ecoScore")
-    .populate("friend", "name profileImage ecoScore");
+    .populate("creator", "name profileImage ecoPoints")
+    .populate("friend", "name profileImage ecoPoints");
 
   return res.status(200).json({
     success: true,
     challenge: populatedChallenge,
+    progressEvidence: "self_reported",
   });
 } catch (error) {
-  return res.status(500).json({
-    success: false,
-    message: error.message,
-  });
+  return sendServerError(res, "Unable to update progress");
 }};

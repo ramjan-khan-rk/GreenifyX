@@ -5,7 +5,9 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../data/api/upload_api.dart';
 import '../../data/repository/profile_repository.dart';
+import '../../../../core/services/socket_service.dart';
 import '../../../../core/services/storage_service.dart';
+import '../../../../core/session/session_controller.dart';
 
 
 final profileRepositoryProvider = Provider((ref) {
@@ -27,9 +29,7 @@ class ProfileState {
 
   final String bio;
 
-  final int ecoScore;
-
-  final int karamCount;
+  final int ecoPoints;
 
   final int streak;
 
@@ -45,8 +45,7 @@ class ProfileState {
     this.profileImage = "",
     this.name = "",
     this.bio = "",
-    this.ecoScore = 0,
-    this.karamCount = 0,
+    this.ecoPoints = 0,
     this.streak = 0,
     this.level = 1,
     this.friendsCount = 0,
@@ -59,8 +58,7 @@ class ProfileState {
     String? profileImage,
     String? name,
     String? bio,
-    int? ecoScore,
-    int? karamCount,
+    int? ecoPoints,
     int? streak,
     int? level,
     int? friendsCount,
@@ -72,8 +70,7 @@ class ProfileState {
       profileImage: profileImage ?? this.profileImage,
       name: name ?? this.name,
       bio: bio ?? this.bio,
-      ecoScore: ecoScore ?? this.ecoScore,
-      karamCount: karamCount ?? this.karamCount,
+      ecoPoints: ecoPoints ?? this.ecoPoints,
       streak: streak ?? this.streak,
       level: level ?? this.level,
       friendsCount: friendsCount ?? this.friendsCount,
@@ -182,9 +179,7 @@ Future<void> loadProfile() async {
 
       profileImage: profile.profileImage,
 
-      ecoScore: profile.ecoScore,
-
-      karamCount: profile.karamCount,
+      ecoPoints: profile.ecoPoints,
 
       streak: profile.streak,
 
@@ -208,9 +203,9 @@ Future<void> loadProfile() async {
 
 }
 Future<void> logout() async {
-
+  SocketService.instance.disconnect();
   await StorageService.clear();
-
+  SessionController.instance.setHasToken(false);
 }
 }
 final profileProvider =

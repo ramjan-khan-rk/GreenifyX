@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_status.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../application/providers/chats_provider.dart';
 import 'chat_screen.dart';
 
@@ -12,54 +16,72 @@ class ChatsScreen extends ConsumerWidget {
     final chats = ref.watch(chatsProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text("Chats"),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Chat", style: AppTextStyles.title),
+            Text("Friends only", style: AppTextStyles.tagline),
+          ],
+        ),
       ),
       body: chats.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator()),
-
-        error: (e, s) => Center(
-          child: Text(e.toString()),
+        loading: () => const AppLoading(),
+        error: (e, _) => AppErrorState(
+          message: e.toString(),
+          onRetry: () => ref.invalidate(chatsProvider),
         ),
-
         data: (list) {
           if (list.isEmpty) {
-            return const Center(
-              child: Text("No chats yet"),
+            return const AppEmptyState(
+              icon: Icons.chat_bubble_rounded,
+              title: "No conversations yet",
+              message: "Open a friend profile and start a chat.",
             );
           }
 
-          return ListView.builder(
-            itemCount: list.length,
-            itemBuilder: (context, index) {
-              final chat = list[index];
+          return RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: () async => ref.invalidate(chatsProvider),
+            child: ListView.separated(
+              itemCount: list.length,
+              separatorBuilder: (_, _) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final chat = list[index];
 
-              return ListTile(
-                leading: const CircleAvatar(
-                  child: Icon(Icons.person),
-                ),
-                title: Text(chat.userName),
-                subtitle: Text(chat.lastMessage),
-                trailing: chat.unread
-                    ? const Icon(
-                        Icons.mark_chat_unread,
-                        color: Colors.green,
-                      )
-                    : null,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ChatScreen(
-                        userId: chat.userId,
-                        userName: chat.userName,
+                return ListTile(
+                  leading: UserAvatar(
+                    imageUrl: chat.profileImage,
+                    semanticLabel: "${chat.userName} photo",
+                  ),
+                  title: Text(chat.userName, style: AppTextStyles.body),
+                  subtitle: Text(
+                    chat.lastMessage.isEmpty ? "Say hello" : chat.lastMessage,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.subtitle,
+                  ),
+                  trailing: chat.unread
+                      ? const Icon(
+                          Icons.mark_chat_unread,
+                          color: AppColors.primary,
+                        )
+                      : null,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ChatScreen(
+                          userId: chat.userId,
+                          userName: chat.userName,
+                        ),
                       ),
-                    ),
-                  );
-                },
-              );
-            },
+                    );
+                  },
+                );
+              },
+            ),
           );
         },
       ),
