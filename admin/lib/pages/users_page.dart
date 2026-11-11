@@ -110,6 +110,7 @@ class _UsersPageState extends State<UsersPage> {
                       ButtonSegment(value: 'all', label: Text('All')),
                       ButtonSegment(value: 'active', label: Text('Active')),
                       ButtonSegment(value: 'suspended', label: Text('Suspended')),
+                      ButtonSegment(value: 'verifiers', label: Text('Verifiers')),
                       ButtonSegment(value: 'admins', label: Text('Admins')),
                     ],
                     selected: {_status},
@@ -264,7 +265,9 @@ class _UserRow extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: admin
                   ? const StatusPill('Admin', color: Brand.coral)
-                  : suspended
+                  : user['role'] == 'verifier' && !suspended
+                      ? const StatusPill('Verifier', color: Brand.sky)
+                      : suspended
                       ? const StatusPill('Suspended', color: Brand.danger)
                       : const StatusPill('Active', color: Brand.eco),
             ),
@@ -287,6 +290,24 @@ class _UserDialogState extends State<_UserDialog> {
   late Future<Json> _future = Session.instance.api.user(widget.id);
   bool _busy = false;
   bool _changed = false;
+
+  Future<void> _toggleVerifier(Json user, bool on) async {
+    setState(() => _busy = true);
+    try {
+      await Session.instance.api.setRole(widget.id, on ? 'verifier' : 'user');
+      _changed = true;
+      setState(() => _future = Session.instance.api.user(widget.id));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(on ? 'Now an authorised field verifier' : 'Field verifier access removed')),
+        );
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 
   Future<void> _toggle(Json user) async {
     final suspend = user['isSuspended'] != true;
@@ -374,6 +395,19 @@ class _UserDialogState extends State<_UserDialog> {
                   _Line('Level', '${u['level'] ?? 1}'),
                   if (suspended && (u['suspendedReason'] as String?)?.isNotEmpty == true)
                     _Line('Suspension reason', u['suspendedReason'] as String),
+                  if (!admin) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      decoration: BoxDecoration(color: Brand.canvas, borderRadius: BorderRadius.circular(12)),
+                      child: SwitchListTile(
+                        value: u['role'] == 'verifier',
+                        onChanged: _busy || suspended ? null : (on) => _toggleVerifier(u, on),
+                        title: const Text('Field verifier', style: TextStyle(fontWeight: FontWeight.w700)),
+                        subtitle: const Text('Can be assigned to campaigns and submit on-site evidence'),
+                        secondary: const Icon(Icons.verified_user_rounded, color: Brand.sky),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 20),
                   if (admin)
                     const Text('Admin accounts are managed with the make-admin script.', style: TextStyle(color: Brand.muted))

@@ -123,6 +123,64 @@ class AdminApi {
     return Json.from(data['post'] as Map);
   }
 
+  Future<String> setRole(String id, String role) async {
+    final data = await _send(() => _dio.patch('/admin/users/$id/role', data: {'role': role}));
+    return data['role']?.toString() ?? role;
+  }
+
+  // ---- Campaigns & verification ----
+
+  Future<Paged> campaigns({String status = '', String q = '', int page = 1, int limit = 20}) async {
+    final data = await _send(() => _dio.get('/admin/campaigns', queryParameters: {
+          if (status.isNotEmpty) 'status': status,
+          if (q.isNotEmpty) 'q': q,
+          'page': page,
+          'limit': limit,
+        }));
+    return _paged(data, 'campaigns');
+  }
+
+  Future<Json> createCampaign(Json body) async =>
+      Json.from((await _send(() => _dio.post('/admin/campaigns', data: body)))['campaign'] as Map);
+
+  Future<Json> updateCampaign(String id, Json body) async =>
+      Json.from((await _send(() => _dio.patch('/admin/campaigns/$id', data: body)))['campaign'] as Map);
+
+  Future<Json> setCampaignVerifiers(String id, List<String> verifierIds) async => Json.from(
+      (await _send(() => _dio.put('/admin/campaigns/$id/verifiers', data: {'verifierIds': verifierIds})))['campaign'] as Map);
+
+  Future<List<Json>> verifiers() async {
+    final data = await _send(() => _dio.get('/admin/verifiers'));
+    return List<Json>.from((data['verifiers'] as List? ?? const []).map((e) => Json.from(e as Map)));
+  }
+
+  Future<Paged> reports({String status = 'pending', int page = 1, int limit = 12}) async {
+    final data = await _send(() => _dio.get('/admin/reports', queryParameters: {'status': status, 'page': page, 'limit': limit}));
+    return _paged(data, 'reports');
+  }
+
+  Future<Json> reviewReport(String id, {required bool approve, String note = ''}) async => Json.from((await _send(
+          () => _dio.patch('/admin/reports/$id/review', data: {'decision': approve ? 'approve' : 'reject', 'note': note})))['report']
+      as Map);
+
+  Future<({Paged page, int credited, int reversed})> transactions({String type = '', int page = 1, int limit = 25}) async {
+    final data = await _send(() => _dio.get('/admin/points', queryParameters: {
+          if (type.isNotEmpty) 'type': type,
+          'page': page,
+          'limit': limit,
+        }));
+    final totals = Json.from(data['totals'] as Map? ?? const {});
+    return (
+      page: _paged(data, 'transactions'),
+      credited: (totals['credited'] as num?)?.toInt() ?? 0,
+      reversed: (totals['reversed'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  Future<void> reverseTransaction(String id, String reason) async {
+    await _send(() => _dio.post('/admin/points/$id/reverse', data: {'reason': reason}));
+  }
+
   Future<Paged> challenges({String status = '', int page = 1, int limit = 20}) async {
     final data = await _send(() => _dio.get('/admin/challenges', queryParameters: {
           if (status.isNotEmpty) 'status': status,

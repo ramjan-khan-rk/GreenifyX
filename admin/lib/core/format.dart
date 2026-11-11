@@ -23,6 +23,9 @@ class Fmt {
     return d == null ? '—' : _date.format(d);
   }
 
+  /// Formats a calendar day as-is (no time-zone shift), e.g. from a date picker.
+  static String day(DateTime d) => _date.format(d);
+
   static String shortDay(String ymd) {
     final d = DateTime.tryParse(ymd);
     return d == null ? ymd : _short.format(d);

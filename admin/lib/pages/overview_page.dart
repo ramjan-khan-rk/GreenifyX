@@ -40,6 +40,7 @@ class _Overview extends StatelessWidget {
     final newPrev = (k['newUsersPrev7d'] as num?)?.toInt() ?? 0;
     final growth = newPrev == 0 ? null : (((newNow - newPrev) / newPrev) * 100).round();
     final reported = (k['reportedPosts'] as num?)?.toInt() ?? 0;
+    final pendingReports = (k['reportsPending'] as num?)?.toInt() ?? 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -51,6 +52,14 @@ class _Overview extends StatelessWidget {
             OutlinedButton.icon(onPressed: reload, icon: const Icon(Icons.refresh_rounded, size: 18), label: const Text('Refresh')),
           ],
         ),
+        if (pendingReports > 0) ...[
+          _Alert(
+            text: '$pendingReports field verification ${pendingReports == 1 ? 'report is' : 'reports are'} waiting for approval.',
+            action: 'Review evidence',
+            onTap: () => context.go('/verification'),
+          ),
+          const SizedBox(height: 12),
+        ],
         if (reported > 0) ...[
           _Alert(
             text: '$reported ${reported == 1 ? 'post is' : 'posts are'} waiting for review.',
@@ -90,6 +99,8 @@ class _Overview extends StatelessWidget {
             caption: 'From verified actions',
           ),
         ]),
+        const SizedBox(height: 16),
+        _CampaignStrip(k: k),
         const SizedBox(height: 16),
         LayoutBuilder(builder: (context, c) {
           final wide = c.maxWidth >= 980;
@@ -149,6 +160,59 @@ class _Overview extends StatelessWidget {
           KpiCard(label: 'Comments', value: Fmt.compact(k['totalComments'] as num?), icon: Icons.forum_rounded, color: Brand.coral),
         ]),
       ],
+    );
+  }
+}
+
+/// Operational strip for the campaign + field verification pipeline.
+class _CampaignStrip extends StatelessWidget {
+  const _CampaignStrip({required this.k});
+  final Json k;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+    Widget stat(String value, String label, IconData icon) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
+              child: Icon(icon, color: Brand.sun, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+              Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 20)),
+              Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12.5)),
+            ]),
+          ]),
+        );
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(colors: [Brand.ink, Brand.inkSoft], begin: Alignment.topLeft, end: Alignment.bottomRight),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Text('Campaigns & field verification', style: t.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
+          const Spacer(),
+          TextButton(
+            onPressed: () => context.go('/campaigns'),
+            style: TextButton.styleFrom(foregroundColor: Brand.sun),
+            child: const Text('Open campaigns'),
+          ),
+        ]),
+        const SizedBox(height: 14),
+        Wrap(spacing: 36, runSpacing: 14, children: [
+          stat(Fmt.number(k['campaignsActive'] as num?), 'Active campaigns', Icons.forest_rounded),
+          stat(Fmt.number(k['campaignParticipantsVerified'] as num?), 'Verified participants', Icons.how_to_reg_rounded),
+          stat(Fmt.number(k['treesVerified'] as num?), 'Trees verified', Icons.park_rounded),
+          stat('${Fmt.number(k['wasteKgVerified'] as num?)} kg', 'Waste collected', Icons.delete_sweep_rounded),
+          stat(Fmt.number(k['reportsPending'] as num?), 'Reports to review', Icons.fact_check_rounded),
+        ]),
+      ]),
     );
   }
 }
