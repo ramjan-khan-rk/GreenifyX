@@ -20,8 +20,8 @@ class IssueApi {
 
   Future<List<IssueReport>> nearby({double? lat, double? lng}) async {
     final res = await ApiService.dio.get("/env-reports/nearby", queryParameters: {
-      if (lat != null) "lat": lat,
-      if (lng != null) "lng": lng,
+      "lat": ?lat,
+      "lng": ?lng,
       "radiusKm": 25,
     });
     return _list(res.data["reports"]);
