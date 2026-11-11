@@ -23,6 +23,7 @@ import {
   listTransactions,
   reversePoints,
 } from "../controllers/adminCampaignController.js";
+import { adminListEnvReports, adminUpdateEnvReport } from "../controllers/envReportController.js";
 
 const router = express.Router();
 
@@ -47,5 +48,7 @@ router.get("/reports", listReports);
 router.patch("/reports/:id/review", reviewReport);
 router.get("/points", listTransactions);
 router.post("/points/:id/reverse", reversePoints);
+router.get("/env-reports", adminListEnvReports);
+router.patch("/env-reports/:id/status", adminUpdateEnvReport);
 
 export default router;

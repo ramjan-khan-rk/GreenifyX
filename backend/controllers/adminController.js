@@ -5,6 +5,7 @@ import Challenge from "../models/Challenge.js";
 import Comment from "../models/Comment.js";
 import Campaign from "../models/Campaign.js";
 import VerificationReport from "../models/VerificationReport.js";
+import EnvironmentalReport from "../models/EnvironmentalReport.js";
 import { resolveEcoPoints } from "../utils/ecoPoints.js";
 import { escapeRegex } from "../utils/escapeRegex.js";
 import { parsePagination } from "../utils/pagination.js";
@@ -93,6 +94,8 @@ export const getStats = async (req, res) => {
       reportStatus,
       campaignOutput,
       participantsAgg,
+      issueStatus,
+      survivalCampaigns,
     ] = await Promise.all([
       User.countDocuments(),
       User.countDocuments({ isSuspended: true }),
@@ -136,7 +139,29 @@ export const getStats = async (req, res) => {
         { $unwind: "$participants" },
         { $group: { _id: "$participants.status", count: { $sum: 1 } } },
       ]),
+      EnvironmentalReport.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
+      Campaign.find({ "survivalChecks.0": { $exists: true } }).select("title emirate verifiedOutput survivalChecks"),
     ]);
+    // Latest checkpoint per planting campaign: planted (verified) vs still alive.
+    const survival = survivalCampaigns
+      .map((c) => {
+        const latest = [...c.survivalChecks].sort((a, b) => b.checkpointDays - a.checkpointDays)[0];
+        return {
+          _id: c._id,
+          title: c.title,
+          emirate: c.emirate,
+          planted: c.verifiedOutput || 0,
+          surviving: latest?.surviving || 0,
+          checkpointDays: latest?.checkpointDays || 0,
+          checks: [...c.survivalChecks]
+            .sort((a, b) => a.checkpointDays - b.checkpointDays)
+            .map((s) => ({ checkpointDays: s.checkpointDays, surviving: s.surviving })),
+        };
+      })
+      .filter((s) => s.planted > 0);
+    const survivalPlanted = survival.reduce((a, s) => a + s.planted, 0);
+    const survivalSurviving = survival.reduce((a, s) => a + Math.min(s.surviving, s.planted), 0);
+    const issuesBy = Object.fromEntries(issueStatus.map((c) => [c._id, c.count]));
     const campaignsBy = Object.fromEntries(campaignStatus.map((c) => [c._id, c.count]));
     const reportsBy = Object.fromEntries(reportStatus.map((c) => [c._id, c.count]));
     const outputBy = Object.fromEntries(campaignOutput.map((c) => [c._id, c.total]));
@@ -176,6 +201,12 @@ export const getStats = async (req, res) => {
         wasteKgVerified: outputBy.kg || 0,
         campaignParticipants: Object.values(participantsBy).reduce((a, b) => a + b, 0),
         campaignParticipantsVerified: participantsBy.verified || 0,
+        issuesOpen: (issuesBy.submitted || 0) + (issuesBy.under_review || 0) + (issuesBy.forwarded || 0),
+        issuesNew: issuesBy.submitted || 0,
+        issuesResolved: issuesBy.resolved || 0,
+        survivalPlanted,
+        survivalSurviving,
+        survivalRate: survivalPlanted ? Math.round((survivalSurviving / survivalPlanted) * 100) : null,
       },
       series: {
         signups: fillDays(signupsDaily, days),
@@ -193,6 +224,7 @@ export const getStats = async (req, res) => {
           };
         })
         .sort((a, b) => b.co2Kg - a.co2Kg),
+      survival,
       byActivity: postsByActivity.map((r) => ({ activity: r._id || "Other", count: r.count })),
       byEmirate: [
         ...EMIRATES.map((name) => ({ emirate: name, count: emirateCounts.get(name) || 0 })),

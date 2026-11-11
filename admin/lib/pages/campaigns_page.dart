@@ -406,6 +406,12 @@ class _CampaignDetailState extends State<_CampaignDetail> {
                             backgroundColor: Brand.surface,
                           ),
                       ]),
+                    if ((c['survivalChecks'] as List?)?.isNotEmpty == true) ...[
+                      const SizedBox(height: 18),
+                      Text('Tree survival', style: t.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 8),
+                      _SurvivalBars(planted: (c['verifiedOutput'] as num?) ?? 0, checks: List<Json>.from((c['survivalChecks'] as List).map((e) => Json.from(e as Map)))),
+                    ],
                     if (pending > 0) ...[
                       const SizedBox(height: 18),
                       OutlinedButton.icon(
@@ -447,6 +453,42 @@ class _CampaignDetailState extends State<_CampaignDetail> {
         ),
       ),
     );
+  }
+}
+
+class _SurvivalBars extends StatelessWidget {
+  const _SurvivalBars({required this.planted, required this.checks});
+  final num planted;
+  final List<Json> checks;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget bar(String label, num value) {
+      final pct = planted <= 0 ? 0.0 : (value / planted).clamp(0, 1).toDouble();
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: Row(children: [
+          SizedBox(width: 92, child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13))),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(value: pct, minHeight: 10, backgroundColor: Brand.canvas, color: Brand.eco),
+            ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 110,
+            child: Text('${Fmt.number(value)} · ${(pct * 100).round()}%',
+                textAlign: TextAlign.right, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+          ),
+        ]),
+      );
+    }
+
+    return Column(children: [
+      bar('Planted', planted),
+      for (final c in checks) bar('${c['checkpointDays']} days', (c['surviving'] as num?) ?? 0),
+    ]);
   }
 }
 

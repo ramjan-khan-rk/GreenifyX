@@ -39,7 +39,27 @@ class _VerificationPageState extends State<VerificationPage> {
 
   Future<void> _review(Json r, bool approve) async {
     String note = '';
-    if (approve) {
+    if (approve && r['kind'] == 'survival_check') {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text('Approve ${r['checkpointDays']}-day survival check?'),
+          content: Text(
+            '${Fmt.number(r['outputCount'] as num?)} living trees will be recorded against this campaign. '
+            'Survival checks update the impact record only. No Eco Points are credited.',
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: Brand.eco),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Approve'),
+            ),
+          ],
+        ),
+      );
+      if (ok != true) return;
+    } else if (approve) {
       final attendees = (r['attendees'] as List? ?? const []).length;
       final each = ((r['campaign'] as Map?)?['pointsPerParticipant'] as num?) ?? 0;
       final ok = await showDialog<bool>(
@@ -76,7 +96,9 @@ class _VerificationPageState extends State<VerificationPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(approve
-            ? 'Approved. ${Fmt.number(updated['pointsCredited'] as num?)} Eco Points credited.'
+            ? (updated['kind'] == 'survival_check'
+                ? 'Survival check approved. The campaign survival record was updated.'
+                : 'Approved. ${Fmt.number(updated['pointsCredited'] as num?)} Eco Points credited.')
             : 'Report rejected. No points were credited.'),
       ));
       await _load();
@@ -169,6 +191,8 @@ class _ReportCard extends StatelessWidget {
     final status = r['status'] as String? ?? 'pending';
     final inside = r['withinGeofence'] == true;
     final gps = Json.from(r['gps'] as Map? ?? const {});
+    final survival = r['kind'] == 'survival_check';
+    final planted = (campaign['verifiedOutput'] as num?) ?? 0;
 
     final evidence = _Evidence(photos: photos);
     final details = Column(
@@ -183,6 +207,10 @@ class _ReportCard extends StatelessWidget {
         ]),
         const SizedBox(height: 4),
         Text(campaign['locationName'] as String? ?? '', style: const TextStyle(color: Brand.muted, fontSize: 13)),
+        if (survival) ...[
+          const SizedBox(height: 8),
+          StatusPill('Tree survival check · ${r['checkpointDays']} days', color: Brand.eco),
+        ],
         const SizedBox(height: 14),
         Row(children: [
           Avatar(name: verifier['name'] as String? ?? '', url: verifier['profileImage'] as String?, size: 30),
@@ -204,13 +232,20 @@ class _ReportCard extends StatelessWidget {
           ok: !flags.contains('low_gps_accuracy'),
           text: gps['accuracyM'] == null ? 'GPS accuracy not reported' : 'GPS accuracy ±${gps['accuracyM']} m',
         ),
-        _CheckLine(ok: !flags.contains('outside_campaign_dates'), text: 'Server timestamp ${flags.contains('outside_campaign_dates') ? 'outside' : 'within'} campaign dates'),
+        if (!survival)
+          _CheckLine(ok: !flags.contains('outside_campaign_dates'), text: 'Server timestamp ${flags.contains('outside_campaign_dates') ? 'outside' : 'within'} campaign dates'),
         _CheckLine(ok: !flags.contains('duplicate_photo'), text: flags.contains('duplicate_photo') ? 'A photo matches an earlier report' : 'Photos are unique'),
         const SizedBox(height: 12),
         Wrap(spacing: 10, runSpacing: 10, children: [
-          _Mini('Outcome', '${r['outcome']}'.replaceFirstMapped(RegExp(r'^.'), (m) => m[0]!.toUpperCase())),
-          _Mini('Recorded', '${Fmt.number(r['outputCount'] as num?)} ${campaign['outputUnit'] ?? ''}'),
-          _Mini('Attendees', Fmt.number(attendees.length)),
+          if (survival) ...[
+            _Mini('Verified planted', Fmt.number(planted)),
+            _Mini('Still alive', Fmt.number(r['outputCount'] as num?)),
+            _Mini('Survival', planted > 0 ? '${((r['outputCount'] as num? ?? 0) / planted * 100).round()}%' : '—'),
+          ] else ...[
+            _Mini('Outcome', '${r['outcome']}'.replaceFirstMapped(RegExp(r'^.'), (m) => m[0]!.toUpperCase())),
+            _Mini('Recorded', '${Fmt.number(r['outputCount'] as num?)} ${campaign['outputUnit'] ?? ''}'),
+            _Mini('Attendees', Fmt.number(attendees.length)),
+          ],
           if (status == 'approved') _Mini('Points credited', Fmt.number(r['pointsCredited'] as num?)),
         ]),
         if (species.isNotEmpty) ...[
@@ -275,7 +310,7 @@ class _ReportCard extends StatelessWidget {
                 style: FilledButton.styleFrom(backgroundColor: Brand.eco),
                 onPressed: busy ? null : onApprove,
                 icon: const Icon(Icons.check_rounded),
-                label: const Text('Approve & credit'),
+                label: Text(survival ? 'Approve' : 'Approve & credit'),
               ),
             ),
           ]),

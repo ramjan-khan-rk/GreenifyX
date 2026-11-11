@@ -14,6 +14,7 @@ import Notification from "../models/Notification.js";
 import Campaign from "../models/Campaign.js";
 import VerificationReport from "../models/VerificationReport.js";
 import PointsTransaction from "../models/PointsTransaction.js";
+import EnvironmentalReport from "../models/EnvironmentalReport.js";
 import { evaluateEvidence } from "../utils/geo.js";
 import { creditPoints } from "../utils/ledger.js";
 
@@ -148,6 +149,18 @@ const CAMPAIGNS = [
     requirements: "",
     startOffset: 14, days: 30, targetParticipants: 25, targetOutput: 40, outputUnit: "beds", points: 70, status: "draft",
   },
+  {
+    title: "Al Wathba Ghaf Belt",
+    category: "Tree Plantation",
+    organiserName: "Emirates Green Volunteers",
+    emirate: "Abu Dhabi",
+    locationName: "Al Wathba community green belt, Abu Dhabi",
+    location: { lat: 24.2602, lng: 54.6094 },
+    permitReference: "DEMO-PERMIT-AD-0177",
+    description: "Native ghaf saplings planted along a drip-irrigated green belt, with survival checks at 30, 90 and 180 days.",
+    requirements: "Morning session. Tools and saplings provided.",
+    startOffset: -100, days: 1, targetParticipants: 40, targetOutput: 300, outputUnit: "trees", points: 120, status: "completed",
+  },
 ];
 
 const seedCampaigns = async ({ users, admin, userHash, now }) => {
@@ -222,6 +235,7 @@ const seedCampaigns = async ({ users, admin, userHash, now }) => {
     [2, 4, 210, 50, "pending"],
     [4, 10, 118, 25, "approved"],
     [4, 4, 31, 20, "approved"],
+    [6, 12, 296, 35, "approved"],
   ];
 
   let reports = 0;
@@ -287,7 +301,109 @@ const seedCampaigns = async ({ users, admin, userHash, now }) => {
     reports += 1;
   }
 
-  return `${campaigns.length} campaigns, 2 field verifiers, ${reports} verification reports, ${credited} campaign Eco Points credited`;
+  // Survival checks for the completed ghaf belt: 30-day approved, 90-day waiting for review.
+  const belt = campaigns[6];
+  for (const [days, surviving, approved] of [[30, 284, true], [90, 263, false]]) {
+    const submittedAt = new Date(belt.startDate.getTime() + days * DAY + 3 * 3600000);
+    const gps = { lat: belt.location.lat + 25 / 111320, lng: belt.location.lng, accuracyM: between(6, 18) };
+    const photos = [{ url: image(`survival${days}`), kind: "after", hash: `demo-survival-${days}` }];
+    const check = evaluateEvidence({ campaign: belt, gps, submittedAt, outputCount: surviving, photos, kind: "survival_check" });
+    const r = await VerificationReport.create({
+      campaign: belt._id,
+      verifier: belt.verifiers[0],
+      kind: "survival_check",
+      checkpointDays: days,
+      outcome: "completed",
+      photos,
+      gps,
+      distanceM: check.distanceM,
+      withinGeofence: check.withinGeofence,
+      submittedAt,
+      outputCount: surviving,
+      species: ["Ghaf (Prosopis cineraria)"],
+      notes: `${days}-day check: counted living saplings row by row. Replacements noted for gaps.`,
+      attendees: [],
+      flags: check.flags,
+      status: approved ? "approved" : "pending",
+      reviewedBy: approved ? admin._id : undefined,
+      reviewedAt: approved ? new Date(submittedAt.getTime() + 5 * 3600000) : undefined,
+      isDemo: true,
+    });
+    if (approved) belt.survivalChecks.push({ checkpointDays: days, surviving, report: r._id, at: submittedAt });
+    reports += 1;
+  }
+  await belt.save();
+
+  return `${campaigns.length} campaigns, 2 field verifiers, ${reports} verification reports (incl. tree survival checks), ${credited} campaign Eco Points credited`;
+};
+
+// [category, emirate, landmark, lat, lng, status, daysAgo, description]
+const ISSUES = [
+  ["Illegal Dumping", "Dubai", "Behind Al Quoz industrial area 3", 25.1365, 55.2302, "submitted", 0, "Construction debris and paint cans dumped on open sand."],
+  ["Overflowing Bin", "Dubai", "JLT Cluster D bus stop", 25.0717, 55.1449, "under_review", 1, "Bin overflowing since Thursday, rubbish blowing onto the road."],
+  ["Littering", "Abu Dhabi", "Corniche Beach, gate 4", 24.4721, 54.3375, "forwarded", 3, "Plastic bottles and food wrappers along the waterline."],
+  ["Polluted Area", "Sharjah", "Khalid Lagoon walkway", 25.3383, 55.3880, "submitted", 1, "Oily film on the water near the walkway."],
+  ["Illegal Dumping", "Ajman", "Al Jurf industrial road", 25.4219, 55.5193, "resolved", 9, "Old furniture and mattresses left by the roadside."],
+  ["Overflowing Bin", "Sharjah", "Al Majaz park entrance", 25.3270, 55.3858, "resolved", 6, "Recycling bins full, cans on the ground."],
+  ["Damaged Facility", "Ras Al Khaimah", "Al Qawasim Corniche", 25.7951, 55.9445, "under_review", 2, "Broken recycling bin lid, waste exposed to birds."],
+  ["Littering", "Fujairah", "Snoopy Island beach access", 25.4910, 56.3640, "rejected", 12, "Litter after a weekend event."],
+  ["Illegal Dumping", "Abu Dhabi", "Mussafah M-37 service road", 24.3466, 54.5026, "submitted", 0, "Tyres and drums dumped beside the service road."],
+  ["Overflowing Bin", "Umm Al Quwain", "UAQ Marina parking", 25.5647, 55.5540, "forwarded", 4, "Two bins overflowing, smell in the parking area."],
+];
+
+const seedIssues = async ({ users, admin, now }) => {
+  const notes = {
+    under_review: "Our team is reviewing this report.",
+    forwarded: "Shared with the area cleaning contractor.",
+    resolved: "Site cleaned and confirmed with a follow-up photo.",
+    rejected: "Already cleared by the time of review.",
+  };
+  const order = ["submitted", "under_review", "forwarded", "resolved"];
+  let resolvedPoints = 0;
+  for (const [i, [category, emirate, landmark, lat, lng, status, daysAgo, description]] of ISSUES.entries()) {
+    const reporter = users[(i * 5 + 2) % users.length];
+    const createdAt = new Date(now - daysAgo * DAY - between(1, 8) * 3600000);
+    const steps = status === "rejected" ? ["submitted", "under_review", "rejected"] : order.slice(0, order.indexOf(status) + 1);
+    const history = steps.map((st, k) => ({
+      status: st,
+      note: st === "submitted" ? "Report received." : notes[st],
+      by: st === "submitted" ? reporter._id : admin._id,
+      at: new Date(createdAt.getTime() + k * 7 * 3600000),
+    }));
+    const r = await EnvironmentalReport.create({
+      reporter: reporter._id,
+      category,
+      description,
+      landmark,
+      emirate,
+      photos: [{ url: image(`issue${i}`), hash: `demo-issue-${i}` }],
+      location: { lat, lng },
+      accuracyM: between(5, 30),
+      status,
+      history,
+      forwardedTo: status === "forwarded" ? "Area cleaning contractor (demo)" : "",
+      confirmations: users.filter((_, k) => (k + i) % 6 === 0 && k !== (i * 5 + 2) % users.length).map((u) => u._id),
+      isDemo: true,
+      createdAt,
+      updatedAt: history[history.length - 1].at,
+    });
+    if (status === "resolved") {
+      const tx = await creditPoints({
+        userId: reporter._id,
+        amount: 15,
+        type: "report_resolved",
+        reason: `Your ${category.toLowerCase()} report was resolved`,
+        createdBy: admin._id,
+        isDemo: true,
+      });
+      if (tx) {
+        r.pointsCredited = tx.amount;
+        resolvedPoints += tx.amount;
+        await r.save();
+      }
+    }
+  }
+  return `${ISSUES.length} environmental reports (${resolvedPoints} reward points for resolved ones)`;
 };
 
 const clear = async () => {
@@ -299,6 +415,7 @@ const clear = async () => {
   const extra = await Promise.all([
     VerificationReport.deleteMany({ $or: [{ isDemo: true }, { verifier: { $in: ids } }] }),
     Campaign.deleteMany({ isDemo: true }),
+    EnvironmentalReport.deleteMany({ $or: [{ isDemo: true }, { reporter: { $in: ids } }] }),
     PointsTransaction.deleteMany({ $or: [{ isDemo: true }, { user: { $in: ids } }] }),
   ]);
   // Real users who joined a demo campaign are simply detached by the delete above.
@@ -317,7 +434,8 @@ const clear = async () => {
   console.log(
     `Cleared demo data: ${users.deletedCount} users, ${results[3].deletedCount} posts, ` +
       `${results[2].deletedCount} challenges, ${results[0].deletedCount} comments, ` +
-      `${extra[1].deletedCount} campaigns, ${extra[0].deletedCount} reports, ${extra[2].deletedCount} ledger entries.`
+      `${extra[1].deletedCount} campaigns, ${extra[0].deletedCount} verification reports, ` +
+      `${extra[2].deletedCount} environmental reports, ${extra[3].deletedCount} ledger entries.`
   );
 };
 
@@ -457,10 +575,12 @@ const create = async () => {
   await Challenge.insertMany(challenges);
 
   const campaignSummary = await seedCampaigns({ users, admin, userHash, now });
+  const issueSummary = await seedIssues({ users, admin, now });
 
   console.log("Demo data ready:");
   console.log(`  ${users.length} users across all 7 emirates, ${savedPosts.length} posts, ${challenges.length} challenges, ${comments.length} comments`);
   console.log(`  ${campaignSummary}`);
+  console.log(`  ${issueSummary}`);
   console.log(`  Admin dashboard login: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
   console.log(`  Field verifier login: verifier@greenifyx.demo / ${DEMO_PASSWORD}`);
   console.log(`  Any demo user, e.g. ${users[0].email} / ${DEMO_PASSWORD}`);

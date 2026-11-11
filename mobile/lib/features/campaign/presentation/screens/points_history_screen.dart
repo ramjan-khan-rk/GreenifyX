@@ -112,6 +112,7 @@ class _EntryTile extends StatelessWidget {
       "campaign_verified" => (Icons.forest_rounded, AppColors.eco),
       "post_verified" => (Icons.verified_rounded, const Color(0xFF4A78B5)),
       "challenge_won" => (Icons.emoji_events_rounded, const Color(0xFF8A5A00)),
+      "report_resolved" => (Icons.report_gmailerrorred_rounded, AppColors.primary),
       "reversal" => (Icons.undo_rounded, AppColors.error),
       _ => (Icons.tune_rounded, AppColors.subtitle),
     };

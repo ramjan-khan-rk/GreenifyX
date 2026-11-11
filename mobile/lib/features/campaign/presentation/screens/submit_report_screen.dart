@@ -26,7 +26,10 @@ const _flagText = {
 
 class SubmitReportScreen extends ConsumerStatefulWidget {
   final CampaignModel campaign;
-  const SubmitReportScreen({super.key, required this.campaign});
+
+  /// True for a 30/90/180-day tree survival visit instead of the event report.
+  final bool survival;
+  const SubmitReportScreen({super.key, required this.campaign, this.survival = false});
 
   @override
   ConsumerState<SubmitReportScreen> createState() => _SubmitReportScreenState();
@@ -42,12 +45,23 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
       if (p.status == "joined") p.id,
   };
   String _outcome = "completed";
+  late int _checkpoint = _suggestCheckpoint();
   Position? _position;
   bool _locating = false;
   String? _locationError;
   bool _submitting = false;
 
   CampaignModel get c => widget.campaign;
+  bool get _survival => widget.survival;
+
+  int _suggestCheckpoint() {
+    final days = DateTime.now().difference(widget.campaign.endDate).inDays;
+    final done = widget.campaign.survivalChecks.map((s) => s.days).toSet();
+    for (final d in const [30, 90, 180]) {
+      if (!done.contains(d) && days >= d - 7) return d;
+    }
+    return 30;
+  }
   bool get _isPlanting => c.category == "Tree Plantation" || c.category == "Mangrove Restoration";
 
   @override
@@ -118,7 +132,7 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
       messenger.showSnackBar(const SnackBar(content: Text("Take at least one photo on site")));
       return;
     }
-    if (_outcome != "unsuccessful" && _attendees.isEmpty) {
+    if (!_survival && _outcome != "unsuccessful" && _attendees.isEmpty) {
       messenger.showSnackBar(const SnackBar(content: Text("Select the volunteers who attended")));
       return;
     }
@@ -131,11 +145,13 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
             lng: _position!.longitude,
             accuracyM: _position!.accuracy,
             mockLocation: _position!.isMocked,
-            outcome: _outcome,
+            kind: _survival ? "survival_check" : "activity",
+            checkpointDays: _survival ? _checkpoint : null,
+            outcome: _survival ? "completed" : _outcome,
             outputCount: int.tryParse(_count.text.trim()) ?? 0,
             species: _species.text.split(",").map((s) => s.trim()).where((s) => s.isNotEmpty).toList(),
             notes: _notes.text.trim(),
-            attendeeIds: _outcome == "unsuccessful" ? const [] : _attendees.toList(),
+            attendeeIds: _survival || _outcome == "unsuccessful" ? const [] : _attendees.toList(),
           );
       if (!mounted) return;
       await showDialog<void>(context: context, builder: (_) => _ResultDialog(result: result));
@@ -152,7 +168,7 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
     final eligible = c.participants.where((p) => p.status != "verified").toList();
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text("Field report", style: AppTextStyles.title)),
+      appBar: AppBar(title: Text(_survival ? "Tree survival check" : "Field report", style: AppTextStyles.title)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
         children: [
@@ -193,6 +209,30 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
               ),
             ),
           ],
+          if (_survival) ...[
+            _step(3, "Count living trees"),
+            SegmentedButton<int>(
+              segments: const [
+                ButtonSegment(value: 30, label: Text("30 days")),
+                ButtonSegment(value: 90, label: Text("90 days")),
+                ButtonSegment(value: 180, label: Text("180 days")),
+              ],
+              selected: {_checkpoint},
+              showSelectedIcon: false,
+              onSelectionChanged: (s) => setState(() => _checkpoint = s.first),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: _count,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: InputDecoration(
+                labelText: "Trees still alive",
+                helperText: "Verified as planted: ${c.verifiedOutput}",
+                prefixIcon: const Icon(Icons.park_rounded),
+              ),
+            ),
+          ] else ...[
           _step(3, "Record the outcome"),
           SegmentedButton<String>(
             segments: const [
@@ -226,7 +266,8 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
               ),
             ),
           ],
-          if (_outcome != "unsuccessful") ...[
+          ],
+          if (!_survival && _outcome != "unsuccessful") ...[
             _step(4, "Check in volunteers"),
             if (eligible.isEmpty)
               const Text("No registered volunteers to check in.", style: TextStyle(color: AppColors.subtitle))
@@ -261,7 +302,7 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
                 ]),
               ),
           ],
-          _step(_outcome == "unsuccessful" ? 4 : 5, "Notes"),
+          _step(_survival ? 4 : _outcome == "unsuccessful" ? 4 : 5, "Notes"),
           TextField(
             controller: _notes,
             maxLines: 3,

@@ -46,6 +46,9 @@ export const campaignView = (c, me) => {
     status: c.status,
     phase,
     verifiedOutput: c.verifiedOutput || 0,
+    survivalChecks: (c.survivalChecks || [])
+      .map((s) => ({ checkpointDays: s.checkpointDays, surviving: s.surviving, at: s.at }))
+      .sort((a, b) => a.checkpointDays - b.checkpointDays),
     participantCount: (c.participants || []).length,
     joined: Boolean(mine),
     myStatus: mine?.status || null,
@@ -298,6 +301,16 @@ export const submitReport = async (req, res) => {
     const accuracyRaw = Number(req.body.accuracyM);
     const accuracyM = Number.isFinite(accuracyRaw) && accuracyRaw >= 0 ? Math.round(accuracyRaw) : null;
 
+    const kind = req.body.kind === "survival_check" ? "survival_check" : "activity";
+    const checkpointDays = kind === "survival_check" ? Number(req.body.checkpointDays) : null;
+    if (kind === "survival_check") {
+      if (![30, 90, 180].includes(checkpointDays)) {
+        return res.status(400).json({ success: false, message: "Choose a 30, 90 or 180-day checkpoint" });
+      }
+      if (!["Tree Plantation", "Mangrove Restoration"].includes(campaign.category)) {
+        return res.status(400).json({ success: false, message: "Survival checks apply to planting campaigns only" });
+      }
+    }
     const outcome = ["completed", "partial", "unsuccessful"].includes(req.body.outcome) ? req.body.outcome : "completed";
     const outputCount = Math.max(0, Math.floor(Number(req.body.outputCount) || 0));
     const species = parseList(req.body.species).slice(0, 10).map((s) => s.slice(0, 60));
@@ -305,7 +318,7 @@ export const submitReport = async (req, res) => {
 
     // Only people who joined the campaign can be credited.
     const joined = new Set(campaign.participants.map((p) => String(p.user)));
-    const attendees = [...new Set(parseList(req.body.attendees))].filter((id) => joined.has(id));
+    const attendees = kind === "survival_check" ? [] : [...new Set(parseList(req.body.attendees))].filter((id) => joined.has(id));
 
     const kinds = parseList(req.body.photoKinds);
     const hashed = files.map((f, i) => ({
@@ -331,6 +344,7 @@ export const submitReport = async (req, res) => {
       outputCount,
       photos,
       duplicateHashes: dupes.map((d) => d._id),
+      kind,
     });
     // The device reported a simulated (mock) location.
     if (String(req.body.mockLocation) === "true") check.flags.push("mock_location");
@@ -338,6 +352,8 @@ export const submitReport = async (req, res) => {
     const report = await VerificationReport.create({
       campaign: campaign._id,
       verifier: req.user._id,
+      kind,
+      checkpointDays,
       outcome,
       photos,
       gps: { lat, lng, accuracyM },

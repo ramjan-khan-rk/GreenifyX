@@ -10,6 +10,7 @@ const _typeLabels = {
   'campaign_verified': 'Campaign verified',
   'post_verified': 'Post verified',
   'challenge_won': 'Challenge won',
+  'report_resolved': 'Report resolved',
   'reversal': 'Reversal',
   'adjustment': 'Adjustment',
 };
@@ -18,6 +19,7 @@ Color _typeColor(String t) => switch (t) {
       'campaign_verified' => Brand.eco,
       'post_verified' => Brand.sky,
       'challenge_won' => Brand.sun,
+      'report_resolved' => Brand.coral,
       'reversal' => Brand.danger,
       _ => Brand.muted,
     };

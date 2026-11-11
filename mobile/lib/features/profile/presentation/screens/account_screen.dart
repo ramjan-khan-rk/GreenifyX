@@ -22,6 +22,7 @@ import 'edit_profile_screen.dart';
 import '../../../campaign/presentation/screens/points_history_screen.dart';
 import '../../../campaign/presentation/screens/verifier_home_screen.dart';
 import '../../../challenge/presentation/screens/challenge_screen.dart';
+import '../../../issues/presentation/issues_hub_screen.dart';
 import '../../../../core/utils/friendly_error.dart';
 
 class AccountScreen extends ConsumerWidget {
@@ -146,6 +147,17 @@ class AccountScreen extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const PointsHistoryScreen()),
+                    );
+                  },
+                ),
+                _ProfileLink(
+                  icon: Icons.report_gmailerrorred_rounded,
+                  title: "My environmental reports",
+                  subtitle: "Track what you reported",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const IssuesHubScreen()),
                     );
                   },
                 ),

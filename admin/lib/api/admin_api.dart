@@ -181,6 +181,24 @@ class AdminApi {
     await _send(() => _dio.post('/admin/points/$id/reverse', data: {'reason': reason}));
   }
 
+  // ---- Report & Restore ----
+
+  Future<({Paged page, Map<String, int> counts})> issues({String status = 'open', String category = '', int page = 1, int limit = 12}) async {
+    final data = await _send(() => _dio.get('/admin/env-reports', queryParameters: {
+          'status': status,
+          if (category.isNotEmpty) 'category': category,
+          'page': page,
+          'limit': limit,
+        }));
+    final counts = <String, int>{};
+    (data['counts'] as Map? ?? const {}).forEach((k, v) => counts[k.toString()] = (v as num).toInt());
+    return (page: _paged(data, 'reports'), counts: counts);
+  }
+
+  Future<Json> updateIssue(String id, String status, {String note = '', String forwardedTo = ''}) async => Json.from((await _send(
+          () => _dio.patch('/admin/env-reports/$id/status', data: {'status': status, 'note': note, 'forwardedTo': forwardedTo})))['report']
+      as Map);
+
   Future<Paged> challenges({String status = '', int page = 1, int limit = 20}) async {
     final data = await _send(() => _dio.get('/admin/challenges', queryParameters: {
           if (status.isNotEmpty) 'status': status,

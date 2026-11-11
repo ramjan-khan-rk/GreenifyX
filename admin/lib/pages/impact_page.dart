@@ -31,6 +31,7 @@ class _Impact extends StatelessWidget {
     final impact = List<Json>.from((stats['impactByActivity'] as List? ?? const []).map((e) => Json.from(e as Map)));
     final emirates = List<Json>.from((stats['byEmirate'] as List).map((e) => Json.from(e as Map)));
     final co2 = (k['co2SavedKg'] as num?)?.toDouble() ?? 0;
+    final survival = List<Json>.from((stats['survival'] as List? ?? const []).map((e) => Json.from(e as Map)));
     final reached = emirates.where((e) => e['emirate'] != 'Not set' && (e['count'] as num) > 0).length;
 
     // Plain-language equivalents help non-technical stakeholders.
@@ -90,6 +91,36 @@ class _Impact extends StatelessWidget {
             ),
           ),
         ]),
+        if (survival.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Panel(
+            title: 'Tree survival',
+            trailing: StatusPill(
+              k['survivalRate'] == null ? '—' : '${k['survivalRate']}% surviving',
+              color: Brand.eco,
+            ),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(
+                '${Fmt.number(k['survivalSurviving'] as num?)} of ${Fmt.number(k['survivalPlanted'] as num?)} verified trees alive at the latest check. '
+                'Planted and surviving are tracked separately, so impact is never overstated.',
+                style: const TextStyle(color: Brand.muted, height: 1.5),
+              ),
+              const SizedBox(height: 12),
+              BarList(
+                color: Brand.eco,
+                valueLabel: (v) => '${v.round()}%',
+                items: [
+                  for (final s in survival)
+                    BarItem(
+                      s['title'] as String,
+                      ((s['planted'] as num) == 0 ? 0 : (s['surviving'] as num) / (s['planted'] as num) * 100),
+                      note: '${Fmt.number(s['surviving'] as num?)} / ${Fmt.number(s['planted'] as num?)} at ${s['checkpointDays']} days',
+                    ),
+                ],
+              ),
+            ]),
+          ),
+        ],
         const SizedBox(height: 16),
         const Panel(
           title: 'How these numbers are calculated',

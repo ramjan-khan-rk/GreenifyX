@@ -20,7 +20,7 @@ const DAY = 24 * 60 * 60 * 1000;
  * Server-side evidence checks for a verifier report.
  * Returns the computed distance, geofence result and any flags for admin review.
  */
-export const evaluateEvidence = ({ campaign, gps, submittedAt, outputCount, photos, duplicateHashes = [] }) => {
+export const evaluateEvidence = ({ campaign, gps, submittedAt, outputCount, photos, duplicateHashes = [], kind = "activity" }) => {
   const distanceM = Math.round(distanceMeters(campaign.location, gps));
   const withinGeofence = distanceM <= (campaign.geofenceRadiusM || 500);
   const flags = [];
@@ -31,12 +31,16 @@ export const evaluateEvidence = ({ campaign, gps, submittedAt, outputCount, phot
   const start = new Date(campaign.startDate).getTime() - DAY;
   const end = new Date(campaign.endDate).getTime() + DAY;
   const at = new Date(submittedAt).getTime();
-  if (at < start || at > end) flags.push("outside_campaign_dates");
+  // Survival checks happen weeks after the event, so only activity reports are date-bound.
+  if (kind === "activity" && (at < start || at > end)) flags.push("outside_campaign_dates");
 
   if (gps.accuracyM != null && gps.accuracyM > 100) flags.push("low_gps_accuracy");
   if (duplicateHashes.length > 0) flags.push("duplicate_photo");
 
-  if (campaign.targetOutput > 0 && outputCount > campaign.targetOutput * 1.5) {
+  if (kind === "survival_check") {
+    // Can't have more surviving trees than were verified as planted.
+    if ((campaign.verifiedOutput || 0) > 0 && outputCount > campaign.verifiedOutput) flags.push("output_above_target");
+  } else if (campaign.targetOutput > 0 && outputCount > campaign.targetOutput * 1.5) {
     flags.push("output_above_target");
   }
   if (!photos.some((p) => p.kind === "after")) flags.push("no_after_photo");

@@ -25,6 +25,12 @@ class EvidencePhoto {
   const EvidencePhoto(this.url, this.kind);
 }
 
+class SurvivalCheck {
+  final int days;
+  final int surviving;
+  const SurvivalCheck(this.days, this.surviving);
+}
+
 class CampaignModel {
   final String id;
   final String title;
@@ -57,6 +63,7 @@ class CampaignModel {
 
   final List<PersonRef> verifiers;
   final List<EvidencePhoto> evidence;
+  final List<SurvivalCheck> survivalChecks;
 
   // Verifier-only fields
   final List<PersonRef> participants;
@@ -92,6 +99,7 @@ class CampaignModel {
     required this.canJoin,
     this.verifiers = const [],
     this.evidence = const [],
+    this.survivalChecks = const [],
     this.participants = const [],
     this.myReports = 0,
     this.myPendingReports = 0,
@@ -138,6 +146,10 @@ class CampaignModel {
       canJoin: j['canJoin'] == true,
       verifiers: people(j['verifiers']),
       evidence: evidence,
+      survivalChecks: (j['survivalChecks'] as List? ?? const [])
+          .whereType<Map>()
+          .map((s) => SurvivalCheck(_int(s['checkpointDays']), _int(s['surviving'])))
+          .toList(),
       participants: people(j['participants']),
       myReports: _int(j['myReports']),
       myPendingReports: _int(j['myPendingReports']),
@@ -146,6 +158,8 @@ class CampaignModel {
 
   double get participantProgress => targetParticipants == 0 ? 0 : (participantCount / targetParticipants).clamp(0, 1).toDouble();
   double get outputProgress => targetOutput == 0 ? 0 : (verifiedOutput / targetOutput).clamp(0, 1).toDouble();
+  bool get isPlanting => category == 'Tree Plantation' || category == 'Mangrove Restoration';
+
   int get spotsLeft => (targetParticipants - participantCount).clamp(0, targetParticipants);
 }
 

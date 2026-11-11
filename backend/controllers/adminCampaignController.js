@@ -35,6 +35,9 @@ const adminCampaignView = (c) => ({
   coverImage: c.coverImage,
   status: c.status,
   verifiedOutput: c.verifiedOutput || 0,
+  survivalChecks: (c.survivalChecks || [])
+    .map((s) => ({ checkpointDays: s.checkpointDays, surviving: s.surviving, at: s.at }))
+    .sort((a, b) => a.checkpointDays - b.checkpointDays),
   participantCount: (c.participants || []).length,
   attendedCount: (c.participants || []).filter((p) => p.status !== "joined").length,
   verifiedCount: (c.participants || []).filter((p) => p.status === "verified").length,
@@ -240,10 +243,13 @@ const reportView = (r) => ({
         geofenceRadiusM: r.campaign.geofenceRadiusM,
         outputUnit: r.campaign.outputUnit,
         targetOutput: r.campaign.targetOutput,
+        verifiedOutput: r.campaign.verifiedOutput,
         pointsPerParticipant: r.campaign.pointsPerParticipant,
       }
     : null,
   verifier: r.verifier && r.verifier.name !== undefined ? { _id: r.verifier._id, name: r.verifier.name, profileImage: r.verifier.profileImage } : null,
+  kind: r.kind || "activity",
+  checkpointDays: r.checkpointDays,
   outcome: r.outcome,
   photos: (r.photos || []).map((p) => ({ url: p.url, kind: p.kind })),
   gps: r.gps,
@@ -280,7 +286,7 @@ export const listReports = async (req, res) => {
         .sort({ submittedAt: status === "pending" || status === "flagged" ? 1 : -1 })
         .skip(skip)
         .limit(limit)
-        .populate("campaign", "title locationName location geofenceRadiusM outputUnit targetOutput pointsPerParticipant")
+        .populate("campaign", "title locationName location geofenceRadiusM outputUnit targetOutput verifiedOutput pointsPerParticipant")
         .populate("verifier", "name profileImage")
         .populate("attendees", "name profileImage")
         .populate("reviewedBy", "name"),
@@ -319,7 +325,12 @@ export const reviewReport = async (req, res) => {
     const campaign = await Campaign.findById(report.campaign);
     let credited = 0;
 
-    if (decision === "approve" && campaign) {
+    if (decision === "approve" && campaign && report.kind === "survival_check") {
+      // Replace any earlier figure for the same checkpoint.
+      campaign.survivalChecks = (campaign.survivalChecks || []).filter((s) => s.checkpointDays !== report.checkpointDays);
+      campaign.survivalChecks.push({ checkpointDays: report.checkpointDays, surviving: report.outputCount, report: report._id });
+      await campaign.save();
+    } else if (decision === "approve" && campaign) {
       const pay = report.outcome === "unsuccessful" ? 0 : campaign.pointsPerParticipant;
       for (const userId of report.attendees) {
         const tx = await creditPoints({
@@ -372,7 +383,7 @@ export const reviewReport = async (req, res) => {
     }
 
     await report.populate([
-      { path: "campaign", select: "title locationName location geofenceRadiusM outputUnit targetOutput pointsPerParticipant" },
+      { path: "campaign", select: "title locationName location geofenceRadiusM outputUnit targetOutput verifiedOutput pointsPerParticipant" },
       { path: "verifier", select: "name profileImage" },
       { path: "attendees", select: "name profileImage" },
       { path: "reviewedBy", select: "name" },
@@ -388,7 +399,7 @@ export const listTransactions = async (req, res) => {
   try {
     const { page, limit, skip } = parsePagination(req.query, { defaultLimit: 25, maxLimit: 100 });
     const filter = {};
-    if (["campaign_verified", "post_verified", "challenge_won", "reversal", "adjustment"].includes(req.query.type)) {
+    if (["campaign_verified", "post_verified", "challenge_won", "report_resolved", "reversal", "adjustment"].includes(req.query.type)) {
       filter.type = req.query.type;
     }
     if (["credited", "reversed"].includes(req.query.status)) filter.status = req.query.status;

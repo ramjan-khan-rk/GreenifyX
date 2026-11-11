@@ -13,6 +13,13 @@ export const corsOriginDelegate = (origin, callback) => {
   }
 
   const allowed = corsOriginList();
+
+  // Local development: allow any localhost port (Flutter web picks a random one).
+  if (!isProduction() && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    callback(null, true);
+    return;
+  }
+
   if (allowed.includes(origin)) {
     callback(null, true);
     return;

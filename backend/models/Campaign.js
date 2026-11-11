@@ -60,6 +60,17 @@ const campaignSchema = new mongoose.Schema(
     // Sum of approved verification reports.
     verifiedOutput: { type: Number, default: 0, min: 0 },
 
+    // Approved survival checks for planting campaigns (planted vs still alive).
+    survivalChecks: [
+      {
+        checkpointDays: { type: Number, enum: [30, 90, 180] },
+        surviving: { type: Number, min: 0 },
+        report: { type: mongoose.Schema.Types.ObjectId, ref: "VerificationReport" },
+        at: { type: Date, default: Date.now },
+        _id: false,
+      },
+    ],
+
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     isDemo: { type: Boolean, default: false },
   },

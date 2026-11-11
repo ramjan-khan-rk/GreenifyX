@@ -25,6 +25,10 @@ const verificationReportSchema = new mongoose.Schema(
     campaign: { type: mongoose.Schema.Types.ObjectId, ref: "Campaign", required: true, index: true },
     verifier: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 
+    // activity = the event itself; survival_check = a later visit counting surviving trees.
+    kind: { type: String, enum: ["activity", "survival_check"], default: "activity" },
+    checkpointDays: { type: Number, enum: [30, 90, 180, null], default: null },
+
     outcome: { type: String, enum: ["completed", "partial", "unsuccessful"], default: "completed" },
     photos: [photoSchema],
 

@@ -41,6 +41,7 @@ class _Overview extends StatelessWidget {
     final growth = newPrev == 0 ? null : (((newNow - newPrev) / newPrev) * 100).round();
     final reported = (k['reportedPosts'] as num?)?.toInt() ?? 0;
     final pendingReports = (k['reportsPending'] as num?)?.toInt() ?? 0;
+    final newIssues = (k['issuesNew'] as num?)?.toInt() ?? 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -57,6 +58,14 @@ class _Overview extends StatelessWidget {
             text: '$pendingReports field verification ${pendingReports == 1 ? 'report is' : 'reports are'} waiting for approval.',
             action: 'Review evidence',
             onTap: () => context.go('/verification'),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (newIssues > 0) ...[
+          _Alert(
+            text: '$newIssues new environmental ${newIssues == 1 ? 'report' : 'reports'} from residents.',
+            action: 'Open Report & Restore',
+            onTap: () => context.go('/issues'),
           ),
           const SizedBox(height: 12),
         ],
@@ -211,6 +220,8 @@ class _CampaignStrip extends StatelessWidget {
           stat(Fmt.number(k['treesVerified'] as num?), 'Trees verified', Icons.park_rounded),
           stat('${Fmt.number(k['wasteKgVerified'] as num?)} kg', 'Waste collected', Icons.delete_sweep_rounded),
           stat(Fmt.number(k['reportsPending'] as num?), 'Reports to review', Icons.fact_check_rounded),
+          stat(Fmt.number(k['issuesOpen'] as num?), 'Open issues', Icons.report_gmailerrorred_rounded),
+          stat(Fmt.number(k['issuesResolved'] as num?), 'Issues resolved', Icons.task_alt_rounded),
         ]),
       ]),
     );

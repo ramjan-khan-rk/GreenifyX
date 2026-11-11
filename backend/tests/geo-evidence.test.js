@@ -48,3 +48,16 @@ test("coordinate validation", () => {
   assert.equal(isValidCoord(NaN, 54.3), false);
   assert.equal(isValidCoord(95, 54.3), false);
 });
+
+test("survival checks are not bound to campaign dates", () => {
+  const ended = { ...campaign, startDate: new Date(Date.now() - 100 * DAY), endDate: new Date(Date.now() - 98 * DAY), verifiedOutput: 300 };
+  const r = evaluateEvidence({ campaign: ended, gps: { lat: 24.454, lng: 54.3774 }, submittedAt: new Date(), outputCount: 270, photos: after, kind: "survival_check" });
+  assert.equal(r.flags.includes("outside_campaign_dates"), false);
+  assert.equal(r.flags.includes("output_above_target"), false);
+});
+
+test("survival count above the verified planting is flagged", () => {
+  const ended = { ...campaign, verifiedOutput: 300 };
+  const r = evaluateEvidence({ campaign: ended, gps: { lat: 24.454, lng: 54.3774 }, submittedAt: new Date(), outputCount: 320, photos: after, kind: "survival_check" });
+  assert.ok(r.flags.includes("output_above_target"));
+});

@@ -149,6 +149,25 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
                 ),
               ],
             ]),
+            if (c.isPlanting && c.survivalChecks.isNotEmpty && c.verifiedOutput > 0) ...[
+              const _Heading("Tree survival"),
+              _Section(children: [
+                Text(
+                  "${c.verifiedOutput} trees verified as planted. Survival is checked on site so we only count trees that live.",
+                  style: const TextStyle(color: AppColors.subtitle, height: 1.4, fontSize: 13),
+                ),
+                const SizedBox(height: 12),
+                for (final s in c.survivalChecks) ...[
+                  ProgressMeter(
+                    label: "${s.days}-day check",
+                    value: "${s.surviving} alive · ${(s.surviving / c.verifiedOutput * 100).round()}%",
+                    progress: (s.surviving / c.verifiedOutput).clamp(0, 1).toDouble(),
+                    color: AppColors.eco,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ]),
+            ],
             if (c.description.isNotEmpty) ...[
               const _Heading("About"),
               Text(c.description, style: const TextStyle(fontSize: 15, height: 1.55, color: AppColors.ink)),

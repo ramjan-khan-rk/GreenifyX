@@ -62,6 +62,8 @@ class CampaignApi {
     required double lng,
     double? accuracyM,
     bool mockLocation = false,
+    String kind = 'activity',
+    int? checkpointDays,
     required String outcome,
     required int outputCount,
     required List<String> species,
@@ -93,7 +95,9 @@ class CampaignApi {
       ..add(MapEntry('species', species.join(',')))
       ..add(MapEntry('notes', notes))
       ..add(MapEntry('attendees', attendeeIds.join(',')))
-      ..add(MapEntry('mockLocation', mockLocation.toString()));
+      ..add(MapEntry('mockLocation', mockLocation.toString()))
+      ..add(MapEntry('kind', kind));
+    if (checkpointDays != null) form.fields.add(MapEntry('checkpointDays', checkpointDays.toString()));
     if (accuracyM != null) form.fields.add(MapEntry('accuracyM', accuracyM.toStringAsFixed(0)));
 
     final res = await _dio.post(

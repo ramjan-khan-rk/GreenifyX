@@ -85,6 +85,7 @@ class _AssignmentCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final badge = phaseBadge(c);
     final waiting = c.participants.where((p) => p.status == "joined").length;
+    final canCheckSurvival = c.isPlanting && c.verifiedOutput > 0 && (c.phase == "ended" || c.phase == "completed");
     return Card(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       clipBehavior: Clip.antiAlias,
@@ -125,6 +126,34 @@ class _AssignmentCard extends ConsumerWidget {
                 "${c.myReports} report${c.myReports == 1 ? '' : 's'} submitted"
                 "${c.myPendingReports > 0 ? ' · ${c.myPendingReports} awaiting admin review' : ''}",
                 style: const TextStyle(color: AppColors.eco, fontWeight: FontWeight.w700, fontSize: 13),
+              ),
+            ],
+            if (c.survivalChecks.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Text(
+                "Survival: ${c.survivalChecks.map((s) => "${s.days}d ${s.surviving}/${c.verifiedOutput}").join(" · ")}",
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.ink),
+              ),
+            ],
+            if (canCheckSurvival) ...[
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final done = await Navigator.push<bool>(
+                      context,
+                      MaterialPageRoute(builder: (_) => SubmitReportScreen(campaign: c, survival: true)),
+                    );
+                    if (done == true) {
+                      ref.invalidate(verifierCampaignsProvider);
+                      ref.invalidate(verifierReportsProvider);
+                    }
+                  },
+                  icon: const Icon(Icons.park_rounded),
+                  label: const Text("Tree survival check"),
+                ),
               ),
             ],
             const SizedBox(height: 14),
