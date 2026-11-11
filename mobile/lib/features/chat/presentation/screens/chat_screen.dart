@@ -9,6 +9,7 @@ import '../../application/call_coordinator.dart';
 import 'call_screen.dart';
 import '../../data/repository/message_repository.dart';
 import '../widgets/message_bubble.dart';
+import '../../../../core/utils/friendly_error.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String userId;
@@ -75,7 +76,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString()),
+          content: Text(friendlyError(e)),
         ),
       );
     }
@@ -139,7 +140,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           Expanded(
             child: messages.when(
               loading: () => const AppLoading(),
-              error: (e, s) => AppErrorState(message: e.toString()),
+              error: (e, s) => AppErrorState(message: friendlyError(e)),
               data: (list) {
                 if (list.isEmpty) {
                   return const AppEmptyState(

@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_status.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../application/providers/friend_provider.dart';
 import '../../application/providers/search_user_provider.dart';
+import '../../../../core/utils/friendly_error.dart';
 
 class SearchFriendsScreen extends ConsumerStatefulWidget {
   const SearchFriendsScreen({super.key});
@@ -56,7 +57,7 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
             child: users.when(
               loading: () => const AppLoading(),
               error: (e, s) => AppErrorState(
-                message: e.toString(),
+                message: friendlyError(e),
                 onRetry: () => ref.invalidate(searchUsersProvider(keyword)),
               ),
               data: (list) {

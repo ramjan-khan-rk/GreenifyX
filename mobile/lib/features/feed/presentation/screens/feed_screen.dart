@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_status.dart';
 import '../../../../core/widgets/brand_icons.dart';
 import '../../../../core/widgets/count_badge.dart';
 import '../../../../core/widgets/points_status_chip.dart';
+import '../../../../core/utils/friendly_error.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../auth/application/providers/auth_provider.dart';
 import '../../../comment/presentation/widgets/comment_bottom_sheet.dart';
@@ -15,6 +16,7 @@ import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../../profile/application/providers/my_profile_provider.dart';
 import '../../application/providers/feed_provider.dart';
 import '../widgets/moment_media.dart';
+import '../widgets/report_post_sheet.dart';
 
 class FeedScreen extends ConsumerWidget {
   const FeedScreen({super.key});
@@ -103,6 +105,46 @@ class FeedScreen extends ConsumerWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
+                        trailing: post.userId.isNotEmpty && post.userId != meId
+                            ? PopupMenuButton<String>(
+                                tooltip: "More",
+                                icon: const Icon(Icons.more_vert_rounded),
+                                onSelected: (_) async {
+                                  final reason = await showReportPostSheet(context);
+                                  if (reason == null) return;
+                                  try {
+                                    await ref
+                                        .read(feedRepositoryProvider)
+                                        .reportPost(post.id, reason);
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text("Thanks. Our team will review this post."),
+                                        ),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(friendlyError(e))),
+                                      );
+                                    }
+                                  }
+                                },
+                                itemBuilder: (_) => const [
+                                  PopupMenuItem(
+                                    value: "report",
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.flag_outlined, size: 20),
+                                        SizedBox(width: 12),
+                                        Text("Report post"),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : null,
                       ),
                       MomentMedia(url: post.image, mediaType: post.mediaType),
                       if (post.description.isNotEmpty)
@@ -131,7 +173,7 @@ class FeedScreen extends ConsumerWidget {
                               } catch (e) {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(e.toString())),
+                                    SnackBar(content: Text(friendlyError(e))),
                                   );
                                 }
                               }
@@ -180,7 +222,7 @@ class FeedScreen extends ConsumerWidget {
                                 } catch (e) {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(e.toString())),
+                                      SnackBar(content: Text(friendlyError(e))),
                                     );
                                   }
                                 }
@@ -199,7 +241,7 @@ class FeedScreen extends ConsumerWidget {
         },
         loading: () => const AppLoading(),
         error: (e, _) => AppErrorState(
-          message: e.toString(),
+          message: friendlyError(e, fallback: "Could not load moments."),
           onRetry: () => ref.invalidate(feedProvider),
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/media_url.dart';
 import '../../application/providers/comment_provider.dart';
+import '../../../../core/utils/friendly_error.dart';
 
 class CommentBottomSheet extends ConsumerStatefulWidget {
   final String postId;
@@ -89,7 +90,7 @@ class _CommentBottomSheetState
                   child: CircularProgressIndicator(),
                 ),
                 error: (e, s) =>
-                    Center(child: Text(e.toString())),
+                    Center(child: Text(friendlyError(e))),
               ),
             ),
 

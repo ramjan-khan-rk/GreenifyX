@@ -6,6 +6,7 @@ class ProfileModel {
   final String bio;
   final String profileImage;
   final String email;
+  final String emirate;
 
   final int ecoPoints;
   final int streak;
@@ -19,6 +20,7 @@ class ProfileModel {
     required this.bio,
     required this.profileImage,
     required this.email,
+    this.emirate = "",
     required this.ecoPoints,
     required this.streak,
     required this.level,
@@ -33,6 +35,7 @@ class ProfileModel {
       bio: json["bio"] ?? "",
       profileImage: json["profileImage"] ?? "",
       email: json["email"] ?? "",
+      emirate: json["emirate"] ?? "",
       ecoPoints: parseEcoPoints(json),
       streak: json["streak"] ?? 0,
       level: json["level"] ?? 1,

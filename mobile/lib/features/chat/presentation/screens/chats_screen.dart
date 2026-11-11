@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_status.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../application/providers/chats_provider.dart';
 import 'chat_screen.dart';
+import '../../../../core/utils/friendly_error.dart';
 
 class ChatsScreen extends ConsumerWidget {
   const ChatsScreen({super.key});
@@ -29,7 +30,7 @@ class ChatsScreen extends ConsumerWidget {
       body: chats.when(
         loading: () => const AppLoading(),
         error: (e, _) => AppErrorState(
-          message: e.toString(),
+          message: friendlyError(e),
           onRetry: () => ref.invalidate(chatsProvider),
         ),
         data: (list) {

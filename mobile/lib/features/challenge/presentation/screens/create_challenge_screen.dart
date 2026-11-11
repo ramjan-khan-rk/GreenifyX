@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../friends/application/providers/friend_provider.dart';
 import 'choose_friend_screen.dart';
+import '../../../../core/utils/friendly_error.dart';
 
 class CreateChallengeScreen extends ConsumerStatefulWidget {
   const CreateChallengeScreen({super.key});
@@ -117,7 +118,7 @@ class _CreateChallengeScreenState
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text(e.toString(), textAlign: TextAlign.center),
+            child: Text(friendlyError(e), textAlign: TextAlign.center),
           ),
         ),
         data: (friendList) {

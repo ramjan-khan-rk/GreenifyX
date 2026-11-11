@@ -7,6 +7,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../friends/application/providers/friend_provider.dart';
 import '../../../friends/domain/models/friend_model.dart';
 import '../../application/providers/challenge_provider.dart';
+import '../../../../core/utils/friendly_error.dart';
 
 class ChooseFriendScreen extends ConsumerStatefulWidget {
   final String title;
@@ -72,7 +73,7 @@ class _ChooseFriendScreenState extends ConsumerState<ChooseFriendScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(content: Text(friendlyError(e))),
       );
     } finally {
       if (mounted) setState(() => sending = false);
@@ -97,7 +98,7 @@ class _ChooseFriendScreenState extends ConsumerState<ChooseFriendScreen> {
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.primary),
         ),
-        error: (e, _) => Center(child: Text(e.toString())),
+        error: (e, _) => Center(child: Text(friendlyError(e))),
         data: (list) {
           final filtered = list.where((friend) {
             return friend.name

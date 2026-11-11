@@ -14,12 +14,13 @@ import '../../../notifications/application/providers/notification_provider.dart'
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../../post/presentation/screens/create_post_screen.dart';
 import '../../../profile/application/providers/my_profile_provider.dart';
-import '../../../profile/presentation/screens/complete_profile_screen.dart';
+import '../../../profile/presentation/screens/edit_profile_screen.dart';
 import '../widgets/eco_points_card.dart';
 import '../widgets/quote_card.dart';
 import '../widgets/spark_card.dart';
 import '../../../challenge/presentation/screens/challenge_screen.dart';
 import 'leaderboard_screen.dart';
+import '../../../../core/utils/friendly_error.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -35,7 +36,7 @@ class HomeScreen extends ConsumerWidget {
         child: profile.when(
           loading: () => const AppLoading(),
           error: (e, _) => AppErrorState(
-            message: e.toString(),
+            message: friendlyError(e),
             onRetry: () => ref.invalidate(myProfileProvider),
           ),
           data: (user) {
@@ -243,7 +244,7 @@ class HomeScreen extends ConsumerWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const CompleteProfileScreen(),
+                              builder: (_) => const EditProfileScreen(),
                             ),
                           );
                         },

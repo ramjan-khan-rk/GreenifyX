@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_status.dart';
 import '../../application/providers/notification_provider.dart';
+import '../../../../core/utils/friendly_error.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
@@ -33,7 +34,7 @@ class NotificationsScreen extends ConsumerWidget {
         child: notifications.when(
           loading: () => const AppLoading(),
           error: (error, _) => AppErrorState(
-            message: error.toString(),
+            message: friendlyError(error),
             onRetry: () => ref.invalidate(notificationsProvider),
           ),
           data: (list) {

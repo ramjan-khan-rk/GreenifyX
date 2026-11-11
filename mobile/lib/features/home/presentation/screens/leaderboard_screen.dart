@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_status.dart';
 import '../../../../core/widgets/brand_icons.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../application/providers/leaderboard_provider.dart';
+import '../../../../core/utils/friendly_error.dart';
 
 class LeaderboardScreen extends ConsumerWidget {
   const LeaderboardScreen({super.key});
@@ -29,7 +30,7 @@ class LeaderboardScreen extends ConsumerWidget {
       body: board.when(
         loading: () => const AppLoading(),
         error: (e, _) => AppErrorState(
-          message: e.toString(),
+          message: friendlyError(e),
           onRetry: () => ref.invalidate(leaderboardProvider),
         ),
         data: (list) {

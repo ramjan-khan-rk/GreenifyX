@@ -7,6 +7,7 @@ import '../../../../core/services/storage_service.dart';
 import '../../domain/models/login_response.dart';
 import '../../../../core/services/socket_service.dart';
 import '../../../../core/session/session_controller.dart';
+import '../../../../core/utils/friendly_error.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
@@ -163,7 +164,7 @@ class AuthNotifier extends Notifier<AuthState> {
         return data["message"].toString();
       }
     } catch (_) {}
-    return e.toString();
+    return friendlyError(e);
   }
 }
 

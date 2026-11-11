@@ -132,6 +132,7 @@ class ProfileNotifier extends Notifier<ProfileState> {
   Future<bool> saveProfile({
     required String name,
     required String bio,
+    String? emirate,
   }) async {
     state = state.copyWith(isLoading: true);
 
@@ -140,6 +141,7 @@ class ProfileNotifier extends Notifier<ProfileState> {
         name: name,
         bio: bio,
         profileImage: state.profileImage,
+        emirate: emirate,
       );
 
       state = state.copyWith(isLoading: false);

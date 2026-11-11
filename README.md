@@ -38,6 +38,22 @@
 * Text & image messages
 * Instant delivery using **Socket.IO**
 
+### 🛡️ Admin Dashboard (Flutter Web)
+
+* Overview: members, weekly actives, verified actions, estimated CO₂ saved
+* 30-day growth and activity trend, top actions, top contributors, live activity
+* Impact page: CO₂ by action type, members by emirate, plain-language equivalents
+* User management: search, filter by emirate and status, suspend / restore with reason
+* Moderation queue: reported posts, hide / restore / keep
+* Challenges overview with live progress
+* Responsive: sidebar on desktop, drawer on tablets and phones; deployable as a website
+
+### 🇦🇪 UAE Pilot
+
+* Emirate on every profile (all seven emirates) for regional reporting
+* Asia/Dubai time for streaks and dashboard charts, +971 phone defaults
+* In-app post reporting feeds the admin moderation queue
+
 ### 🔔 Notification System
 
 * Friend requests
@@ -53,6 +69,7 @@
 | Layer               | Technologies                 |
 | ------------------- | ---------------------------- |
 | **Mobile**          | Flutter, Dart, Riverpod, Dio |
+| **Admin web**       | Flutter Web, GoRouter, Dio   |
 | **Backend**         | Node.js, Express.js          |
 | **Database**        | MongoDB, Mongoose            |
 | **Authentication**  | JWT                          |
@@ -65,10 +82,10 @@
 ## 🏗 System Architecture
 
 ```text
-Flutter Mobile App
-        │
-        │ REST APIs
-        ▼
+Flutter Mobile App      Flutter Web Admin
+        │                      │
+        └──── REST APIs ───────┘
+                   ▼
 Node.js + Express
    │      │
    │      ├────────► MongoDB
@@ -87,6 +104,13 @@ The mobile application communicates with the backend through REST APIs, while So
 
 ```text
 GreenifyX
+│
+├── admin/              Flutter Web admin dashboard
+│   └── lib/
+│       ├── api/
+│       ├── core/
+│       ├── pages/
+│       └── widgets/
 │
 ├── mobile/
 │   └── lib/
@@ -150,6 +174,7 @@ The backend currently provides APIs for:
 /messages
 /uploads
 /notifications
+/admin          (admin role only: stats, users, posts, challenges)
 ```
 
 Protected endpoints use JWT authentication middleware.
@@ -180,6 +205,35 @@ cd backend
 npm install
 npm run dev
 ```
+
+### Admin dashboard
+
+```bash
+cd admin
+flutter pub get
+flutter run -d chrome
+# against a local API:
+flutter run -d chrome --dart-define=API_BASE=http://localhost:5000/api
+```
+
+Build it as a website with `flutter build web --dart-define=API_BASE=https://your-api/api`, then host the `admin/build/web` folder on any static host and add that address to `CORS_ORIGIN`.
+
+To give an existing account admin access:
+
+```bash
+cd backend
+npm run make-admin -- you@example.com
+```
+
+### Demo data
+
+```bash
+cd backend
+npm run seed:demo             # 24 members across all 7 emirates, 96 posts, challenges, comments
+npm run seed:demo -- --clear  # removes only what the seeder created
+```
+
+The seeder prints the admin and demo-user logins. Every seeded record is flagged `isDemo`, so clearing never touches real accounts.
 
 Create a `.env` file inside the backend directory with:
 
@@ -239,9 +293,17 @@ Copy `backend/.env.example` to `backend/.env` and fill values locally. Productio
 * Friend verify → Eco Points (not on upload)
 * Friends reject / unfriend / block
 * Friends-only chat and comments
+* Admin dashboard (Flutter Web): overview, impact, users, moderation, challenges
+* Admin role, account suspension, post reporting and moderation
+* Emirate on profiles and CO₂ impact estimates
+* Demo-data seeder for presentations
 
 ### 🔜 Planned
 
+* Organisation accounts (companies, schools) with their own dashboards
+* Monthly ESG / impact PDF reports
+* UAE PASS sign-in
+* Rewards marketplace with partner vouchers
 * GPS-based eco verification
 * Nearby user verification
 * Arabic / RTL (English-only for this UAE pilot)
@@ -249,7 +311,7 @@ Copy `backend/.env.example` to `backend/.env` and fill values locally. Productio
 
 ### UAE pilot notes
 
-UI copy is **English only**. Arabic and RTL are not implemented; adding them later means localizing strings and mirroring layouts, not flipping a toggle. Phone helpers default to **+971**. Streaks use the **Asia/Dubai** calendar day. Eco Points are **community-verified** (a friend confirms a post), not GPS or government MRV. Challenge progress remains self-reported. Do not treat this README as a live ops report — Brevo (`BREVO_API_KEY`), JWT length, Atlas indexes, and Render must still be set on the host.
+UI copy is **English only**. Arabic and RTL are not implemented; adding them later means localizing strings and mirroring layouts, not flipping a toggle. Phone helpers default to **+971**. Streaks use the **Asia/Dubai** calendar day. Eco Points are **community-verified** (a friend confirms a post), not GPS or government MRV. CO₂ figures in the admin dashboard are indicative per-action estimates, not certified measurement. Challenge progress remains self-reported. Do not treat this README as a live ops report — Brevo (`BREVO_API_KEY`), JWT length, Atlas indexes, and Render must still be set on the host.
 
 ---
 

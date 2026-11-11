@@ -26,6 +26,7 @@ class ProfileApi {
     required String name,
     required String bio,
     required String profileImage,
+    String? emirate,
 
   }) async {
 
@@ -38,6 +39,7 @@ class ProfileApi {
         "name":name,
         "bio":bio,
         "profileImage":profileImage,
+        if (emirate != null) "emirate": emirate,
 
       },
 

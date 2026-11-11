@@ -10,6 +10,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/deeds.dart';
 import '../../domain/looks.dart';
 import '../../data/repositories/post_repository.dart';
+import '../../../../core/utils/friendly_error.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -107,7 +108,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(content: Text(friendlyError(e))),
       );
     } finally {
       if (mounted) setState(() => submitting = false);
