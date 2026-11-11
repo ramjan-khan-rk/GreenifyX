@@ -3,6 +3,8 @@ import User from "../models/User.js";
 import Post from "../models/Post.js";
 import Challenge from "../models/Challenge.js";
 import Comment from "../models/Comment.js";
+import Campaign from "../models/Campaign.js";
+import VerificationReport from "../models/VerificationReport.js";
 import { resolveEcoPoints } from "../utils/ecoPoints.js";
 import { escapeRegex } from "../utils/escapeRegex.js";
 import { parsePagination } from "../utils/pagination.js";
@@ -87,6 +89,10 @@ export const getStats = async (req, res) => {
       postsDaily,
       topUsers,
       recentPosts,
+      campaignStatus,
+      reportStatus,
+      campaignOutput,
+      participantsAgg,
     ] = await Promise.all([
       User.countDocuments(),
       User.countDocuments({ isSuspended: true }),
@@ -123,7 +129,18 @@ export const getStats = async (req, res) => {
         .limit(8)
         .populate("user", "name profileImage emirate")
         .select("user activity isVerified ecoPoints createdAt image mediaType"),
+      Campaign.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
+      VerificationReport.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
+      Campaign.aggregate([{ $group: { _id: "$outputUnit", total: { $sum: "$verifiedOutput" } } }]),
+      Campaign.aggregate([
+        { $unwind: "$participants" },
+        { $group: { _id: "$participants.status", count: { $sum: 1 } } },
+      ]),
     ]);
+    const campaignsBy = Object.fromEntries(campaignStatus.map((c) => [c._id, c.count]));
+    const reportsBy = Object.fromEntries(reportStatus.map((c) => [c._id, c.count]));
+    const outputBy = Object.fromEntries(campaignOutput.map((c) => [c._id, c.total]));
+    const participantsBy = Object.fromEntries(participantsAgg.map((c) => [c._id, c.count]));
 
     const challenges = Object.fromEntries(challengeStatus.map((c) => [c._id, c.count]));
     const emirateCounts = new Map(usersByEmirate.map((e) => [e._id || null, e.count]));
@@ -150,6 +167,15 @@ export const getStats = async (req, res) => {
         ),
         challengesActive: (challenges.ongoing || 0) + (challenges.pending || 0),
         challengesCompleted: challenges.completed || 0,
+        campaignsTotal: Object.values(campaignsBy).reduce((a, b) => a + b, 0),
+        campaignsActive: campaignsBy.active || 0,
+        reportsPending: reportsBy.pending || 0,
+        reportsApproved: reportsBy.approved || 0,
+        reportsRejected: reportsBy.rejected || 0,
+        treesVerified: outputBy.trees || 0,
+        wasteKgVerified: outputBy.kg || 0,
+        campaignParticipants: Object.values(participantsBy).reduce((a, b) => a + b, 0),
+        campaignParticipantsVerified: participantsBy.verified || 0,
       },
       series: {
         signups: fillDays(signupsDaily, days),
@@ -205,6 +231,7 @@ export const listUsers = async (req, res) => {
     if (status === "suspended") filter.isSuspended = true;
     if (status === "active") filter.isSuspended = { $ne: true };
     if (status === "admins") filter.role = "admin";
+    if (status === "verifiers") filter.role = "verifier";
     const emirate = normalizeEmirate(req.query.emirate);
     if (emirate) filter.emirate = emirate;
 

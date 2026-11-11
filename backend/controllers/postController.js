@@ -7,7 +7,7 @@ import { uploadBufferToCloudinary } from "../utils/cloudinaryUpload.js";
 import { sendServerError } from "../utils/httpError.js";
 import { parsePagination } from "../utils/pagination.js";
 import { applyVerifyAward, pointsStatusFor } from "../utils/postPoints.js";
-import { applyEcoAward } from "../utils/verifiedProgress.js";
+import { creditPoints } from "../utils/ledger.js";
 import { CAUSES, LOOKS, presentMediaUrl } from "../utils/mediaLook.js";
 
 const ecoPointsMap = {
@@ -282,12 +282,18 @@ export const verifyPost = async (req, res) => {
       });
     }
 
-    if (result.award && author) {
-      applyEcoAward(author, result.points);
-      await author.save();
-    }
-
     await post.save();
+
+    if (result.award && author) {
+      await creditPoints({
+        userId: author._id,
+        amount: result.points,
+        type: "post_verified",
+        reason: `${post.activity} verified by a friend`,
+        post: post._id,
+        createdBy: req.user._id,
+      });
+    }
 
     try {
       const notification = await Notification.create({

@@ -130,7 +130,8 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["user", "admin"],
+      // verifier = authorised field verifier for campaigns
+      enum: ["user", "verifier", "admin"],
       default: "user",
     },
 

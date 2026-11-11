@@ -11,6 +11,18 @@ import {
   moderatePost,
   listChallenges,
 } from "../controllers/adminController.js";
+import {
+  listCampaignsAdmin,
+  createCampaign,
+  updateCampaign,
+  setCampaignVerifiers,
+  listVerifiers,
+  setUserRole,
+  listReports,
+  reviewReport,
+  listTransactions,
+  reversePoints,
+} from "../controllers/adminCampaignController.js";
 
 const router = express.Router();
 
@@ -24,5 +36,16 @@ router.patch("/users/:id/status", setUserStatus);
 router.get("/posts", listPosts);
 router.patch("/posts/:id/moderate", moderatePost);
 router.get("/challenges", listChallenges);
+
+router.patch("/users/:id/role", setUserRole);
+router.get("/verifiers", listVerifiers);
+router.get("/campaigns", listCampaignsAdmin);
+router.post("/campaigns", createCampaign);
+router.patch("/campaigns/:id", updateCampaign);
+router.put("/campaigns/:id/verifiers", setCampaignVerifiers);
+router.get("/reports", listReports);
+router.patch("/reports/:id/review", reviewReport);
+router.get("/points", listTransactions);
+router.post("/points/:id/reverse", reversePoints);
 
 export default router;
