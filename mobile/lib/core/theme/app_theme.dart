@@ -19,7 +19,7 @@ class AppTheme {
       onSurface: AppColors.text,
       error: AppColors.error,
     ),
-    textTheme: GoogleFonts.poppinsTextTheme().apply(
+    textTheme: GoogleFonts.manropeTextTheme().apply(
       bodyColor: AppColors.text,
       displayColor: AppColors.text,
     ),
@@ -42,8 +42,8 @@ class AppTheme {
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
-      selectedItemColor: AppColors.primary,
-      unselectedItemColor: AppColors.navy,
+      selectedItemColor: AppColors.joy,
+      unselectedItemColor: AppColors.ink,
       type: BottomNavigationBarType.fixed,
       selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
       unselectedLabelStyle: TextStyle(fontSize: 12),

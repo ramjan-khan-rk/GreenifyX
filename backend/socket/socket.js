@@ -7,6 +7,9 @@ import { corsOriginDelegate } from "../utils/corsConfig.js";
 let io;
 
 const onlineUsers = new Map();
+const liveCalls = new Set();
+
+const pairKey = (a, b) => [String(a), String(b)].sort().join(":");
 
 const readHandshakeToken = (socket) => {
   const authToken = socket.handshake.auth?.token;
@@ -66,9 +69,66 @@ export const initializeSocket = (server) => {
       onlineUsers.set(socket.userId, socket.id);
     });
 
+    socket.on("call:signal", async (payload) => {
+      try {
+        const to = String(payload?.to || "");
+        const type = String(payload?.type || "");
+        const allowed = new Set(["offer", "answer", "ice", "reject", "end"]);
+        if (!to || to === userId || !allowed.has(type)) return;
+
+        const key = pairKey(userId, to);
+        let fromName;
+
+        if (type === "offer") {
+          const me = await User.findById(userId).select("friends name");
+          const isFriend = me?.friends?.some((id) => id.toString() === to);
+          if (!isFriend) return;
+          liveCalls.add(key);
+          fromName = me?.name || "Friend";
+        } else if (!liveCalls.has(key)) {
+          return;
+        }
+
+        if (type === "end" || type === "reject") {
+          liveCalls.delete(key);
+        }
+
+        const sdp = payload?.sdp;
+        const candidate = payload?.candidate;
+        emitToUser(to, "call:signal", {
+          from: userId,
+          fromName,
+          type,
+          video: payload?.video === true,
+          sdp:
+            sdp && typeof sdp === "object"
+              ? {
+                  type: String(sdp.type || ""),
+                  sdp: String(sdp.sdp || "").slice(0, 120000),
+                }
+              : undefined,
+          candidate:
+            candidate && typeof candidate === "object"
+              ? {
+                  candidate: String(candidate.candidate || "").slice(0, 4000),
+                  sdpMid: candidate.sdpMid ?? null,
+                  sdpMLineIndex: candidate.sdpMLineIndex ?? null,
+                }
+              : undefined,
+        });
+      } catch (error) {
+        console.error("Call signal failed");
+      }
+    });
+
     socket.on("disconnect", () => {
       if (onlineUsers.get(userId) === socket.id) {
         onlineUsers.delete(userId);
+      }
+      for (const key of liveCalls) {
+        if (key.split(":").includes(userId)) {
+          liveCalls.delete(key);
+        }
       }
     });
   });

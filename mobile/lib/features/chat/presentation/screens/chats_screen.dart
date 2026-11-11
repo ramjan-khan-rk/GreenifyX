@@ -37,7 +37,7 @@ class ChatsScreen extends ConsumerWidget {
             return const AppEmptyState(
               icon: Icons.chat_bubble_rounded,
               title: "No conversations yet",
-              message: "Open a friend profile and start a chat.",
+              message: "Open a friend and say hello. Calls live in the chat.",
             );
           }
 

@@ -1,10 +1,14 @@
 import cloudinary from "../config/cloudinary.js";
 import streamifier from "streamifier";
 
-export const uploadBufferToCloudinary = (buffer, folder = "GreenifyX") =>
+export const uploadBufferToCloudinary = (
+  buffer,
+  folder = "GreenifyX",
+  resourceType = "auto"
+) =>
   new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder },
+      { folder, resource_type: resourceType },
       (error, result) => {
         if (error) {
           reject(error);

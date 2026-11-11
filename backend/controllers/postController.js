@@ -8,6 +8,7 @@ import { sendServerError } from "../utils/httpError.js";
 import { parsePagination } from "../utils/pagination.js";
 import { applyVerifyAward, pointsStatusFor } from "../utils/postPoints.js";
 import { applyEcoAward } from "../utils/verifiedProgress.js";
+import { CAUSES, LOOKS, presentMediaUrl } from "../utils/mediaLook.js";
 
 const ecoPointsMap = {
   "Tree Plantation": 50,
@@ -16,29 +17,48 @@ const ecoPointsMap = {
   Walk: 10,
   "Cleanliness Drive": 40,
   "Water Conservation": 30,
+  "Planted a Tree": 50,
+  "Gave It Another Life": 20,
+  "Rode Instead": 15,
+  "Walked Today": 10,
+  "Cleaned a Corner": 40,
+  "Protected Water": 30,
+  "Stood for Someone": 25,
+  "Shared a Table": 25,
+  "Cared for a Life": 25,
+  "Made Room for Them": 20,
+  "After the Good": 15,
+  "A Quiet Win": 10,
 };
 
 export const createPost = async (req, res) => {
   try {
     const { description, activity } = req.body;
+    const cause = CAUSES.has(req.body.cause) ? req.body.cause : "Planet";
+    const look = LOOKS.has(req.body.look) ? req.body.look : "hd";
 
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: "Image is required",
+        message: "Add a photo or a short video",
       });
     }
 
     if (!activity) {
       return res.status(400).json({
         success: false,
-        message: "Activity is required",
+        message: "Choose what you did",
       });
     }
 
+    const mediaType = String(req.file.mimetype || "").startsWith("video/")
+      ? "video"
+      : "image";
+
     const imageUrl = await uploadBufferToCloudinary(
       req.file.buffer,
-      "GreenifyX/posts"
+      "GreenifyX/posts",
+      "auto"
     );
     const ecoPoints = ecoPointsMap[activity] || 10;
 
@@ -47,6 +67,9 @@ export const createPost = async (req, res) => {
       image: imageUrl,
       description,
       activity,
+      cause,
+      mediaType,
+      look: mediaType === "video" ? "natural" : look,
       ecoPoints,
       isVerified: false,
       pointsAwarded: false,
@@ -64,7 +87,7 @@ export const createPost = async (req, res) => {
           sender: req.user._id,
           type: "verification",
           title: "Verification Needed",
-          message: `${req.user.name} uploaded a new eco activity. Help verify it.`,
+          message: `${req.user.name} shared a moment. Help verify it.`,
           referenceId: post._id,
         });
 
@@ -76,7 +99,7 @@ export const createPost = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Eco activity posted. Eco Points are awarded after a friend verifies it.",
+      message: "Shared. Eco Points land after a friend verifies it.",
       post,
       pointsStatus: pointsStatusFor(post),
     });
@@ -114,7 +137,10 @@ export const getPosts = async (req, res) => {
       posts.map(async (post) => ({
         _id: post._id,
         user: post.user,
-        image: post.image,
+        image: presentMediaUrl(post.image, post.look, post.mediaType),
+        mediaType: post.mediaType || "image",
+        cause: post.cause || "Planet",
+        look: post.look || "natural",
         description: post.description,
         activity: post.activity,
         ecoPoints: post.ecoPoints,

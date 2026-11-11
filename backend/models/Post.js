@@ -24,6 +24,22 @@ const postSchema = new mongoose.Schema(
       required: true,
     },
 
+    cause: {
+      type: String,
+      default: "Planet",
+    },
+
+    mediaType: {
+      type: String,
+      enum: ["image", "video"],
+      default: "image",
+    },
+
+    look: {
+      type: String,
+      default: "natural",
+    },
+
     ecoPoints: {
       type: Number,
       default: 10,

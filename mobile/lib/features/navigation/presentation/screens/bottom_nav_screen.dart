@@ -9,10 +9,12 @@ import '../../../challenge/application/providers/challenge_provider.dart';
 import '../../../challenge/presentation/screens/challenge_screen.dart';
 import '../../../chat/application/providers/chat_provider.dart';
 import '../../../chat/application/providers/chats_provider.dart';
+import '../../../chat/application/call_coordinator.dart';
+import '../../../chat/presentation/screens/call_screen.dart';
+import '../../../chat/presentation/screens/chats_screen.dart';
+import '../../../feed/presentation/screens/feed_screen.dart';
 import '../../../friends/application/providers/friend_provider.dart';
-import '../../../friends/presentation/screens/friends_screen.dart';
 import '../../../home/presentation/screens/home_screen.dart';
-import '../../../home/presentation/screens/leaderboard_screen.dart';
 import '../../../notifications/application/providers/notification_provider.dart';
 import '../../../profile/presentation/screens/account_screen.dart';
 
@@ -25,11 +27,12 @@ class BottomNavScreen extends ConsumerStatefulWidget {
 
 class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
   int currentIndex = 0;
+  bool _callOpen = false;
   final pages = const [
     HomeScreen(),
-    FriendsScreen(),
+    FeedScreen(),
+    ChatsScreen(),
     ChallengeScreen(),
-    LeaderboardScreen(),
     AccountScreen(),
   ];
 
@@ -50,6 +53,19 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
     socket.on("challengeRejected", _onRealtimeEvent);
     socket.on("challengeCompleted", _onRealtimeEvent);
     socket.on("newNotification", _onRealtimeEvent);
+    final calls = CallCoordinator.instance;
+    calls.bind();
+    calls.addListener(_onIncomingCall);
+  }
+
+  void _onIncomingCall() {
+    final call = CallCoordinator.instance;
+    if (!mounted || _callOpen || call.phase != "incoming") return;
+    _callOpen = true;
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const CallScreen()),
+    ).whenComplete(() => _callOpen = false);
   }
 
   @override
@@ -61,6 +77,7 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
     socket.off("challengeRejected");
     socket.off("challengeCompleted");
     socket.off("newNotification");
+    CallCoordinator.instance.removeListener(_onIncomingCall);
     super.dispose();
   }
 
@@ -76,8 +93,8 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
       body: pages[currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.navy,
+        selectedItemColor: AppColors.joy,
+        unselectedItemColor: AppColors.ink,
         onTap: (index) {
           setState(() {
             currentIndex = index;
@@ -92,23 +109,23 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
             ),
             label: "Home",
           ),
-          BottomNavigationBarItem(
-            icon: CountBadge(
-              count: pendingFriends,
-              child: const Icon(BrandGlyph.friends),
-            ),
-            label: "Friends",
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.auto_awesome_rounded),
+            label: "Moments",
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(BrandGlyph.chat),
+            label: "Chat",
           ),
           const BottomNavigationBarItem(
             icon: Icon(BrandGlyph.challenges),
             label: "Challenges",
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(BrandGlyph.leaderboard),
-            label: "Leaderboard",
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(BrandGlyph.profile),
+          BottomNavigationBarItem(
+            icon: CountBadge(
+              count: pendingFriends,
+              child: const Icon(BrandGlyph.profile),
+            ),
             label: "Profile",
           ),
         ],

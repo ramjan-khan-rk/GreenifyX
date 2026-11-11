@@ -5,6 +5,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_status.dart';
 import '../../application/providers/chat_provider.dart';
+import '../../application/call_coordinator.dart';
+import 'call_screen.dart';
 import '../../data/repository/message_repository.dart';
 import '../widgets/message_bubble.dart';
 
@@ -85,6 +87,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
+  Future<void> _startCall(bool withVideo) async {
+    final call = CallCoordinator.instance;
+    call.bind();
+    await call.start(
+      userId: widget.userId,
+      userName: widget.userName,
+      withVideo: withVideo,
+    );
+    if (!mounted) return;
+    if (call.phase == "ended") {
+      final message = call.detail;
+      await call.hangUp(notifyPeer: false);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+      return;
+    }
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const CallScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final messages = ref.watch(
@@ -95,6 +121,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(widget.userName, style: AppTextStyles.title),
+        actions: [
+          IconButton(
+            tooltip: "Voice call",
+            onPressed: () => _startCall(false),
+            icon: const Icon(Icons.call_rounded),
+          ),
+          IconButton(
+            tooltip: "Video call",
+            onPressed: () => _startCall(true),
+            icon: const Icon(Icons.videocam_rounded),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -107,7 +145,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   return const AppEmptyState(
                     icon: Icons.chat_bubble_outline,
                     title: "Say hello",
-                    message: "Friends-only chat. Keep it kind.",
+                    message: "Say something kind. Voice and video are in the top corner.",
                   );
                 }
 
