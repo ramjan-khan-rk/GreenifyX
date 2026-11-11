@@ -3,7 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>NSCameraUsageDescription</key>
-	<string>GreenifyX uses the camera for video calls and moments you choose to share.</string>
+	<string>GreenifyX uses the camera for video calls, moments you share, and on-site verification photos.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>GreenifyX checks your location to confirm field verification reports are made at the approved campaign site.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>GreenifyX uses the microphone for voice and video calls with friends.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>

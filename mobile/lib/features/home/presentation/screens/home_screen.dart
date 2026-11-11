@@ -21,6 +21,7 @@ import '../widgets/spark_card.dart';
 import '../../../challenge/presentation/screens/challenge_screen.dart';
 import 'leaderboard_screen.dart';
 import '../../../../core/utils/friendly_error.dart';
+import '../../../campaign/presentation/widgets/featured_campaign.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -180,6 +181,7 @@ class HomeScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  const FeaturedCampaign(),
                   const SizedBox(height: 22),
                   Text("Quick actions", style: AppTextStyles.title.copyWith(fontSize: 18)),
                   const SizedBox(height: 12),

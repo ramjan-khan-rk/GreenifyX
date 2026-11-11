@@ -6,7 +6,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/brand_icons.dart';
 import '../../../../core/widgets/count_badge.dart';
 import '../../../challenge/application/providers/challenge_provider.dart';
-import '../../../challenge/presentation/screens/challenge_screen.dart';
+import '../../../campaign/application/campaign_providers.dart';
+import '../../../campaign/presentation/screens/campaigns_screen.dart';
 import '../../../chat/application/providers/chat_provider.dart';
 import '../../../chat/application/providers/chats_provider.dart';
 import '../../../chat/application/call_coordinator.dart';
@@ -30,9 +31,9 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
   bool _callOpen = false;
   final pages = const [
     HomeScreen(),
+    CampaignsScreen(),
     FeedScreen(),
     ChatsScreen(),
-    ChallengeScreen(),
     AccountScreen(),
   ];
 
@@ -41,6 +42,9 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
     ref.invalidate(chatProvider);
     ref.invalidate(challengesProvider);
     ref.invalidate(notificationsProvider);
+    // Points and campaign status change when a report is approved.
+    ref.invalidate(campaignsProvider("mine"));
+    ref.invalidate(myPointsProvider);
   }
 
   @override
@@ -110,16 +114,16 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
             label: "Home",
           ),
           const BottomNavigationBarItem(
+            icon: Icon(Icons.forest_rounded),
+            label: "Campaigns",
+          ),
+          const BottomNavigationBarItem(
             icon: Icon(Icons.auto_awesome_rounded),
             label: "Moments",
           ),
           const BottomNavigationBarItem(
             icon: Icon(BrandGlyph.chat),
             label: "Chat",
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(BrandGlyph.challenges),
-            label: "Challenges",
           ),
           BottomNavigationBarItem(
             icon: CountBadge(

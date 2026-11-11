@@ -19,6 +19,9 @@ import '../../../home/presentation/widgets/eco_points_card.dart';
 import '../../application/providers/my_profile_provider.dart';
 import '../../application/providers/profile_provider.dart';
 import 'edit_profile_screen.dart';
+import '../../../campaign/presentation/screens/points_history_screen.dart';
+import '../../../campaign/presentation/screens/verifier_home_screen.dart';
+import '../../../challenge/presentation/screens/challenge_screen.dart';
 import '../../../../core/utils/friendly_error.dart';
 
 class AccountScreen extends ConsumerWidget {
@@ -112,6 +115,51 @@ class AccountScreen extends ConsumerWidget {
                   ),
                 ],
                 const SizedBox(height: 8),
+                if (user.role == "verifier" || user.role == "admin")
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    color: AppColors.eco,
+                    child: ListTile(
+                      leading: const Icon(Icons.verified_user_rounded, color: Colors.white),
+                      title: const Text(
+                        "Field verification",
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+                      ),
+                      subtitle: Text(
+                        "Your assignments and on-site reports",
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.85)),
+                      ),
+                      trailing: const Icon(Icons.chevron_right, color: Colors.white),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const VerifierHomeScreen()),
+                        );
+                      },
+                    ),
+                  ),
+                _ProfileLink(
+                  icon: Icons.stars_rounded,
+                  title: "Eco Points",
+                  subtitle: "Balance and full history",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const PointsHistoryScreen()),
+                    );
+                  },
+                ),
+                _ProfileLink(
+                  icon: BrandGlyph.challenges,
+                  title: "Challenges",
+                  subtitle: "Friendly eco challenges",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ChallengeScreen()),
+                    );
+                  },
+                ),
                 _ProfileLink(
                   icon: BrandGlyph.settings,
                   title: "Settings",

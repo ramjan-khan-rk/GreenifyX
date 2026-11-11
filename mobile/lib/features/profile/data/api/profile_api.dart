@@ -39,7 +39,7 @@ class ProfileApi {
         "name":name,
         "bio":bio,
         "profileImage":profileImage,
-        if (emirate != null) "emirate": emirate,
+        "emirate": ?emirate,
 
       },
 
