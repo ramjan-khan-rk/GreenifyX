@@ -19,6 +19,7 @@ import challengeRoutes from "./routes/challengeRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 dotenv.config();
 assertJwtSecret();
@@ -44,6 +45,7 @@ app.use("/api/challenges", challengeRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.send("GreenifyX API Running...");

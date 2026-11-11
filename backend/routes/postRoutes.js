@@ -4,6 +4,7 @@ import {
   getPosts,
   toggleLike,
   verifyPost,
+  reportPost,
 } from "../controllers/postController.js";
 
 import upload from "../middleware/uploadMiddleware.js";
@@ -33,5 +34,6 @@ router.get("/", protect, getPosts);
 
 router.put("/:id/like", protect, toggleLike);
 router.put("/:id/verify", protect, verifyPost);
+router.post("/:id/report", protect, reportPost);
 
 export default router;

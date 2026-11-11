@@ -61,6 +61,33 @@ const postSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    reports: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        reason: { type: String, default: "", maxlength: 200 },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+
+    isHidden: {
+      type: Boolean,
+      default: false,
+    },
+
+    moderatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    moderatedAt: {
+      type: Date,
+    },
+
+    isDemo: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

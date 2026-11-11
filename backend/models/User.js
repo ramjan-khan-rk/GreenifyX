@@ -114,6 +114,42 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    emirate: {
+      type: String,
+      enum: [
+        "Abu Dhabi",
+        "Dubai",
+        "Sharjah",
+        "Ajman",
+        "Umm Al Quwain",
+        "Ras Al Khaimah",
+        "Fujairah",
+      ],
+    },
+
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+
+    isSuspended: {
+      type: Boolean,
+      default: false,
+    },
+
+    suspendedReason: {
+      type: String,
+      default: "",
+      maxlength: 200,
+    },
+
+    // Marks records created by scripts/seedDemo.js so they can be cleared.
+    isDemo: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

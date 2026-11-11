@@ -120,6 +120,7 @@ export const getPosts = async (req, res) => {
       user: {
         $in: [...user.friends, req.user._id],
       },
+      isHidden: { $ne: true },
     };
 
     const [posts, total] = await Promise.all([
@@ -168,6 +169,32 @@ export const getPosts = async (req, res) => {
     });
   } catch (error) {
     return sendServerError(res, "Unable to load posts");
+  }
+};
+
+const REPORT_REASONS = new Set(["Spam", "Inappropriate", "Not an eco action", "Misleading", "Other"]);
+
+// REPORT POST
+export const reportPost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post || post.isHidden) {
+      return res.status(404).json({ success: false, message: "Post not found" });
+    }
+    if (String(post.user) === String(req.user._id)) {
+      return res.status(400).json({ success: false, message: "You cannot report your own post" });
+    }
+
+    const reason = REPORT_REASONS.has(req.body.reason) ? req.body.reason : "Other";
+    const already = (post.reports || []).some((r) => String(r.user) === String(req.user._id));
+    if (!already) {
+      post.reports.push({ user: req.user._id, reason });
+      await post.save();
+    }
+
+    res.json({ success: true, message: "Thanks, our team will review this post." });
+  } catch (error) {
+    return sendServerError(res, "Unable to report post");
   }
 };
 
