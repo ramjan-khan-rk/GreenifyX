@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="GreenifyX Admin — community, impact and moderation dashboard.">
+  <meta name="theme-color" content="#2B2440">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <title>GreenifyX Admin</title>
+  <style>
+    body { margin: 0; background: #FFF6EF; }
+    #boot { position: fixed; inset: 0; display: grid; place-items: center;
+            font-family: system-ui, sans-serif; color: #2B2440; }
+    #boot span { width: 34px; height: 34px; border-radius: 50%;
+                 border: 3px solid #FFE8DC; border-top-color: #E36A4A;
+                 animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="boot"><span></span></div>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var el = document.getElementById('boot'); if (el) el.remove();
+    });
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
