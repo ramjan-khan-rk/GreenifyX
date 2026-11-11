@@ -8,6 +8,7 @@ import '../../../../core/widgets/app_status.dart';
 import '../../application/campaign_providers.dart';
 import '../widgets/campaign_visuals.dart';
 import 'campaign_detail_screen.dart';
+import '../../../map/eco_map_screen.dart';
 
 class CampaignsScreen extends ConsumerWidget {
   const CampaignsScreen({super.key});
@@ -26,6 +27,13 @@ class CampaignsScreen extends ConsumerWidget {
               Text("Verified environmental action across the UAE", style: AppTextStyles.tagline),
             ],
           ),
+          actions: [
+            IconButton(
+              tooltip: "Smart Eco Map",
+              icon: const Icon(Icons.map_rounded),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EcoMapScreen())),
+            ),
+          ],
           bottom: const TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.subtitle,

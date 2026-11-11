@@ -17,6 +17,7 @@ const navItems = [
   NavItem('/campaigns', 'Campaigns', Icons.forest_rounded),
   NavItem('/verification', 'Verification', Icons.fact_check_rounded),
   NavItem('/issues', 'Report & Restore', Icons.report_gmailerrorred_rounded),
+  NavItem('/places', 'Eco places', Icons.place_rounded),
   NavItem('/impact', 'Impact', Icons.eco_rounded),
   NavItem('/points', 'Eco Points', Icons.account_balance_wallet_rounded),
   NavItem('/users', 'Users', Icons.people_alt_rounded),
@@ -115,19 +116,26 @@ class _Sidebar extends StatelessWidget {
                   style: TextStyle(color: Colors.white.withValues(alpha: 0.55), fontSize: 12)),
             ),
             const SizedBox(height: 28),
-            for (final item in navItems)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: _NavTile(
-                  item: item,
-                  active: _active(item.path),
-                  onTap: () {
-                    if (closeOnTap) Navigator.of(context).pop();
-                    context.go(item.path);
-                  },
-                ),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  for (final item in navItems)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: _NavTile(
+                        item: item,
+                        active: _active(item.path),
+                        onTap: () {
+                          if (closeOnTap) Navigator.of(context).pop();
+                          context.go(item.path);
+                        },
+                      ),
+                    ),
+                ],
               ),
-            const Spacer(),
+            ),
+            const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(

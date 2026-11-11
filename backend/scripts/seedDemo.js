@@ -15,6 +15,7 @@ import Campaign from "../models/Campaign.js";
 import VerificationReport from "../models/VerificationReport.js";
 import PointsTransaction from "../models/PointsTransaction.js";
 import EnvironmentalReport from "../models/EnvironmentalReport.js";
+import EcoPlace from "../models/EcoPlace.js";
 import { evaluateEvidence } from "../utils/geo.js";
 import { creditPoints } from "../utils/ledger.js";
 
@@ -337,6 +338,23 @@ const seedCampaigns = async ({ users, admin, userHash, now }) => {
   return `${campaigns.length} campaigns, 2 field verifiers, ${reports} verification reports (incl. tree survival checks), ${credited} campaign Eco Points credited`;
 };
 
+// [name, type, emirate, lat, lng, materials, hours, verified]  Demo listings, not real partners.
+const DEMO_PLACES = [
+  ["Al Quoz Recycling Hub", "Recycling Centre", "Dubai", 25.1406, 55.2364, ["Plastic", "Paper", "Cans", "Glass"], "Daily 8am–8pm", true],
+  ["Dubai Marina Refill Point", "Water Refill", "Dubai", 25.0805, 55.1403, ["Water"], "24 hours", false],
+  ["JLT E-waste Box", "E-waste Drop-off", "Dubai", 25.0693, 55.1412, ["Phones", "Batteries", "Cables"], "Mall hours", true],
+  ["Mushrif Park Recycling Bins", "Recycling Bin", "Dubai", 25.2153, 55.4482, ["Plastic", "Cans"], "Park hours", false],
+  ["Mussafah Materials Recovery", "Recycling Centre", "Abu Dhabi", 24.3481, 54.5048, ["Plastic", "Metal", "Cardboard"], "Sun–Thu 7am–4pm", true],
+  ["Corniche Refill Station", "Water Refill", "Abu Dhabi", 24.4763, 54.3415, ["Water"], "24 hours", true],
+  ["Khalidiya E-waste Point", "E-waste Drop-off", "Abu Dhabi", 24.4693, 54.3474, ["Laptops", "Batteries"], "10am–10pm", false],
+  ["Al Majaz Recycling Corner", "Recycling Bin", "Sharjah", 25.3262, 55.3846, ["Plastic", "Paper"], "Park hours", true],
+  ["Sharjah Industrial Recycling Yard", "Recycling Centre", "Sharjah", 25.3105, 55.4316, ["Metal", "Plastic", "Tyres"], "Sat–Thu 8am–5pm", false],
+  ["Ajman Corniche Refill", "Water Refill", "Ajman", 25.4144, 55.4419, ["Water"], "24 hours", false],
+  ["Al Hamra Recycling Point", "Recycling Bin", "Ras Al Khaimah", 25.6936, 55.7800, ["Plastic", "Cans"], "24 hours", true],
+  ["Fujairah City E-waste Box", "E-waste Drop-off", "Fujairah", 25.1210, 56.3270, ["Phones", "Batteries"], "Mall hours", false],
+  ["UAQ Marina Recycling Bins", "Recycling Bin", "Umm Al Quwain", 25.5650, 55.5534, ["Plastic", "Glass"], "24 hours", false],
+];
+
 // [category, emirate, landmark, lat, lng, status, daysAgo, description]
 const ISSUES = [
   ["Illegal Dumping", "Dubai", "Behind Al Quoz industrial area 3", 25.1365, 55.2302, "submitted", 0, "Construction debris and paint cans dumped on open sand."],
@@ -416,6 +434,7 @@ const clear = async () => {
     VerificationReport.deleteMany({ $or: [{ isDemo: true }, { verifier: { $in: ids } }] }),
     Campaign.deleteMany({ isDemo: true }),
     EnvironmentalReport.deleteMany({ $or: [{ isDemo: true }, { reporter: { $in: ids } }] }),
+    EcoPlace.deleteMany({ isDemo: true }),
     PointsTransaction.deleteMany({ $or: [{ isDemo: true }, { user: { $in: ids } }] }),
   ]);
   // Real users who joined a demo campaign are simply detached by the delete above.
@@ -435,7 +454,7 @@ const clear = async () => {
     `Cleared demo data: ${users.deletedCount} users, ${results[3].deletedCount} posts, ` +
       `${results[2].deletedCount} challenges, ${results[0].deletedCount} comments, ` +
       `${extra[1].deletedCount} campaigns, ${extra[0].deletedCount} verification reports, ` +
-      `${extra[2].deletedCount} environmental reports, ${extra[3].deletedCount} ledger entries.`
+      `${extra[2].deletedCount} environmental reports, ${extra[3].deletedCount} eco places, ${extra[4].deletedCount} ledger entries.`
   );
 };
 
@@ -576,11 +595,27 @@ const create = async () => {
 
   const campaignSummary = await seedCampaigns({ users, admin, userHash, now });
   const issueSummary = await seedIssues({ users, admin, now });
+  const places = await EcoPlace.insertMany(
+    DEMO_PLACES.map(([name, type, emirate, lat, lng, materials, hours, verified]) => ({
+      name,
+      type,
+      emirate,
+      location: { lat, lng },
+      acceptedMaterials: materials,
+      hours,
+      verified,
+      source: verified ? "Partner confirmed (demo)" : "Community listed (demo)",
+      address: "",
+      createdBy: admin._id,
+      isDemo: true,
+    }))
+  );
 
   console.log("Demo data ready:");
   console.log(`  ${users.length} users across all 7 emirates, ${savedPosts.length} posts, ${challenges.length} challenges, ${comments.length} comments`);
   console.log(`  ${campaignSummary}`);
   console.log(`  ${issueSummary}`);
+  console.log(`  ${places.length} eco places on the Smart Eco Map`);
   console.log(`  Admin dashboard login: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
   console.log(`  Field verifier login: verifier@greenifyx.demo / ${DEMO_PASSWORD}`);
   console.log(`  Any demo user, e.g. ${users[0].email} / ${DEMO_PASSWORD}`);

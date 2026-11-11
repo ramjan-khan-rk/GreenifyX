@@ -24,6 +24,7 @@ import {
   reversePoints,
 } from "../controllers/adminCampaignController.js";
 import { adminListEnvReports, adminUpdateEnvReport } from "../controllers/envReportController.js";
+import { adminListPlaces, adminCreatePlace, adminUpdatePlace } from "../controllers/mapController.js";
 
 const router = express.Router();
 
@@ -50,5 +51,8 @@ router.get("/points", listTransactions);
 router.post("/points/:id/reverse", reversePoints);
 router.get("/env-reports", adminListEnvReports);
 router.patch("/env-reports/:id/status", adminUpdateEnvReport);
+router.get("/places", adminListPlaces);
+router.post("/places", adminCreatePlace);
+router.patch("/places/:id", adminUpdatePlace);
 
 export default router;

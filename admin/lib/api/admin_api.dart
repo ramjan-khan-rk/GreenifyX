@@ -199,6 +199,19 @@ class AdminApi {
           () => _dio.patch('/admin/env-reports/$id/status', data: {'status': status, 'note': note, 'forwardedTo': forwardedTo})))['report']
       as Map);
 
+  // ---- Eco places (Smart Eco Map) ----
+
+  Future<List<Json>> places() async {
+    final data = await _send(() => _dio.get('/admin/places'));
+    return List<Json>.from((data['places'] as List? ?? const []).map((e) => Json.from(e as Map)));
+  }
+
+  Future<Json> createPlace(Json body) async =>
+      Json.from((await _send(() => _dio.post('/admin/places', data: body)))['place'] as Map);
+
+  Future<Json> updatePlace(String id, Json body) async =>
+      Json.from((await _send(() => _dio.patch('/admin/places/$id', data: body)))['place'] as Map);
+
   Future<Paged> challenges({String status = '', int page = 1, int limit = 20}) async {
     final data = await _send(() => _dio.get('/admin/challenges', queryParameters: {
           if (status.isNotEmpty) 'status': status,

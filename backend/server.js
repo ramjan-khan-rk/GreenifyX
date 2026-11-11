@@ -23,6 +23,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import campaignRoutes from "./routes/campaignRoutes.js";
 import verifierRoutes from "./routes/verifierRoutes.js";
 import envReportRoutes from "./routes/envReportRoutes.js";
+import mapRoutes from "./routes/mapRoutes.js";
 
 dotenv.config();
 assertJwtSecret();
@@ -52,6 +53,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/campaigns", campaignRoutes);
 app.use("/api/verifier", verifierRoutes);
 app.use("/api/env-reports", envReportRoutes);
+app.use("/api/map", mapRoutes);
 
 app.get("/", (req, res) => {
   res.send("GreenifyX API Running...");
