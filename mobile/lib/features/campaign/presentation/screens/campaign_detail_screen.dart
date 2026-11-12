@@ -112,7 +112,16 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
                       Text(c.title,
                           style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800, height: 1.15)),
                       const SizedBox(height: 4),
-                      Text("by ${c.organiserName}", style: TextStyle(color: Colors.white.withValues(alpha: 0.85))),
+                      Row(children: [
+                        Flexible(
+                          child: Text("by ${c.organizationName.isNotEmpty ? c.organizationName : c.organiserName}",
+                              style: TextStyle(color: Colors.white.withValues(alpha: 0.85))),
+                        ),
+                        if (c.organizationVerified) ...[
+                          const SizedBox(width: 6),
+                          const Icon(Icons.verified_rounded, size: 16, color: Colors.white),
+                        ],
+                      ]),
                     ],
                   ),
                 ),

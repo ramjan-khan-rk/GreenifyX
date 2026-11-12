@@ -24,6 +24,7 @@ import '../../../campaign/presentation/screens/verifier_home_screen.dart';
 import '../../../challenge/presentation/screens/challenge_screen.dart';
 import '../../../issues/presentation/issues_hub_screen.dart';
 import '../../../map/eco_map_screen.dart';
+import '../../../orgs/teams_screen.dart';
 import '../../../../core/utils/friendly_error.dart';
 
 class AccountScreen extends ConsumerWidget {
@@ -150,6 +151,14 @@ class AccountScreen extends ConsumerWidget {
                       context,
                       MaterialPageRoute(builder: (_) => const PointsHistoryScreen()),
                     );
+                  },
+                ),
+                _ProfileLink(
+                  icon: Icons.groups_rounded,
+                  title: "Teams",
+                  subtitle: "Your company, school or community impact",
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const TeamsScreen()));
                   },
                 ),
                 _ProfileLink(
