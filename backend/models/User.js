@@ -170,6 +170,14 @@ const userSchema = new mongoose.Schema(
       setAt: { type: Date },
     },
 
+    // Carbon footprint questionnaire and result (kg CO2e / year).
+    carbon: {
+      answers: { type: mongoose.Schema.Types.Mixed, default: undefined },
+      baselineKg: { type: Number },
+      targetKg: { type: Number },
+      updatedAt: { type: Date },
+    },
+
     // Topics picked by the member (boost the For you feed).
     interests: [{ type: String, trim: true, maxlength: 40 }],
 

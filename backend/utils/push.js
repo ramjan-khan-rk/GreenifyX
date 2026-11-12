@@ -14,6 +14,7 @@ const PREF_FOR_TYPE = {
   like: "social",
   comment: "social",
   tag: "social",
+  listing: "social",
   challenge: "social",
   challenge_accept: "social",
   challenge_reject: "social",

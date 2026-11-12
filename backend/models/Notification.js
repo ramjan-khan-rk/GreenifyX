@@ -32,6 +32,7 @@ const notificationSchema = new mongoose.Schema(
         "call",
         "reward",
         "tag",
+        "listing",
         "pickup",
         "event",
       ],

@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import { emitToUser, isUserOnline } from "../socket/socket.js";
 import Notification from "../models/Notification.js";
 import { assertCanMessage } from "../utils/friendOps.js";
+import { marketplaceCanMessage } from "./marketController.js";
 import { sendServerError } from "../utils/httpError.js";
 import { parsePagination } from "../utils/pagination.js";
 
@@ -11,7 +12,10 @@ const loadPair = async (senderId, receiverId) => {
     User.findById(senderId),
     User.findById(receiverId),
   ]);
-  return { sender, receiver, gate: assertCanMessage(sender, receiver) };
+  let gate = assertCanMessage(sender, receiver);
+  // Swap & Share: a seller and someone interested in their item may chat without being friends.
+  if (!gate.ok && gate.reason === "not_friends" && (await marketplaceCanMessage(senderId, receiverId))) gate = { ok: true };
+  return { sender, receiver, gate };
 };
 
 const rejectGate = (res, gate) => {
