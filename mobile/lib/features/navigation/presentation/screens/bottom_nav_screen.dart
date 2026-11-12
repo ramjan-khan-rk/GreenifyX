@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/socket_service.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/brand_icons.dart';
 import '../../../../core/widgets/count_badge.dart';
 import '../../../challenge/application/providers/challenge_provider.dart';
 import '../../../campaign/application/campaign_providers.dart';
@@ -122,48 +121,53 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
           orElse: () => 0,
         );
 
+    final unreadChats = ref.watch(chatsProvider).maybeWhen(
+          data: (list) => list.where((c) => c.unread).length,
+          orElse: () => 0,
+        );
+
     return Scaffold(
-      body: pages[currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        selectedItemColor: AppColors.joy,
-        unselectedItemColor: AppColors.ink,
-        onTap: (index) {
-          // Feed soundtracks stop when you leave the feed.
-          if (index != currentIndex) FeedAudio.instance.stop();
-          setState(() {
-            currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-            icon: CountBadge(
-              count: unreadNotes,
-              child: const Icon(BrandGlyph.home),
+      // Keeps each tab's scroll position and state when switching.
+      body: IndexedStack(index: currentIndex, children: pages),
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(
+          boxShadow: [BoxShadow(color: Color(0x14000000), blurRadius: 18, offset: Offset(0, -4))],
+        ),
+        child: NavigationBar(
+          selectedIndex: currentIndex,
+          onDestinationSelected: (index) {
+            // Feed soundtracks stop when you leave the feed.
+            if (index != currentIndex) FeedAudio.instance.stop();
+            setState(() => currentIndex = index);
+          },
+          destinations: [
+            NavigationDestination(
+              icon: CountBadge(count: unreadNotes, child: const Icon(Icons.home_outlined)),
+              selectedIcon: CountBadge(count: unreadNotes, child: const Icon(Icons.home_rounded)),
+              label: "Home",
             ),
-            label: "Home",
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.forest_rounded),
-            label: "Campaigns",
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.auto_awesome_rounded),
-            label: "Moments",
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(BrandGlyph.chat),
-            label: "Chat",
-          ),
-          BottomNavigationBarItem(
-            icon: CountBadge(
-              count: pendingFriends,
-              child: const Icon(BrandGlyph.profile),
+            const NavigationDestination(
+              icon: Icon(Icons.forest_outlined),
+              selectedIcon: Icon(Icons.forest_rounded),
+              label: "Campaigns",
             ),
-            label: "Profile",
-          ),
-        ],
+            const NavigationDestination(
+              icon: Icon(Icons.auto_awesome_outlined),
+              selectedIcon: Icon(Icons.auto_awesome_rounded),
+              label: "Moments",
+            ),
+            NavigationDestination(
+              icon: CountBadge(count: unreadChats, child: const Icon(Icons.chat_bubble_outline_rounded)),
+              selectedIcon: CountBadge(count: unreadChats, child: const Icon(Icons.chat_bubble_rounded)),
+              label: "Chat",
+            ),
+            NavigationDestination(
+              icon: CountBadge(count: pendingFriends, child: const Icon(Icons.person_outline_rounded)),
+              selectedIcon: CountBadge(count: pendingFriends, child: const Icon(Icons.person_rounded)),
+              label: "Profile",
+            ),
+          ],
+        ),
       ),
     );
   }

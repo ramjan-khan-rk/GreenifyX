@@ -18,7 +18,7 @@ import '../../../home/presentation/screens/leaderboard_screen.dart';
 import '../../../home/presentation/widgets/eco_points_card.dart';
 import '../../application/providers/my_profile_provider.dart';
 import '../../application/providers/profile_provider.dart';
-import 'edit_profile_screen.dart';
+import '../../../settings/settings_screen.dart';
 import '../../../campaign/presentation/screens/points_history_screen.dart';
 import '../../../campaign/presentation/screens/verifier_home_screen.dart';
 import '../../../challenge/presentation/screens/challenge_screen.dart';
@@ -202,7 +202,7 @@ class AccountScreen extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const EditProfileScreen(),
+                        builder: (_) => const SettingsScreen(),
                       ),
                     );
                   },

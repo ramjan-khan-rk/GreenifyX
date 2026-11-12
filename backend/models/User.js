@@ -146,6 +146,38 @@ const userSchema = new mongoose.Schema(
       maxlength: 200,
     },
 
+    notificationPrefs: {
+      messages: { type: Boolean, default: true },
+      calls: { type: Boolean, default: true },
+      social: { type: Boolean, default: true },
+      campaigns: { type: Boolean, default: true },
+      points: { type: Boolean, default: true },
+    },
+
+    // Push notification device tokens (Firebase Cloud Messaging).
+    pushTokens: [
+      {
+        token: { type: String },
+        platform: { type: String, default: "android" },
+        updatedAt: { type: Date, default: Date.now },
+        _id: false,
+      },
+    ],
+
+    language: {
+      type: String,
+      enum: ["en", "ar"],
+      default: "en",
+    },
+
+    lastSeenAt: {
+      type: Date,
+    },
+
+    deletedAt: {
+      type: Date,
+    },
+
     // Marks records created by scripts/seedDemo.js so they can be cleared.
     isDemo: {
       type: Boolean,
