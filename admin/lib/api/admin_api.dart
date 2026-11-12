@@ -223,6 +223,26 @@ class AdminApi {
     return (text: data['text']?.toString() ?? '', mode: data['mode']?.toString() ?? 'template');
   }
 
+  // ---- Organisations ----
+
+  Future<({Paged page, Map<String, int> counts})> orgs({String status = '', int page = 1}) async {
+    final data = await _send(() => _dio.get('/admin/orgs', queryParameters: {
+          if (status.isNotEmpty) 'status': status,
+          'page': page,
+        }));
+    final counts = <String, int>{};
+    (data['counts'] as Map? ?? const {}).forEach((k, v) => counts[k.toString()] = (v as num).toInt());
+    return (page: _paged(data, 'organizations'), counts: counts);
+  }
+
+  Future<Json> setOrgStatus(String id, String status, {String note = ''}) async => Json.from(
+      (await _send(() => _dio.patch('/admin/orgs/$id/status', data: {'status': status, 'note': note})))['organization'] as Map);
+
+  Future<List<Json>> orgOptions() async {
+    final data = await _send(() => _dio.get('/admin/orgs/options'));
+    return List<Json>.from((data['organizations'] as List? ?? const []).map((e) => Json.from(e as Map)));
+  }
+
   Future<Paged> challenges({String status = '', int page = 1, int limit = 20}) async {
     final data = await _send(() => _dio.get('/admin/challenges', queryParameters: {
           if (status.isNotEmpty) 'status': status,

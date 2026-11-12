@@ -4,6 +4,7 @@ import VerificationReport from "../models/VerificationReport.js";
 import PointsTransaction from "../models/PointsTransaction.js";
 import User from "../models/User.js";
 import Notification from "../models/Notification.js";
+import Organization from "../models/Organization.js";
 import { emitToUser } from "../socket/socket.js";
 import { sendServerError } from "../utils/httpError.js";
 import { parsePagination } from "../utils/pagination.js";
@@ -20,6 +21,7 @@ const adminCampaignView = (c) => ({
   description: c.description,
   category: c.category,
   organiserName: c.organiserName,
+  organization: c.organization && c.organization.name !== undefined ? { _id: c.organization._id, name: c.organization.name } : c.organization || null,
   emirate: c.emirate,
   locationName: c.locationName,
   location: c.location,
@@ -46,6 +48,20 @@ const adminCampaignView = (c) => ({
   ),
   createdAt: c.createdAt,
 });
+
+/** Links a campaign to a verified organisation, or clears the link with "". */
+const applyOrganization = async (target, body) => {
+  if (body.organization === undefined) return null;
+  if (!body.organization) {
+    target.organization = null;
+    return null;
+  }
+  if (!isId(body.organization)) return "Invalid organisation";
+  const org = await Organization.findOne({ _id: body.organization, status: "verified" }).select("_id");
+  if (!org) return "Only verified organisations can run or sponsor campaigns";
+  target.organization = org._id;
+  return null;
+};
 
 /** Validates and copies allowed fields from body onto target. Returns an error string or null. */
 const applyCampaignFields = (target, body, { creating }) => {
@@ -117,7 +133,12 @@ export const listCampaignsAdmin = async (req, res) => {
     if (q) filter.title = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
 
     const [items, total, pending] = await Promise.all([
-      Campaign.find(filter).sort({ startDate: -1 }).skip(skip).limit(limit).populate("verifiers", "name profileImage"),
+      Campaign.find(filter)
+        .sort({ startDate: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("verifiers", "name profileImage")
+        .populate("organization", "name"),
       Campaign.countDocuments(filter),
       VerificationReport.aggregate([{ $match: { status: "pending" } }, { $group: { _id: "$campaign", n: { $sum: 1 } } }]),
     ]);
@@ -138,9 +159,10 @@ export const listCampaignsAdmin = async (req, res) => {
 export const createCampaign = async (req, res) => {
   try {
     const c = new Campaign({ createdBy: req.user._id, status: "draft" });
-    const err = applyCampaignFields(c, req.body, { creating: true });
+    const err = applyCampaignFields(c, req.body, { creating: true }) || (await applyOrganization(c, req.body));
     if (err) return bad(res, err);
     await c.save();
+    await c.populate("organization", "name");
     res.status(201).json({ success: true, campaign: adminCampaignView(c) });
   } catch (error) {
     return sendServerError(res, "Unable to create campaign");
@@ -153,13 +175,13 @@ export const updateCampaign = async (req, res) => {
     if (!isId(req.params.id)) return bad(res, "Invalid id");
     const c = await Campaign.findById(req.params.id);
     if (!c) return res.status(404).json({ success: false, message: "Campaign not found" });
-    const err = applyCampaignFields(c, req.body, { creating: false });
+    const err = applyCampaignFields(c, req.body, { creating: false }) || (await applyOrganization(c, req.body));
     if (err) return bad(res, err);
     if (c.status === "active" && c.verifiers.length === 0) {
       return bad(res, "Assign at least one field verifier before publishing");
     }
     await c.save();
-    await c.populate("verifiers", "name profileImage");
+    await c.populate([{ path: "verifiers", select: "name profileImage" }, { path: "organization", select: "name" }]);
     res.json({ success: true, campaign: adminCampaignView(c) });
   } catch (error) {
     return sendServerError(res, "Unable to update campaign");

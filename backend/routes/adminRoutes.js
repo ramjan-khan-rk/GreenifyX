@@ -26,6 +26,7 @@ import {
 import { adminListEnvReports, adminUpdateEnvReport } from "../controllers/envReportController.js";
 import { adminListPlaces, adminCreatePlace, adminUpdatePlace } from "../controllers/mapController.js";
 import { insights } from "../controllers/aiInsightsController.js";
+import { adminListOrgs, adminSetOrgStatus, adminOrgOptions } from "../controllers/orgController.js";
 
 const router = express.Router();
 
@@ -56,5 +57,8 @@ router.get("/places", adminListPlaces);
 router.post("/places", adminCreatePlace);
 router.patch("/places/:id", adminUpdatePlace);
 router.post("/ai/insights", insights);
+router.get("/orgs", adminListOrgs);
+router.get("/orgs/options", adminOrgOptions);
+router.patch("/orgs/:id/status", adminSetOrgStatus);
 
 export default router;

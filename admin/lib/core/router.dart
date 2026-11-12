@@ -8,6 +8,7 @@ import '../pages/insights_page.dart';
 import '../pages/issues_page.dart';
 import '../pages/login_page.dart';
 import '../pages/moderation_page.dart';
+import '../pages/orgs_page.dart';
 import '../pages/overview_page.dart';
 import '../pages/places_page.dart';
 import '../pages/points_page.dart';
@@ -43,6 +44,7 @@ final GoRouter adminRouter = GoRouter(
         GoRoute(path: '/places', pageBuilder: (context, state) => _page(state, const PlacesPage())),
         GoRoute(path: '/insights', pageBuilder: (context, state) => _page(state, const InsightsPage())),
         GoRoute(path: '/impact', pageBuilder: (context, state) => _page(state, const ImpactPage())),
+        GoRoute(path: '/orgs', pageBuilder: (context, state) => _page(state, const OrgsPage())),
         GoRoute(path: '/users', pageBuilder: (context, state) => _page(state, const UsersPage())),
         GoRoute(path: '/moderation', pageBuilder: (context, state) => _page(state, const ModerationPage())),
         GoRoute(path: '/challenges', pageBuilder: (context, state) => _page(state, const ChallengesPage())),

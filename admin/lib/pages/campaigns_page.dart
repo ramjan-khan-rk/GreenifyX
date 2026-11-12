@@ -161,7 +161,16 @@ class _CampaignCard extends StatelessWidget {
                   Text(c['title'] as String? ?? '',
                       maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                   const SizedBox(height: 4),
-                  Text(c['organiserName'] as String? ?? '', style: const TextStyle(color: Brand.muted, fontSize: 13)),
+                  Row(children: [
+                    Flexible(
+                      child: Text(c['organiserName'] as String? ?? '',
+                          overflow: TextOverflow.ellipsis, style: const TextStyle(color: Brand.muted, fontSize: 13)),
+                    ),
+                    if (c['organization'] is Map) ...[
+                      const SizedBox(width: 6),
+                      const Tooltip(message: 'Verified organisation', child: Icon(Icons.verified_rounded, size: 15, color: Brand.eco)),
+                    ],
+                  ]),
                   const SizedBox(height: 10),
                   _IconLine(Icons.place_outlined, '${c['locationName']}'),
                   const SizedBox(height: 4),
@@ -608,6 +617,16 @@ class _CampaignEditorState extends State<CampaignEditor> {
   late final _points = TextEditingController(text: (_c['pointsPerParticipant'] ?? 50).toString());
   late String _category = _c['category'] as String? ?? campaignCategories.first;
   late String _emirate = _c['emirate'] as String? ?? 'Dubai';
+  late String _orgId = (_c['organization'] is Map ? (_c['organization'] as Map)['_id'] as String? : null) ?? '';
+  List<Json> _orgs = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    Session.instance.api.orgOptions().then((v) {
+      if (mounted) setState(() => _orgs = v);
+    }).catchError((_) {});
+  }
   late DateTimeRange? _dates = _c['startDate'] == null
       ? null
       : DateTimeRange(
@@ -670,6 +689,7 @@ class _CampaignEditorState extends State<CampaignEditor> {
       'targetOutput': int.tryParse(_output.text.trim()) ?? 0,
       'outputUnit': _unit.text.trim(),
       'pointsPerParticipant': int.tryParse(_points.text.trim()) ?? 0,
+      'organization': _orgId,
     };
     try {
       final api = Session.instance.api;
@@ -762,7 +782,22 @@ class _CampaignEditorState extends State<CampaignEditor> {
                         onChanged: (v) => setState(() => _category = v ?? _category),
                       ),
                       const SizedBox(height: 12),
-                      field(_organiser, 'Organising organisation', validator: _required),
+                      field(_organiser, 'Organiser name (shown to residents)', validator: _required),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        // Rebuild once the options arrive so an existing link is pre-selected.
+                        key: ValueKey('org-${_orgs.length}'),
+                        initialValue: _orgs.any((o) => o['_id'] == _orgId) ? _orgId : '',
+                        decoration: const InputDecoration(
+                          labelText: 'Verified organisation (optional)',
+                          helperText: 'Credits this campaign to the organisation\'s team dashboard',
+                        ),
+                        items: [
+                          const DropdownMenuItem(value: '', child: Text('None')),
+                          for (final o in _orgs) DropdownMenuItem(value: o['_id'] as String, child: Text('${o['name']} · ${o['type']}')),
+                        ],
+                        onChanged: (v) => setState(() => _orgId = v ?? ''),
+                      ),
                       const SizedBox(height: 12),
                       field(_description, 'Description', lines: 3),
                       section('Approved location'),

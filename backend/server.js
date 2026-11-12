@@ -26,6 +26,7 @@ import envReportRoutes from "./routes/envReportRoutes.js";
 import mapRoutes from "./routes/mapRoutes.js";
 import assistantRoutes from "./routes/assistantRoutes.js";
 import callRoutes from "./routes/callRoutes.js";
+import orgRoutes from "./routes/orgRoutes.js";
 
 dotenv.config();
 assertJwtSecret();
@@ -58,6 +59,7 @@ app.use("/api/env-reports", envReportRoutes);
 app.use("/api/map", mapRoutes);
 app.use("/api/assistant", assistantRoutes);
 app.use("/api/calls", callRoutes);
+app.use("/api/orgs", orgRoutes);
 
 app.get("/", (req, res) => {
   res.send("GreenifyX API Running...");

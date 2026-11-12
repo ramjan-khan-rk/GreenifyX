@@ -16,6 +16,8 @@ import VerificationReport from "../models/VerificationReport.js";
 import PointsTransaction from "../models/PointsTransaction.js";
 import EnvironmentalReport from "../models/EnvironmentalReport.js";
 import EcoPlace from "../models/EcoPlace.js";
+import Organization from "../models/Organization.js";
+import { makeJoinCode } from "../controllers/orgController.js";
 import { evaluateEvidence } from "../utils/geo.js";
 import { creditPoints } from "../utils/ledger.js";
 import { repairUserIndexes } from "../utils/repairUserIndexes.js";
@@ -337,6 +339,42 @@ const seedCampaigns = async ({ users, admin, userHash, now }) => {
   return `${campaigns.length} campaigns, 2 field verifiers, ${reports} verification reports (incl. tree survival checks), ${credited} campaign Eco Points credited`;
 };
 
+// Fictional organisations for the demo. [name, type, emirate, status, memberIndexes, campaignTitles]
+const DEMO_ORGS = [
+  ["Emirates Green Volunteers", "NGO", "Abu Dhabi", "verified", [0, 2, 4, 6, 8, 10, 12, 14], ["Eastern Mangroves Planting Day", "Al Wathba Ghaf Belt"]],
+  ["Gulf Horizon Logistics", "Company", "Dubai", "verified", [1, 3, 5, 7, 9, 11], ["Jumeirah Beach Clean-Up"]],
+  ["Al Noor International School", "School", "Sharjah", "verified", [13, 15, 17, 19], ["Ghaf Trees for Sharjah"]],
+  ["Desert Rose University Eco Club", "University", "Ras Al Khaimah", "verified", [16, 18, 20, 22], ["Al Marjan Recycling Drive"]],
+  ["Marina Towers Residents", "Community", "Dubai", "pending", [21, 23], []],
+];
+
+const seedOrgs = async ({ users }) => {
+  let linked = 0;
+  for (const [name, type, emirate, status, idx, campaignTitles] of DEMO_ORGS) {
+    const members = idx.filter((i) => users[i]).map((i, k) => ({ user: users[i]._id, role: k === 0 ? "owner" : k === 1 ? "manager" : "member" }));
+    let code = makeJoinCode();
+    while (await Organization.exists({ joinCode: code })) code = makeJoinCode();
+    const org = await Organization.create({
+      name,
+      type,
+      emirate,
+      description: `${name} takes part in verified environmental action across the UAE.`,
+      registrationRef: status === "verified" ? `DEMO-REG-${code.slice(0, 4)}` : "",
+      status,
+      verifiedAt: status === "verified" ? new Date() : undefined,
+      joinCode: code,
+      members,
+      createdBy: members[0]?.user,
+      isDemo: true,
+    });
+    if (campaignTitles.length) {
+      const r = await Campaign.updateMany({ title: { $in: campaignTitles }, isDemo: true }, { $set: { organization: org._id } });
+      linked += r.modifiedCount;
+    }
+  }
+  return `${DEMO_ORGS.length} organisations (${DEMO_ORGS.filter((o) => o[3] === "verified").length} verified), ${linked} campaigns linked`;
+};
+
 // [name, type, emirate, lat, lng, materials, hours, verified]  Demo listings, not real partners.
 const DEMO_PLACES = [
   ["Al Quoz Recycling Hub", "Recycling Centre", "Dubai", 25.1406, 55.2364, ["Plastic", "Paper", "Cans", "Glass"], "Daily 8am–8pm", true],
@@ -434,6 +472,7 @@ const clear = async () => {
     Campaign.deleteMany({ isDemo: true }),
     EnvironmentalReport.deleteMany({ $or: [{ isDemo: true }, { reporter: { $in: ids } }] }),
     EcoPlace.deleteMany({ isDemo: true }),
+    Organization.deleteMany({ isDemo: true }),
     PointsTransaction.deleteMany({ $or: [{ isDemo: true }, { user: { $in: ids } }] }),
   ]);
   // Real users who joined a demo campaign are simply detached by the delete above.
@@ -453,7 +492,8 @@ const clear = async () => {
     `Cleared demo data: ${users.deletedCount} users, ${results[3].deletedCount} posts, ` +
       `${results[2].deletedCount} challenges, ${results[0].deletedCount} comments, ` +
       `${extra[1].deletedCount} campaigns, ${extra[0].deletedCount} verification reports, ` +
-      `${extra[2].deletedCount} environmental reports, ${extra[3].deletedCount} eco places, ${extra[4].deletedCount} ledger entries.`
+      `${extra[2].deletedCount} environmental reports, ${extra[3].deletedCount} eco places, ` +
+      `${extra[4].deletedCount} organisations, ${extra[5].deletedCount} ledger entries.`
   );
 };
 
@@ -591,6 +631,7 @@ const create = async () => {
 
   const campaignSummary = await seedCampaigns({ users, admin, userHash, now });
   const issueSummary = await seedIssues({ users, admin, now });
+  const orgSummary = await seedOrgs({ users, now });
   const places = await EcoPlace.insertMany(
     DEMO_PLACES.map(([name, type, emirate, lat, lng, materials, hours, verified]) => ({
       name,
@@ -611,6 +652,7 @@ const create = async () => {
   console.log(`  ${users.length} users across all 7 emirates, ${savedPosts.length} posts, ${challenges.length} challenges, ${comments.length} comments`);
   console.log(`  ${campaignSummary}`);
   console.log(`  ${issueSummary}`);
+  console.log(`  ${orgSummary}`);
   console.log(`  ${places.length} eco places on the Smart Eco Map`);
   console.log("  Admin access: create your own account with  npm run create-admin -- --email you@company.com");
   console.log(`  Field verifier login: verifier@greenifyx.demo / ${DEMO_PASSWORD}`);
