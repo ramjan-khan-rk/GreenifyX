@@ -59,6 +59,7 @@ class AccountScreen extends ConsumerWidget {
               children: [
                 Center(
                   child: UserAvatar(
+                    name: user.name,
                     imageUrl: user.profileImage,
                     radius: 52,
                     semanticLabel: "${user.name} photo",

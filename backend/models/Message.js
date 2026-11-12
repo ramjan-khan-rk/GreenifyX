@@ -22,13 +22,26 @@ const messageSchema = new mongoose.Schema(
 
     messageType: {
       type: String,
-      enum: ["text", "image"],
+      enum: ["text", "image", "audio"],
       default: "text",
     },
 
     image: {
       type: String,
       default: "",
+    },
+
+    // Voice note URL and its length in seconds.
+    audio: {
+      type: String,
+      default: "",
+    },
+
+    durationSec: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 300,
     },
 
     isRead: {

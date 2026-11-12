@@ -65,6 +65,8 @@ export const getMessages = async (req, res) => {
 export const sendMessage = async (req, res) => {
   try {
     const { receiverId, text, image } = req.body;
+    const audio = typeof req.body.audio === "string" && /^https:\/\//.test(req.body.audio) ? req.body.audio : "";
+    const durationSec = Math.max(0, Math.min(300, Math.round(Number(req.body.durationSec) || 0)));
 
     if (!receiverId) {
       return res.status(400).json({
@@ -73,7 +75,7 @@ export const sendMessage = async (req, res) => {
       });
     }
 
-    if ((!text || text.trim() === "") && !image) {
+    if ((!text || text.trim() === "") && !image && !audio) {
       return res.status(400).json({
         success: false,
         message: "Message cannot be empty.",
@@ -88,7 +90,9 @@ export const sendMessage = async (req, res) => {
       receiver: receiverId,
       text: text?.trim() ?? "",
       image: image ?? "",
-      messageType: image ? "image" : "text",
+      audio,
+      durationSec: audio ? durationSec : 0,
+      messageType: audio ? "audio" : image ? "image" : "text",
     });
 
     const populatedMessage = await Message.findById(message._id)
@@ -100,7 +104,11 @@ export const sendMessage = async (req, res) => {
       sender: req.user._id,
       type: "message",
       title: "New Message",
-      message: `${sender.name} sent you a message.`,
+      message: audio
+        ? `${sender.name} sent you a voice note.`
+        : image
+          ? `${sender.name} sent you a photo.`
+          : `${sender.name}: ${String(text || "").trim().slice(0, 80)}`,
       referenceId: message._id,
     });
 
@@ -172,7 +180,9 @@ export const getChatList = async (req, res) => {
 
       finalChats.push({
         user: other,
-        lastMessage: msg.text,
+        lastMessage:
+          msg.messageType === "audio" ? "🎤 Voice note" : msg.messageType === "image" ? "📷 Photo" : msg.text,
+        lastFromMe: msg.sender._id.toString() === myId.toString(),
         time: msg.createdAt,
         unread:
           !msg.isRead && msg.receiver._id.toString() === myId.toString(),

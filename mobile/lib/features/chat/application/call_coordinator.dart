@@ -48,12 +48,15 @@ class CallCoordinator extends ChangeNotifier {
 
   bool get busy => phase != "idle" && phase != "ended";
 
+  void _onRaw(dynamic raw) {
+    if (raw is Map) unawaited(_onSignal(Map<String, dynamic>.from(raw)));
+  }
+
+  /// Safe to call many times; the socket registry keeps the listener across reconnects.
   void bind() {
     if (_bound) return;
     _bound = true;
-    SocketService.instance.on("call:signal", (raw) {
-      if (raw is Map) unawaited(_onSignal(Map<String, dynamic>.from(raw)));
-    });
+    SocketService.instance.on("call:signal", _onRaw);
   }
 
   Future<void> start({required String userId, required String userName, required bool withVideo}) async {
@@ -67,6 +70,14 @@ class CallCoordinator extends ChangeNotifier {
     phase = "ringing";
     detail = withVideo ? "Starting video call…" : "Calling…";
     notifyListeners();
+
+    bind();
+    if (!await SocketService.instance.ensureConnected()) {
+      phase = "ended";
+      detail = "You're offline. Check your internet and try again.";
+      notifyListeners();
+      return;
+    }
 
     await _ensureMedia();
     if (_local == null) {

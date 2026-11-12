@@ -13,6 +13,8 @@ import '../../../chat/application/providers/chats_provider.dart';
 import '../../../chat/application/call_coordinator.dart';
 import '../../../chat/presentation/screens/call_screen.dart';
 import '../../../chat/presentation/screens/chats_screen.dart';
+import '../../../chat/presentation/screens/chat_screen.dart';
+import '../../../../core/utils/chat_launcher.dart';
 import '../../../feed/presentation/screens/feed_screen.dart';
 import '../../../friends/application/providers/friend_provider.dart';
 import '../../../home/presentation/screens/home_screen.dart';
@@ -37,6 +39,30 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
     AccountScreen(),
   ];
 
+  /// Shows a "Reply" popup for new messages unless that chat is already open.
+  void _onMessagePopup(dynamic raw) {
+    if (!mounted || raw is! Map) return;
+    final sender = raw["sender"];
+    if (sender is! Map) return;
+    final id = sender["_id"]?.toString() ?? "";
+    if (id.isEmpty || ChatScreen.activeUserId == id) return;
+    final name = sender["name"]?.toString() ?? "Friend";
+    final image = sender["profileImage"]?.toString() ?? "";
+    final type = raw["messageType"]?.toString() ?? "text";
+    final preview = type == "audio" ? "🎤 Voice note" : type == "image" ? "📷 Photo" : raw["text"]?.toString() ?? "";
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(SnackBar(
+      duration: const Duration(seconds: 5),
+      content: Text("$name: $preview", maxLines: 2, overflow: TextOverflow.ellipsis),
+      action: SnackBarAction(
+        label: "Reply",
+        textColor: AppColors.sun,
+        onPressed: () => openChat(context, userId: id, name: name, profileImage: image),
+      ),
+    ));
+  }
+
   void _onRealtimeEvent(dynamic _) {
     ref.invalidate(chatsProvider);
     ref.invalidate(chatProvider);
@@ -52,6 +78,7 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
     super.initState();
     final socket = SocketService.instance;
     socket.on("receiveMessage", _onRealtimeEvent);
+    socket.on("receiveMessage", _onMessagePopup);
     socket.on("challengeReceived", _onRealtimeEvent);
     socket.on("challengeAccepted", _onRealtimeEvent);
     socket.on("challengeRejected", _onRealtimeEvent);
@@ -75,12 +102,13 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
   @override
   void dispose() {
     final socket = SocketService.instance;
-    socket.off("receiveMessage");
-    socket.off("challengeReceived");
-    socket.off("challengeAccepted");
-    socket.off("challengeRejected");
-    socket.off("challengeCompleted");
-    socket.off("newNotification");
+    socket.off("receiveMessage", _onRealtimeEvent);
+    socket.off("receiveMessage", _onMessagePopup);
+    socket.off("challengeReceived", _onRealtimeEvent);
+    socket.off("challengeAccepted", _onRealtimeEvent);
+    socket.off("challengeRejected", _onRealtimeEvent);
+    socket.off("challengeCompleted", _onRealtimeEvent);
+    socket.off("newNotification", _onRealtimeEvent);
     CallCoordinator.instance.removeListener(_onIncomingCall);
     super.dispose();
   }
