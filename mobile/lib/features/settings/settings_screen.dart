@@ -15,6 +15,7 @@ import '../profile/presentation/screens/edit_profile_screen.dart';
 import 'legal_screen.dart';
 import 'settings_api.dart';
 import '../../core/i18n/app_locale.dart';
+import '../../core/services/push_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -90,6 +91,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _logout() async {
+    await PushService.instance.unregister();
     await ref.read(profileProvider.notifier).logout();
     await ref.read(authProvider.notifier).logout();
     ref.invalidate(myProfileProvider);

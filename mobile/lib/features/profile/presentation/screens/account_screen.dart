@@ -29,6 +29,7 @@ import '../../../issues/presentation/issues_hub_screen.dart';
 import '../../../map/eco_map_screen.dart';
 import '../../../orgs/teams_screen.dart';
 import '../../../../core/utils/friendly_error.dart';
+import '../../../../core/services/push_service.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -290,7 +291,8 @@ class AccountScreen extends ConsumerWidget {
                       minimumSize: const Size.fromHeight(48),
                     ),
                     onPressed: () async {
-                      await ref.read(profileProvider.notifier).logout();
+                      await PushService.instance.unregister();
+    await ref.read(profileProvider.notifier).logout();
                       await ref.read(authProvider.notifier).logout();
                       ref.invalidate(myProfileProvider);
                       ref.invalidate(friendsProvider);

@@ -21,6 +21,7 @@ import '../../../home/presentation/screens/home_screen.dart';
 import '../../../notifications/application/providers/notification_provider.dart';
 import '../../../profile/presentation/screens/account_screen.dart';
 import '../../../../core/i18n/app_locale.dart';
+import '../../../../core/services/push_service.dart';
 
 class BottomNavScreen extends ConsumerStatefulWidget {
   const BottomNavScreen({super.key});
@@ -88,6 +89,7 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
     final calls = CallCoordinator.instance;
     calls.bind();
     calls.addListener(_onIncomingCall);
+    PushService.instance.register();
   }
 
   void _onIncomingCall() {
