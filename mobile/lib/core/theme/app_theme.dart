@@ -94,34 +94,84 @@ class AppTheme {
       ),
       dividerTheme: const DividerThemeData(color: AppColors.border, thickness: 1, space: 1),
       listTileTheme: const ListTileThemeData(iconColor: AppColors.primary),
+      // Buttons: one consistent, premium shape and rhythm everywhere.
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          minimumSize: const Size(64, 50),
+          disabledBackgroundColor: AppColors.border,
+          disabledForegroundColor: AppColors.subtitle,
+          minimumSize: const Size(64, 52),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           elevation: 0,
-          textStyle: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 15.5),
+          shadowColor: AppColors.primary.withValues(alpha: 0.35),
+          textStyle: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 15.5, letterSpacing: 0.2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size(64, 48),
-          textStyle: GoogleFonts.manrope(fontWeight: FontWeight.w800),
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: AppColors.border,
+          disabledForegroundColor: AppColors.subtitle,
+          minimumSize: const Size(64, 50),
+          padding: const EdgeInsets.symmetric(horizontal: 22),
+          textStyle: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 15, letterSpacing: 0.2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.border),
-          minimumSize: const Size(64, 46),
-          textStyle: GoogleFonts.manrope(fontWeight: FontWeight.w700),
+          foregroundColor: AppColors.ink,
+          side: const BorderSide(color: Color(0xFFE3D6CC), width: 1.4),
+          minimumSize: const Size(64, 50),
+          padding: const EdgeInsets.symmetric(horizontal: 22),
+          textStyle: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 15),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(textStyle: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          textStyle: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 14.5),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(foregroundColor: AppColors.ink, minimumSize: const Size(44, 44)),
+      ),
+      iconTheme: const IconThemeData(color: AppColors.ink, size: 24),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: SegmentedButton.styleFrom(
+          selectedBackgroundColor: AppColors.primary.withValues(alpha: 0.14),
+          selectedForegroundColor: AppColors.primary,
+          side: const BorderSide(color: AppColors.border),
+          textStyle: GoogleFonts.manrope(fontWeight: FontWeight.w700),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? Colors.white : null),
+        trackColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? AppColors.eco : null),
+        trackOutlineColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? AppColors.eco : AppColors.border),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? AppColors.primary : null),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        showDragHandle: true,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        titleTextStyle: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.ink),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
