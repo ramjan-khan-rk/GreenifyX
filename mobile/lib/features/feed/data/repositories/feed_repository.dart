@@ -18,6 +18,11 @@ class FeedRepository {
   await _api.toggleLike(postId);
 }
 
+  Future<bool> toggleSave(String postId) async {
+    final r = await _api.toggleSave(postId);
+    return r.data["saved"] == true;
+  }
+
   Future<void> verifyPost(String postId) async {
     await _api.verifyPost(postId);
   }

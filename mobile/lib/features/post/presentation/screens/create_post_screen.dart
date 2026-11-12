@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -8,6 +9,10 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/deeds.dart';
+import '../../domain/eco_activity.dart';
+import '../../../../core/widgets/user_avatar.dart';
+import '../../../friends/data/repositories/friend_repository.dart';
+import '../../../friends/domain/models/friend_model.dart';
 import '../../domain/looks.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:just_audio/just_audio.dart';
@@ -33,6 +38,87 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   bool submitting = false;
   String lane = deedLanes.first;
   String activity = deeds.first.name;
+  List<EcoActivity> activities = fallbackActivities;
+  String query = "";
+  final List<FriendModel> tagged = [];
+
+  @override
+  void initState() {
+    super.initState();
+    EcoActivityApi.load().then((list) {
+      if (!mounted) return;
+      setState(() {
+        activities = list;
+        final first = list.where((a) => a.lane == lane);
+        if (first.isNotEmpty && !list.any((a) => a.name == activity)) activity = first.first.name;
+      });
+    });
+  }
+
+  Future<void> _pickTags() async {
+    List<FriendModel> friends;
+    try {
+      friends = await FriendRepository().getFriends();
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+      return;
+    }
+    if (!mounted) return;
+    if (friends.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Add friends first to tag them")));
+      return;
+    }
+    final picked = {for (final t in tagged) t.id};
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) => SafeArea(
+          child: SizedBox(
+            height: MediaQuery.of(ctx).size.height * 0.6,
+            child: Column(children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Row(children: [
+                  Icon(Icons.person_add_alt_1_rounded, color: AppColors.joy),
+                  SizedBox(width: 10),
+                  Text("Who was with you?", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                ]),
+              ),
+              Expanded(
+                child: ListView(children: [
+                  for (final f in friends)
+                    CheckboxListTile(
+                      value: picked.contains(f.id),
+                      onChanged: (v) => setSheet(() => v == true ? picked.add(f.id) : picked.remove(f.id)),
+                      secondary: UserAvatar(imageUrl: f.profileImage, name: f.name, radius: 20),
+                      title: Text(f.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    ),
+                ]),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(picked.isEmpty ? "Done" : "Tag ${picked.length} friend${picked.length == 1 ? "" : "s"}"),
+                  ),
+                ),
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
+    if (!mounted) return;
+    setState(() {
+      tagged
+        ..clear()
+        ..addAll(friends.where((f) => picked.contains(f.id)));
+    });
+  }
   String look = "hd";
 
   // Sound
@@ -148,6 +234,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       final formData = FormData.fromMap({
         "description": descriptionController.text.trim(),
         "activity": activity,
+        if (tagged.isNotEmpty) "taggedUsers": jsonEncode([for (final t in tagged) t.id]),
         "cause": lane,
         "look": look,
         "musicUrl": ?musicUrl,
@@ -192,11 +279,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final laneDeeds = deeds.where((deed) => deed.lane == lane).toList();
-    final selectedDeed = laneDeeds.firstWhere(
-      (deed) => deed.name == activity,
-      orElse: () => laneDeeds.first,
-    );
+    final shown = query.trim().isEmpty
+        ? activities.where((a) => a.lane == lane).toList()
+        : activities.where((a) => a.matches(query)).toList();
+    final selected = activities.firstWhere((a) => a.name == activity, orElse: () => activities.first);
     final selectedLook = lookById(look);
 
     return Scaffold(
@@ -314,69 +400,93 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               ),
           ],
           const SizedBox(height: 18),
-          Text("Who is this for?", style: AppTextStyles.title.copyWith(fontSize: 16)),
+          Text("What did you do?", style: AppTextStyles.title.copyWith(fontSize: 16)),
           const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          TextField(
+            onChanged: (v) => setState(() => query = v),
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.search_rounded),
+              hintText: "Search: beach, metro, compost, e-waste…",
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (query.trim().isEmpty)
+            SizedBox(
+              height: 40,
+              child: ListView(scrollDirection: Axis.horizontal, children: [
+                for (final item in deedLanes)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(item),
+                      selected: lane == item,
+                      onSelected: (_) => setState(() => lane = item),
+                    ),
+                  ),
+              ]),
+            ),
+          const SizedBox(height: 12),
+          if (shown.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text("No activity matches \"$query\"", style: AppTextStyles.subtitle),
+            ),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            childAspectRatio: 1.55,
             children: [
-              for (final item in deedLanes)
-                ChoiceChip(
-                  label: Text(item),
-                  selected: lane == item,
-                  onSelected: (_) {
-                    final next = deeds.firstWhere((deed) => deed.lane == item);
-                    setState(() {
-                      lane = item;
-                      activity = next.name;
-                    });
-                  },
+              for (final a in shown)
+                _ActivityTile(
+                  activity: a,
+                  selected: activity == a.name,
+                  onTap: () => setState(() {
+                    activity = a.name;
+                    lane = a.lane;
+                  }),
                 ),
             ],
           ),
-          const SizedBox(height: 16),
-          for (final deed in laneDeeds)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Material(
-                color: activity == deed.name ? AppColors.blush : AppColors.card,
-                borderRadius: BorderRadius.circular(16),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () => setState(() => activity = deed.name),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    child: Row(
-                      children: [
-                        Icon(
-                          activity == deed.name
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          color: AppColors.joy,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(deed.name, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700)),
-                              Text(deed.line, style: AppTextStyles.subtitle),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+          const SizedBox(height: 18),
+          Material(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(18),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(18),
+              onTap: _pickTags,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(children: [
+                  const Icon(Icons.person_add_alt_1_rounded, color: AppColors.joy),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: tagged.isEmpty
+                        ? Text("Tag friends", style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700))
+                        : Wrap(spacing: 6, runSpacing: 6, children: [
+                            for (final t in tagged)
+                              Chip(
+                                avatar: UserAvatar(imageUrl: t.profileImage, name: t.name, radius: 11),
+                                label: Text(t.name.split(" ").first),
+                                onDeleted: () => setState(() => tagged.remove(t)),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                          ]),
                   ),
-                ),
+                  const Icon(Icons.chevron_right_rounded, color: AppColors.subtitle),
+                ]),
               ),
             ),
+          ),
           const SizedBox(height: 8),
           TextField(
             controller: descriptionController,
             maxLines: 4,
             textCapitalization: TextCapitalization.sentences,
             decoration: InputDecoration(
-              labelText: selectedDeed.lane == "Stories"
+              labelText: selected.lane == "Stories"
                   ? "What stayed with you?"
                   : "Tell it the way it happened",
             ),
@@ -505,6 +615,49 @@ class _PickButton extends StatelessWidget {
         style: FilledButton.styleFrom(
           backgroundColor: Colors.white,
           foregroundColor: AppColors.ink,
+        ),
+      ),
+    );
+  }
+}
+
+
+class _ActivityTile extends StatelessWidget {
+  final EcoActivity activity;
+  final bool selected;
+  final VoidCallback onTap;
+  const _ActivityTile({required this.activity, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = laneColor(activity.lane);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 160),
+      decoration: BoxDecoration(
+        color: selected ? c.withValues(alpha: 0.10) : AppColors.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: selected ? c : AppColors.border, width: selected ? 2 : 1),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(color: c.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(11)),
+                child: Icon(activityIcon(activity.icon), color: c, size: 20),
+              ),
+              const Spacer(),
+              Text("+${activity.points}", style: TextStyle(color: c, fontWeight: FontWeight.w800, fontSize: 13)),
+            ]),
+            const Spacer(),
+            Text(activity.label, maxLines: 2, overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, height: 1.2, color: AppColors.ink)),
+          ]),
         ),
       ),
     );

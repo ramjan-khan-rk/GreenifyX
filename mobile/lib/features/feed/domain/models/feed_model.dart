@@ -1,3 +1,10 @@
+class TaggedUser {
+  final String id;
+  final String name;
+  final String profileImage;
+  const TaggedUser(this.id, this.name, this.profileImage);
+}
+
 class FeedModel {
   final String id;
   final String userId;
@@ -19,6 +26,10 @@ class FeedModel {
   final String musicTitle;
   final int musicStartSec;
   final bool muteOriginal;
+  final bool isSaved;
+  final List<TaggedUser> tagged;
+  final String activityIcon;
+  final DateTime? createdAt;
 
   FeedModel({
     required this.id,
@@ -41,6 +52,10 @@ class FeedModel {
     this.musicTitle = "",
     this.musicStartSec = 0,
     this.muteOriginal = false,
+    this.isSaved = false,
+    this.tagged = const [],
+    this.activityIcon = "eco",
+    this.createdAt,
   });
 
   factory FeedModel.fromJson(Map<String, dynamic> json) {
@@ -70,6 +85,13 @@ class FeedModel {
       musicTitle: json["musicTitle"]?.toString() ?? "",
       musicStartSec: (json["musicStartSec"] as num?)?.toInt() ?? 0,
       muteOriginal: json["muteOriginal"] == true,
+      isSaved: json["isSaved"] == true,
+      tagged: [
+        for (final t in (json["taggedUsers"] as List? ?? const []))
+          if (t is Map) TaggedUser(t["_id"]?.toString() ?? "", t["name"]?.toString() ?? "", t["profileImage"]?.toString() ?? ""),
+      ],
+      activityIcon: json["activityIcon"]?.toString() ?? "eco",
+      createdAt: DateTime.tryParse(json["createdAt"]?.toString() ?? "")?.toLocal(),
     );
   }
 }

@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/i18n/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/friendly_error.dart';
 import '../../../../core/widgets/app_status.dart';
 import '../../../../core/widgets/brand_icons.dart';
 import '../../../../core/widgets/count_badge.dart';
-import '../../../../core/widgets/points_status_chip.dart';
-import '../../../../core/utils/friendly_error.dart';
-import '../../../../core/widgets/user_avatar.dart';
 import '../../../auth/application/providers/auth_provider.dart';
-import '../../../comment/presentation/widgets/comment_bottom_sheet.dart';
 import '../../../notifications/application/providers/notification_provider.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
-import '../../../profile/application/providers/my_profile_provider.dart';
+import '../../../post/presentation/screens/create_post_screen.dart';
 import '../../application/providers/feed_provider.dart';
-import '../widgets/moment_media.dart';
-import '../widgets/report_post_sheet.dart';
+import '../widgets/post_card.dart';
 
 class FeedScreen extends ConsumerWidget {
   const FeedScreen({super.key});
@@ -27,222 +23,61 @@ class FeedScreen extends ConsumerWidget {
     final meId = ref.watch(authProvider).user?.id ?? "";
     final unread = ref.watch(unreadNotificationCountProvider);
 
+    Future<void> create() async {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => const CreatePostScreen()));
+      ref.read(feedProvider.notifier).refresh();
+    }
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF4EFEA),
       appBar: AppBar(
-        title: Text("Moments", style: AppTextStyles.title),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        titleSpacing: 18,
+        title: Text(tr("Moments"), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.ink, letterSpacing: -0.5)),
         actions: [
           IconButton(
-            tooltip: "Updates",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const NotificationsScreen(),
-                ),
-              );
-            },
-            icon: CountBadge(
-              count: unread,
-              child: const Icon(BrandGlyph.updates),
-            ),
+            tooltip: "New post",
+            onPressed: create,
+            icon: const Icon(Icons.add_box_outlined, size: 27),
           ),
+          IconButton(
+            tooltip: "Updates",
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
+            icon: CountBadge(count: unread, child: const Icon(Icons.favorite_border_rounded, size: 27)),
+          ),
+          const SizedBox(width: 6),
         ],
       ),
       body: feed.when(
         data: (page) {
           final posts = page.posts;
           if (posts.isEmpty) {
-            return const AppEmptyState(
+            return AppEmptyState(
               icon: BrandGlyph.post,
               title: "No posts yet",
-              message:
-                  "Share a moment from Home. Points land after a friend verifies it.",
+              message: "Share your first eco moment. Points land after a friend verifies it.",
+              actionLabel: "Share a moment",
+              onAction: create,
             );
           }
-
           return RefreshIndicator(
             color: AppColors.primary,
             onRefresh: () => ref.read(feedProvider.notifier).refresh(),
             child: ListView.builder(
+              padding: const EdgeInsets.only(top: 8, bottom: 24),
               itemCount: posts.length + (page.hasMore ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index >= posts.length) {
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                    child: TextButton(
-                      onPressed: () =>
-                          ref.read(feedProvider.notifier).loadMore(),
+                    child: OutlinedButton(
+                      onPressed: () => ref.read(feedProvider.notifier).loadMore(),
                       child: const Text("Load more"),
                     ),
                   );
                 }
-                final post = posts[index];
-
-                return Card(
-                  elevation: 0,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: const BorderSide(color: AppColors.border),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListTile(
-                        leading: UserAvatar(
-                          imageUrl: post.profileImage,
-                          semanticLabel: "${post.name} photo",
-                        ),
-                        title: Text(post.name, style: AppTextStyles.body),
-                        subtitle: Text(
-                          "${post.cause} · ${post.activity}",
-                          style: AppTextStyles.subtitle.copyWith(
-                            color: AppColors.joy,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        trailing: post.userId.isNotEmpty && post.userId != meId
-                            ? PopupMenuButton<String>(
-                                tooltip: "More",
-                                icon: const Icon(Icons.more_vert_rounded),
-                                onSelected: (_) async {
-                                  final reason = await showReportPostSheet(context);
-                                  if (reason == null) return;
-                                  try {
-                                    await ref
-                                        .read(feedRepositoryProvider)
-                                        .reportPost(post.id, reason);
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text("Thanks. Our team will review this post."),
-                                        ),
-                                      );
-                                    }
-                                  } catch (e) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(friendlyError(e))),
-                                      );
-                                    }
-                                  }
-                                },
-                                itemBuilder: (_) => const [
-                                  PopupMenuItem(
-                                    value: "report",
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.flag_outlined, size: 20),
-                                        SizedBox(width: 12),
-                                        Text("Report post"),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : null,
-                      ),
-                      MomentMedia(
-                        url: post.image,
-                        mediaType: post.mediaType,
-                        look: post.look,
-                        musicUrl: post.musicUrl,
-                        musicTitle: post.musicTitle,
-                        musicStartSec: post.musicStartSec,
-                        muteOriginal: post.muteOriginal,
-                      ),
-                      if (post.description.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Text(post.description, style: AppTextStyles.body),
-                        ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: PointsStatusChip(
-                          ecoPoints: post.ecoPoints,
-                          isVerified: post.isVerified,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      OverflowBar(
-                        alignment: MainAxisAlignment.start,
-                        children: [
-                          TextButton.icon(
-                            onPressed: () async {
-                              try {
-                                await ref
-                                    .read(feedRepositoryProvider)
-                                    .toggleLike(post.id);
-                                await ref.read(feedProvider.notifier).refresh();
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(friendlyError(e))),
-                                  );
-                                }
-                              }
-                            },
-                            icon: Icon(
-                              post.isLiked
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: post.isLiked ? AppColors.error : null,
-                            ),
-                            label: Text("${post.likes}"),
-                          ),
-                          TextButton.icon(
-                            onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (_) => CommentBottomSheet(
-                                  postId: post.id,
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.comment_outlined),
-                            label: Text("${post.comments}"),
-                          ),
-                          if (!post.isVerified &&
-                              post.userId.isNotEmpty &&
-                              post.userId != meId)
-                            TextButton.icon(
-                              onPressed: () async {
-                                try {
-                                  await ref
-                                      .read(feedRepositoryProvider)
-                                      .verifyPost(post.id);
-                                  await ref.read(feedProvider.notifier).refresh();
-                                  ref.invalidate(myProfileProvider);
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          "Verified. Eco Points awarded to your friend.",
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(friendlyError(e))),
-                                    );
-                                  }
-                                }
-                              },
-                              icon: const Icon(BrandGlyph.verified),
-                              label: const Text("Verify"),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
+                return PostCard(key: ValueKey(posts[index].id), post: posts[index], meId: meId);
               },
             ),
           );
