@@ -8,6 +8,7 @@ import '../../../../core/widgets/brand_icons.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../application/providers/leaderboard_provider.dart';
 import '../../../../core/utils/friendly_error.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class LeaderboardScreen extends ConsumerWidget {
   const LeaderboardScreen({super.key});
@@ -22,8 +23,8 @@ class LeaderboardScreen extends ConsumerWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Leaderboard", style: AppTextStyles.title),
-            Text("Verified Eco Points", style: AppTextStyles.tagline),
+            Text(tr("Leaderboard"), style: AppTextStyles.title),
+            Text(tr("Verified Eco Points"), style: AppTextStyles.tagline),
           ],
         ),
       ),
@@ -35,11 +36,11 @@ class LeaderboardScreen extends ConsumerWidget {
         ),
         data: (list) {
           if (list.isEmpty) {
-            return const AppEmptyState(
+            return AppEmptyState(
               icon: BrandGlyph.leaderboard,
-              title: "No rankings yet",
+              title: tr("No rankings yet"),
               message:
-                  "Verified Eco Points will show here once friends confirm activities.",
+                  tr("Verified Eco Points will show here once friends confirm activities."),
             );
           }
 

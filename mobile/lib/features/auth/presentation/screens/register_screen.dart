@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_status.dart';
 import '../../../../core/widgets/brand_icons.dart';
 import '../../application/providers/auth_provider.dart';
 import 'otp_screen.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -28,7 +29,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final email = emailController.text.trim();
     if (email.isEmpty || !email.contains("@")) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enter a valid email")),
+        SnackBar(content: Text(tr("Enter a valid email"))),
       );
       return;
     }
@@ -66,7 +67,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text("Create account")),
+      appBar: AppBar(title: Text(tr("Create account"))),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -74,7 +75,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             children: [
               const BrandMark(size: 64),
               const SizedBox(height: 16),
-              Text("Register with email", style: AppTextStyles.title),
+              Text(tr("Register with email"), style: AppTextStyles.title),
               const SizedBox(height: 8),
               Text(
                 "We'll email a 6-digit code. ${BrandCopy.tagline}.",
@@ -86,8 +87,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 autocorrect: false,
-                decoration: const InputDecoration(
-                  labelText: "Email",
+                decoration: InputDecoration(
+                  labelText: tr("Email"),
                   prefixIcon: Icon(Icons.mail_outline, color: AppColors.primary),
                 ),
               ),
@@ -107,7 +108,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text("Email verification code"),
+                      : Text(tr("Email verification code")),
                 ),
               ),
             ],

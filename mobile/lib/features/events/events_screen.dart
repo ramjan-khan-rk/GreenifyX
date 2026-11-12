@@ -133,11 +133,11 @@ class _EventsScreenState extends State<EventsScreen> {
                   : RefreshIndicator(
                       onRefresh: _load,
                       child: list.isEmpty
-                          ? ListView(children: const [
+                          ? ListView(children: [
                               SizedBox(height: 80),
                               Icon(Icons.event_busy_rounded, size: 56, color: AppColors.subtitle),
                               SizedBox(height: 10),
-                              Center(child: Text("Nothing on this day — try another date")),
+                              Center(child: Text(tr("Nothing on this day — try another date"))),
                             ])
                           : ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 30), children: [
                               for (final g in groups.entries) ...[
@@ -348,7 +348,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     mode: LaunchMode.externalApplication,
                   ),
                   icon: const Icon(Icons.directions_rounded),
-                  label: const Text("Get directions"),
+                  label: Text(tr("Get directions")),
                 ),
               ],
             ]),
@@ -358,7 +358,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
             child: going
-                ? OutlinedButton.icon(onPressed: _busy ? null : _rsvp, icon: const Icon(Icons.check_rounded), label: const Text("You're going · Cancel RSVP"))
+                ? OutlinedButton.icon(onPressed: _busy ? null : _rsvp, icon: const Icon(Icons.check_rounded), label: Text(tr("You're going · Cancel RSVP")))
                 : FilledButton.icon(
                     onPressed: _busy || (cap > 0 && count >= cap) ? null : _rsvp,
                     icon: const Icon(Icons.event_available_rounded),

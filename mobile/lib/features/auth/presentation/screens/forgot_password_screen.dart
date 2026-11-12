@@ -6,6 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_status.dart';
 import '../../application/providers/auth_provider.dart';
 import 'otp_screen.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -29,7 +30,7 @@ class _ForgotPasswordScreenState
     final email = emailController.text.trim();
     if (email.isEmpty || !email.contains("@")) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enter a valid email")),
+        SnackBar(content: Text(tr("Enter a valid email"))),
       );
       return;
     }
@@ -67,7 +68,7 @@ class _ForgotPasswordScreenState
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text("Forgot password")),
+      appBar: AppBar(title: Text(tr("Forgot password"))),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -75,10 +76,10 @@ class _ForgotPasswordScreenState
             children: [
               const BrandMark(size: 64),
               const SizedBox(height: 16),
-              Text("Reset with email", style: AppTextStyles.title),
+              Text(tr("Reset with email"), style: AppTextStyles.title),
               const SizedBox(height: 8),
               Text(
-                "We'll email a verification code so you can set a new password.",
+                tr("We'll email a verification code so you can set a new password."),
                 style: AppTextStyles.subtitle,
                 textAlign: TextAlign.center,
               ),
@@ -87,8 +88,8 @@ class _ForgotPasswordScreenState
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 autocorrect: false,
-                decoration: const InputDecoration(
-                  labelText: "Email",
+                decoration: InputDecoration(
+                  labelText: tr("Email"),
                   prefixIcon: Icon(Icons.mail_outline, color: AppColors.primary),
                 ),
               ),
@@ -107,7 +108,7 @@ class _ForgotPasswordScreenState
                             color: Colors.white,
                           ),
                         )
-                      : const Text("Email verification code"),
+                      : Text(tr("Email verification code")),
                 ),
               ),
             ],

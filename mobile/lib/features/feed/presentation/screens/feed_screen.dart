@@ -37,12 +37,12 @@ class FeedScreen extends ConsumerWidget {
         title: Text(tr("Moments"), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.ink, letterSpacing: -0.5)),
         actions: [
           IconButton(
-            tooltip: "New post",
+            tooltip: tr("New post"),
             onPressed: create,
             icon: const Icon(Icons.add_box_outlined, size: 27),
           ),
           IconButton(
-            tooltip: "Updates",
+            tooltip: tr("Updates"),
             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
             icon: CountBadge(count: unread, child: const Icon(Icons.favorite_border_rounded, size: 27)),
           ),
@@ -55,9 +55,9 @@ class FeedScreen extends ConsumerWidget {
           if (posts.isEmpty) {
             return AppEmptyState(
               icon: BrandGlyph.post,
-              title: "No posts yet",
-              message: "Share your first eco moment. Points land after a friend verifies it.",
-              actionLabel: "Share a moment",
+              title: tr("No posts yet"),
+              message: tr("Share your first eco moment. Points land after a friend verifies it."),
+              actionLabel: tr("Share a moment"),
               onAction: create,
             );
           }
@@ -73,7 +73,7 @@ class FeedScreen extends ConsumerWidget {
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     child: OutlinedButton(
                       onPressed: () => ref.read(feedProvider.notifier).loadMore(),
-                      child: const Text("Load more"),
+                      child: Text(tr("Load more")),
                     ),
                   );
                 }

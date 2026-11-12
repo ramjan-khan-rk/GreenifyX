@@ -11,6 +11,7 @@ import '../../domain/campaign_model.dart';
 import '../widgets/campaign_visuals.dart';
 import 'campaign_detail_screen.dart' show PeopleRow;
 import 'submit_report_screen.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class VerifierHomeScreen extends ConsumerWidget {
   const VerifierHomeScreen({super.key});
@@ -25,8 +26,8 @@ class VerifierHomeScreen extends ConsumerWidget {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Field verification", style: AppTextStyles.title),
-              Text("Authorised verifier", style: AppTextStyles.tagline),
+              Text(tr("Field verification"), style: AppTextStyles.title),
+              Text(tr("Authorised verifier"), style: AppTextStyles.tagline),
             ],
           ),
           bottom: const TabBar(
@@ -58,10 +59,10 @@ class _Assignments extends ConsumerWidget {
       ),
       data: (items) {
         if (items.isEmpty) {
-          return const AppEmptyState(
+          return AppEmptyState(
             icon: Icons.assignment_rounded,
-            title: "No assignments yet",
-            message: "When an admin assigns you to a campaign, it appears here with the site location and attendee list.",
+            title: tr("No assignments yet"),
+            message: tr("When an admin assigns you to a campaign, it appears here with the site location and attendee list."),
           );
         }
         return RefreshIndicator(
@@ -152,7 +153,7 @@ class _AssignmentCard extends ConsumerWidget {
                     }
                   },
                   icon: const Icon(Icons.park_rounded),
-                  label: const Text("Tree survival check"),
+                  label: Text(tr("Tree survival check")),
                 ),
               ),
             ],
@@ -172,7 +173,7 @@ class _AssignmentCard extends ConsumerWidget {
                   }
                 },
                 icon: const Icon(Icons.add_a_photo_rounded),
-                label: const Text("Submit field report"),
+                label: Text(tr("Submit field report")),
               ),
             ),
           ]),
@@ -198,10 +199,10 @@ class _Reports extends ConsumerWidget {
       ),
       data: (items) {
         if (items.isEmpty) {
-          return const AppEmptyState(
+          return AppEmptyState(
             icon: Icons.fact_check_rounded,
-            title: "No reports yet",
-            message: "Reports you submit from the field and their review status show here.",
+            title: tr("No reports yet"),
+            message: tr("Reports you submit from the field and their review status show here."),
           );
         }
         return RefreshIndicator(

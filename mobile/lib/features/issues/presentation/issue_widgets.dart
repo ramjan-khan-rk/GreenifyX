@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../domain/issue_model.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 const issueCategories = [
   ("Illegal Dumping", Icons.delete_forever_rounded),
@@ -102,11 +103,11 @@ class IssueCard extends StatelessWidget {
                 ),
                 if (onConfirm != null)
                   r.confirmedByMe
-                      ? const Text("You confirmed", style: TextStyle(color: AppColors.eco, fontWeight: FontWeight.w800, fontSize: 13))
+                      ? Text(tr("You confirmed"), style: TextStyle(color: AppColors.eco, fontWeight: FontWeight.w800, fontSize: 13))
                       : OutlinedButton.icon(
                           onPressed: busy ? null : onConfirm,
                           icon: const Icon(Icons.visibility_rounded, size: 18),
-                          label: const Text("I see this too"),
+                          label: Text(tr("I see this too")),
                         ),
               ]),
             ],

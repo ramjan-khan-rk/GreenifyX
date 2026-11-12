@@ -13,6 +13,7 @@ import '../../../../core/widgets/user_avatar.dart';
 import '../../application/campaign_providers.dart';
 import '../../data/campaign_api.dart';
 import '../../domain/campaign_model.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 const _flagText = {
   'outside_geofence': 'You were outside the approved site area',
@@ -125,15 +126,15 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
   Future<void> _submit() async {
     final messenger = ScaffoldMessenger.of(context);
     if (_position == null) {
-      messenger.showSnackBar(const SnackBar(content: Text("Get your GPS location first")));
+      messenger.showSnackBar(SnackBar(content: Text(tr("Get your GPS location first"))));
       return;
     }
     if (_shots.isEmpty) {
-      messenger.showSnackBar(const SnackBar(content: Text("Take at least one photo on site")));
+      messenger.showSnackBar(SnackBar(content: Text(tr("Take at least one photo on site"))));
       return;
     }
     if (!_survival && _outcome != "unsuccessful" && _attendees.isEmpty) {
-      messenger.showSnackBar(const SnackBar(content: Text("Select the volunteers who attended")));
+      messenger.showSnackBar(SnackBar(content: Text(tr("Select the volunteers who attended"))));
       return;
     }
     setState(() => _submitting = true);
@@ -185,17 +186,17 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
             onRetry: _locate,
           ),
           _step(2, "Capture evidence"),
-          const Text(
-            "Use the camera in the app. Gallery photos are not accepted as proof.",
+          Text(
+            tr("Use the camera in the app. Gallery photos are not accepted as proof."),
             style: TextStyle(color: AppColors.subtitle, fontSize: 13),
           ),
           const SizedBox(height: 10),
           Row(children: [
-            Expanded(child: _ShotButton(label: "Before", icon: Icons.photo_camera_back_rounded, onTap: () => _capture("before"))),
+            Expanded(child: _ShotButton(label: tr("Before"), icon: Icons.photo_camera_back_rounded, onTap: () => _capture("before"))),
             const SizedBox(width: 8),
-            Expanded(child: _ShotButton(label: "After", icon: Icons.photo_camera_rounded, onTap: () => _capture("after"))),
+            Expanded(child: _ShotButton(label: tr("After"), icon: Icons.photo_camera_rounded, onTap: () => _capture("after"))),
             const SizedBox(width: 8),
-            Expanded(child: _ShotButton(label: "Extra", icon: Icons.add_a_photo_outlined, onTap: () => _capture("other"))),
+            Expanded(child: _ShotButton(label: tr("Extra"), icon: Icons.add_a_photo_outlined, onTap: () => _capture("other"))),
           ]),
           if (_shots.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -212,10 +213,10 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
           if (_survival) ...[
             _step(3, "Count living trees"),
             SegmentedButton<int>(
-              segments: const [
-                ButtonSegment(value: 30, label: Text("30 days")),
-                ButtonSegment(value: 90, label: Text("90 days")),
-                ButtonSegment(value: 180, label: Text("180 days")),
+              segments: [
+                ButtonSegment(value: 30, label: Text(tr("30 days"))),
+                ButtonSegment(value: 90, label: Text(tr("90 days"))),
+                ButtonSegment(value: 180, label: Text(tr("180 days"))),
               ],
               selected: {_checkpoint},
               showSelectedIcon: false,
@@ -227,7 +228,7 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: InputDecoration(
-                labelText: "Trees still alive",
+                labelText: tr("Trees still alive"),
                 helperText: "Verified as planted: ${c.verifiedOutput}",
                 prefixIcon: const Icon(Icons.park_rounded),
               ),
@@ -235,10 +236,10 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
           ] else ...[
           _step(3, "Record the outcome"),
           SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: "completed", label: Text("Completed")),
-              ButtonSegment(value: "partial", label: Text("Partial")),
-              ButtonSegment(value: "unsuccessful", label: Text("Didn't happen")),
+            segments: [
+              ButtonSegment(value: "completed", label: Text(tr("Completed"))),
+              ButtonSegment(value: "partial", label: Text(tr("Partial"))),
+              ButtonSegment(value: "unsuccessful", label: Text(tr("Didn't happen"))),
             ],
             selected: {_outcome},
             showSelectedIcon: false,
@@ -259,9 +260,9 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
             const SizedBox(height: 12),
             TextField(
               controller: _species,
-              decoration: const InputDecoration(
-                labelText: "Species planted",
-                helperText: "Separate with commas",
+              decoration: InputDecoration(
+                labelText: tr("Species planted"),
+                helperText: tr("Separate with commas"),
                 prefixIcon: Icon(Icons.park_rounded),
               ),
             ),
@@ -270,7 +271,7 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
           if (!_survival && _outcome != "unsuccessful") ...[
             _step(4, "Check in volunteers"),
             if (eligible.isEmpty)
-              const Text("No registered volunteers to check in.", style: TextStyle(color: AppColors.subtitle))
+              Text(tr("No registered volunteers to check in."), style: TextStyle(color: AppColors.subtitle))
             else
               Container(
                 decoration: BoxDecoration(
@@ -296,7 +297,7 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
                       onChanged: (on) => setState(() => on == true ? _attendees.add(p.id) : _attendees.remove(p.id)),
                       secondary: UserAvatar(imageUrl: p.profileImage, radius: 16),
                       title: Text(p.name),
-                      subtitle: p.status == "attended" ? const Text("Already in an earlier report") : null,
+                      subtitle: p.status == "attended" ? Text(tr("Already in an earlier report")) : null,
                       controlAffinity: ListTileControlAffinity.leading,
                     ),
                 ]),
@@ -307,7 +308,7 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
             controller: _notes,
             maxLines: 3,
             maxLength: 2000,
-            decoration: const InputDecoration(hintText: "Conditions, issues, anything the reviewer should know"),
+            decoration: InputDecoration(hintText: tr("Conditions, issues, anything the reviewer should know")),
           ),
         ],
       ),
@@ -402,14 +403,14 @@ class _LocationCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(subtitle, style: const TextStyle(fontSize: 12.5, color: AppColors.subtitle, height: 1.35)),
             if (position?.isMocked == true)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 4),
-                child: Text("Simulated location detected. The report will be flagged.",
+                child: Text(tr("Simulated location detected. The report will be flagged."),
                     style: TextStyle(fontSize: 12.5, color: AppColors.error, fontWeight: FontWeight.w700)),
               ),
           ]),
         ),
-        if (!locating) IconButton(tooltip: "Refresh location", onPressed: onRetry, icon: const Icon(Icons.refresh_rounded)),
+        if (!locating) IconButton(tooltip: tr("Refresh location"), onPressed: onRetry, icon: const Icon(Icons.refresh_rounded)),
       ]),
     );
   }
@@ -510,7 +511,7 @@ class _ResultDialog extends StatelessWidget {
             ),
         ],
       ]),
-      actions: [FilledButton(onPressed: () => Navigator.pop(context), child: const Text("Done"))],
+      actions: [FilledButton(onPressed: () => Navigator.pop(context), child: Text(tr("Done")))],
     );
   }
 }

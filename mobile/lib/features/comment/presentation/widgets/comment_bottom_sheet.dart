@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/media_url.dart';
 import '../../application/providers/comment_provider.dart';
 import '../../../../core/utils/friendly_error.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class CommentBottomSheet extends ConsumerStatefulWidget {
   final String postId;
@@ -41,8 +42,8 @@ class _CommentBottomSheetState
           children: [
             const SizedBox(height: 12),
 
-            const Text(
-              "Comments",
+            Text(
+              tr("Comments"),
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -55,8 +56,8 @@ class _CommentBottomSheetState
               child: comments.when(
                 data: (list) {
                   if (list.isEmpty) {
-                    return const Center(
-                      child: Text("No comments yet"),
+                    return Center(
+                      child: Text(tr("No comments yet")),
                     );
                   }
 
@@ -103,8 +104,8 @@ class _CommentBottomSheetState
                   Expanded(
                     child: TextField(
                       controller: controller,
-                      decoration: const InputDecoration(
-                        hintText: "Write a comment...",
+                      decoration: InputDecoration(
+                        hintText: tr("Write a comment..."),
                         border: OutlineInputBorder(),
                       ),
                     ),

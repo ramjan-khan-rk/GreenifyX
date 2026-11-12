@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class ChatInput extends StatelessWidget {
   final TextEditingController controller;
@@ -20,8 +21,8 @@ class ChatInput extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               child: TextField(
                 controller: controller,
-                decoration: const InputDecoration(
-                  hintText: "Type message...",
+                decoration: InputDecoration(
+                  hintText: tr("Type message..."),
                 ),
               ),
             ),

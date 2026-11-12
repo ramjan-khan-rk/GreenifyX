@@ -194,7 +194,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     controller: caption,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: "Add a caption…",
+                      hintText: tr("Add a caption…"),
                       hintStyle: const TextStyle(color: Colors.white60),
                       filled: true,
                       fillColor: Colors.white12,
@@ -239,11 +239,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            _AttachOption(icon: Icons.photo_camera_rounded, label: "Camera", color: AppColors.joy, onTap: () {
+            _AttachOption(icon: Icons.photo_camera_rounded, label: tr("Camera"), color: AppColors.joy, onTap: () {
               Navigator.pop(ctx);
               _pickPhoto(ImageSource.camera);
             }),
-            _AttachOption(icon: Icons.photo_library_rounded, label: "Gallery", color: const Color(0xFF7F53AC), onTap: () {
+            _AttachOption(icon: Icons.photo_library_rounded, label: tr("Gallery"), color: const Color(0xFF7F53AC), onTap: () {
               Navigator.pop(ctx);
               _pickPhoto(ImageSource.gallery);
             }),
@@ -282,7 +282,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> _startRecording() async {
     final ok = await _recorder.start();
     if (!ok) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Allow the microphone to record voice notes")));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("Allow the microphone to record voice notes"))));
       return;
     }
     setState(() => _recording = true);
@@ -308,7 +308,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (!mounted) return;
     setState(() => _recording = false);
     if (result == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Too short. Hold on a little longer.")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("Too short. Hold on a little longer."))));
       return;
     }
     setState(() => _sending = true);
@@ -376,12 +376,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         actions: [
           _HeaderAction(
             icon: Icons.call_rounded,
-            tooltip: "Voice call",
+            tooltip: tr("Voice call"),
             onTap: () => startCall(context, userId: widget.userId, name: widget.userName, video: false),
           ),
           _HeaderAction(
             icon: Icons.videocam_rounded,
-            tooltip: "Video call",
+            tooltip: tr("Video call"),
             onTap: () => startCall(context, userId: widget.userId, name: widget.userName, video: true),
           ),
           const SizedBox(width: 8),
@@ -574,8 +574,8 @@ class _EmptyChat extends StatelessWidget {
           const SizedBox(height: 14),
           Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.ink)),
           const SizedBox(height: 6),
-          const Text(
-            "Say hello, send a voice note, or start a call from the top bar.",
+          Text(
+            tr("Say hello, send a voice note, or start a call from the top bar."),
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColors.subtitle, height: 1.4),
           ),
@@ -633,12 +633,12 @@ class _Composer extends StatelessWidget {
                       const SizedBox(width: 10),
                       Text(formatDuration(elapsed), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                       const SizedBox(width: 10),
-                      const Expanded(child: Text("Recording…", style: TextStyle(color: AppColors.subtitle))),
-                      TextButton(onPressed: onCancelRecording, child: const Text("Cancel")),
+                      Expanded(child: Text(tr("Recording…"), style: TextStyle(color: AppColors.subtitle))),
+                      TextButton(onPressed: onCancelRecording, child: Text(tr("Cancel"))),
                     ])
                   : Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
                       IconButton(
-                        tooltip: "Send a photo",
+                        tooltip: tr("Send a photo"),
                         onPressed: sending ? null : onAttach,
                         icon: const Icon(Icons.add_photo_alternate_outlined, color: AppColors.subtitle),
                       ),
@@ -647,8 +647,8 @@ class _Composer extends StatelessWidget {
                       minLines: 1,
                       maxLines: 5,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(
-                        hintText: "Message",
+                      decoration: InputDecoration(
+                        hintText: tr("Message"),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_card.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class QuoteCard extends StatelessWidget {
   const QuoteCard({super.key});
@@ -13,7 +14,7 @@ class QuoteCard extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            "A greener tomorrow starts with you",
+            tr("A greener tomorrow starts with you"),
             textAlign: TextAlign.center,
             style: AppTextStyles.title.copyWith(fontSize: 16),
           ),

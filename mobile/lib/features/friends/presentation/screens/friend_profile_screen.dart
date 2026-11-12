@@ -7,6 +7,7 @@ import '../../../../core/widgets/user_avatar.dart';
 import '../../../../core/utils/chat_launcher.dart';
 import '../../application/providers/friend_provider.dart';
 import '../../domain/models/friend_model.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class FriendProfileScreen extends ConsumerWidget {
   final FriendModel friend;
@@ -31,7 +32,7 @@ class FriendProfileScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel"),
+            child: Text(tr("Cancel")),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
@@ -74,20 +75,20 @@ class FriendProfileScreen extends ConsumerWidget {
             Row(children: [
               _ProfileAction(
                 icon: Icons.chat_bubble_rounded,
-                label: "Message",
+                label: tr("Message"),
                 primary: true,
                 onTap: () => openChat(context, userId: friend.id, name: friend.name, profileImage: friend.profileImage),
               ),
               const SizedBox(width: 10),
               _ProfileAction(
                 icon: Icons.call_rounded,
-                label: "Call",
+                label: tr("Call"),
                 onTap: () => startCall(context, userId: friend.id, name: friend.name, video: false),
               ),
               const SizedBox(width: 10),
               _ProfileAction(
                 icon: Icons.videocam_rounded,
-                label: "Video",
+                label: tr("Video"),
                 onTap: () => startCall(context, userId: friend.id, name: friend.name, video: true),
               ),
             ]),
@@ -99,17 +100,17 @@ class FriendProfileScreen extends ConsumerWidget {
                   children: [
                     ListTile(
                       leading: const Icon(Icons.monetization_on_rounded, color: AppColors.accent),
-                      title: const Text("Eco Points"),
+                      title: Text(tr("Eco Points")),
                       trailing: Text(friend.ecoPoints.toString()),
                     ),
                     ListTile(
                       leading: const Icon(Icons.star),
-                      title: const Text("Level"),
+                      title: Text(tr("Level")),
                       trailing: Text(friend.level.toString()),
                     ),
                     ListTile(
                       leading: const Icon(Icons.local_fire_department),
-                      title: const Text("Streak"),
+                      title: Text(tr("Streak")),
                       trailing: Text(friend.streak.toString()),
                     ),
                   ],
@@ -123,12 +124,12 @@ class FriendProfileScreen extends ConsumerWidget {
                 onPressed: () => _confirm(
                   context,
                   ref,
-                  title: "Unfriend",
+                  title: tr("Unfriend"),
                   body: "Remove ${friend.name} from your friends?",
                   action: () =>
                       ref.read(friendRepositoryProvider).unfriend(friend.id),
                 ),
-                child: const Text("Unfriend"),
+                child: Text(tr("Unfriend")),
               ),
             ),
             const SizedBox(height: 8),
@@ -141,12 +142,12 @@ class FriendProfileScreen extends ConsumerWidget {
                 onPressed: () => _confirm(
                   context,
                   ref,
-                  title: "Block",
+                  title: tr("Block"),
                   body: "Block ${friend.name}? They won't be able to send requests.",
                   action: () =>
                       ref.read(friendRepositoryProvider).blockUser(friend.id),
                 ),
-                child: const Text("Block"),
+                child: Text(tr("Block")),
               ),
             ),
           ],

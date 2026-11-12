@@ -12,6 +12,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../profile/application/providers/my_profile_provider.dart';
 import '../data/issue_api.dart';
 import 'issue_widgets.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class ReportIssueScreen extends ConsumerStatefulWidget {
   const ReportIssueScreen({super.key});
@@ -111,11 +112,11 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text("Report a problem", style: AppTextStyles.title)),
+      appBar: AppBar(title: Text(tr("Report a problem"), style: AppTextStyles.title)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
         children: [
-          Text("What did you see?", style: AppTextStyles.title.copyWith(fontSize: 17)),
+          Text(tr("What did you see?"), style: AppTextStyles.title.copyWith(fontSize: 17)),
           const SizedBox(height: 10),
           GridView.count(
             crossAxisCount: 3,
@@ -135,9 +136,9 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
             ],
           ),
           const SizedBox(height: 22),
-          Text("Photo", style: AppTextStyles.title.copyWith(fontSize: 17)),
+          Text(tr("Photo"), style: AppTextStyles.title.copyWith(fontSize: 17)),
           const SizedBox(height: 4),
-          const Text("Taken now with the camera. Up to 3.", style: TextStyle(color: AppColors.subtitle, fontSize: 13)),
+          Text(tr("Taken now with the camera. Up to 3."), style: TextStyle(color: AppColors.subtitle, fontSize: 13)),
           const SizedBox(height: 10),
           SizedBox(
             height: 100,
@@ -175,17 +176,17 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppColors.primary.withValues(alpha: 0.5), width: 1.5),
                     ),
-                    child: const Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                       Icon(Icons.photo_camera_rounded, color: AppColors.primary, size: 28),
                       SizedBox(height: 4),
-                      Text("Add photo", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 12.5)),
+                      Text(tr("Add photo"), style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 12.5)),
                     ]),
                   ),
                 ),
             ]),
           ),
           const SizedBox(height: 22),
-          Text("Where is it?", style: AppTextStyles.title.copyWith(fontSize: 17)),
+          Text(tr("Where is it?"), style: AppTextStyles.title.copyWith(fontSize: 17)),
           const SizedBox(height: 10),
           Container(
             padding: const EdgeInsets.all(14),
@@ -211,16 +212,16 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
-              if (!_locating) IconButton(onPressed: _locate, icon: const Icon(Icons.my_location_rounded), tooltip: "Use my location"),
+              if (!_locating) IconButton(onPressed: _locate, icon: const Icon(Icons.my_location_rounded), tooltip: tr("Use my location")),
             ]),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _landmark,
             maxLength: 160,
-            decoration: const InputDecoration(
-              labelText: "Nearby landmark (optional)",
-              hintText: "e.g. behind the community mosque",
+            decoration: InputDecoration(
+              labelText: tr("Nearby landmark (optional)"),
+              hintText: tr("e.g. behind the community mosque"),
               prefixIcon: Icon(Icons.signpost_rounded),
             ),
           ),
@@ -239,11 +240,11 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
             controller: _description,
             maxLines: 3,
             maxLength: 1000,
-            decoration: const InputDecoration(labelText: "Details (optional)", hintText: "How big is it? How long has it been there?"),
+            decoration: InputDecoration(labelText: tr("Details (optional)"), hintText: tr("How big is it? How long has it been there?")),
           ),
           const SizedBox(height: 6),
-          const Text(
-            "Your report goes to the GreenifyX team for review. We'll update you at every step, and you earn Eco Points when it's resolved.",
+          Text(
+            tr("Your report goes to the GreenifyX team for review. We'll update you at every step, and you earn Eco Points when it's resolved."),
             style: TextStyle(color: AppColors.subtitle, fontSize: 12.5, height: 1.45),
           ),
         ],

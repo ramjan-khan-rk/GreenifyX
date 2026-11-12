@@ -7,6 +7,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/friendly_error.dart';
 import 'org_api.dart';
 import 'org_widgets.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class RegisterOrgScreen extends ConsumerStatefulWidget {
   const RegisterOrgScreen({super.key});
@@ -61,43 +62,43 @@ class _RegisterOrgScreenState extends ConsumerState<RegisterOrgScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text("Register organisation", style: AppTextStyles.title)),
+      appBar: AppBar(title: Text(tr("Register organisation"), style: AppTextStyles.title)),
       body: Form(
         key: _form,
         child: ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 120), children: [
-          const Text(
-            "Companies, schools, universities, NGOs and communities can register. Every organisation is verified before it gets the trusted badge.",
+          Text(
+            tr("Companies, schools, universities, NGOs and communities can register. Every organisation is verified before it gets the trusted badge."),
             style: TextStyle(color: AppColors.subtitle, height: 1.45),
           ),
           const SizedBox(height: 18),
           TextFormField(
             controller: _name,
-            decoration: const InputDecoration(labelText: "Organisation name"),
+            decoration: InputDecoration(labelText: tr("Organisation name")),
             validator: (v) => (v == null || v.trim().length < 3) ? "Enter the name" : null,
           ),
           const SizedBox(height: 14),
-          Text("Type", style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w700)),
+          Text(tr("Type"), style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           Wrap(spacing: 8, runSpacing: 8, children: [
             for (final t in orgTypes)
               ChoiceChip(avatar: Icon(orgIcon(t), size: 16), label: Text(t), selected: _type == t, onSelected: (_) => setState(() => _type = t)),
           ]),
           const SizedBox(height: 14),
-          Text("Emirate", style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w700)),
+          Text(tr("Emirate"), style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           Wrap(spacing: 8, runSpacing: 8, children: [
             for (final e in kEmirates) ChoiceChip(label: Text(e), selected: _emirate == e, onSelected: (_) => setState(() => _emirate = e)),
           ]),
           const SizedBox(height: 14),
-          TextFormField(controller: _description, maxLines: 3, maxLength: 600, decoration: const InputDecoration(labelText: "About (optional)")),
-          TextFormField(controller: _website, decoration: const InputDecoration(labelText: "Website (optional)")),
+          TextFormField(controller: _description, maxLines: 3, maxLength: 600, decoration: InputDecoration(labelText: tr("About (optional)"))),
+          TextFormField(controller: _website, decoration: InputDecoration(labelText: tr("Website (optional)"))),
           const SizedBox(height: 14),
           TextFormField(
             controller: _reg,
-            decoration: const InputDecoration(labelText: "Trade licence / registration number", helperText: "Used only to verify your organisation"),
+            decoration: InputDecoration(labelText: tr("Trade licence / registration number"), helperText: tr("Used only to verify your organisation")),
           ),
           const SizedBox(height: 14),
-          TextFormField(controller: _email, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(labelText: "Work contact email")),
+          TextFormField(controller: _email, keyboardType: TextInputType.emailAddress, decoration: InputDecoration(labelText: tr("Work contact email"))),
         ]),
       ),
       bottomNavigationBar: SafeArea(

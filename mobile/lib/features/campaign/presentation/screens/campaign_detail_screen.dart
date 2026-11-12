@@ -10,6 +10,7 @@ import '../../../profile/application/providers/my_profile_provider.dart';
 import '../../application/campaign_providers.dart';
 import '../../domain/campaign_model.dart';
 import '../widgets/campaign_visuals.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class CampaignDetailScreen extends ConsumerStatefulWidget {
   final String campaignId;
@@ -28,11 +29,11 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
       final ok = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text("Leave this campaign?"),
-          content: const Text("Your spot will be given to someone else."),
+          title: Text(tr("Leave this campaign?")),
+          content: Text(tr("Your spot will be given to someone else.")),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Stay")),
-            TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Leave")),
+            TextButton(onPressed: () => Navigator.pop(context, false), child: Text(tr("Stay"))),
+            TextButton(onPressed: () => Navigator.pop(context, true), child: Text(tr("Leave"))),
           ],
         ),
       );
@@ -43,7 +44,7 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
       final api = ref.read(campaignApiProvider);
       if (c.joined) {
         await api.leave(c.id);
-        messenger.showSnackBar(const SnackBar(content: Text("You left the campaign")));
+        messenger.showSnackBar(SnackBar(content: Text(tr("You left the campaign"))));
       } else {
         await api.join(c.id);
         messenger.showSnackBar(SnackBar(
@@ -64,7 +65,7 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
     final uri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}");
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Could not open maps")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("Could not open maps"))));
     }
   }
 
@@ -134,16 +135,16 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
           sliver: SliverList.list(children: [
             if (c.myStatus != null) _StatusBanner(status: c.myStatus!, points: c.pointsPerParticipant),
             Row(children: [
-              _Stat(value: "+${c.pointsPerParticipant}", label: "Eco Points", color: const Color(0xFF8A5A00)),
+              _Stat(value: "+${c.pointsPerParticipant}", label: tr("Eco Points"), color: const Color(0xFF8A5A00)),
               const SizedBox(width: 10),
-              _Stat(value: "${c.spotsLeft}", label: "Spots left", color: AppColors.primary),
+              _Stat(value: "${c.spotsLeft}", label: tr("Spots left"), color: AppColors.primary),
               const SizedBox(width: 10),
               _Stat(value: "${c.verifiedOutput}", label: "Verified ${c.outputUnit}", color: AppColors.eco),
             ]),
             const SizedBox(height: 16),
             _Section(children: [
               ProgressMeter(
-                label: "Volunteers",
+                label: tr("Volunteers"),
                 value: "${c.participantCount} / ${c.targetParticipants}",
                 progress: c.participantProgress,
                 color: AppColors.primary,
@@ -192,7 +193,7 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
                 child: OutlinedButton.icon(
                   onPressed: () => _directions(c),
                   icon: const Icon(Icons.directions_rounded),
-                  label: const Text("Get directions"),
+                  label: Text(tr("Get directions")),
                 ),
               ),
             ]),
@@ -218,9 +219,9 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
                 color: AppColors.eco,
               ),
               const Divider(height: 22),
-              const _InfoRow(
+              _InfoRow(
                 icon: Icons.gps_fixed_rounded,
-                title: "GPS and photo evidence",
+                title: tr("GPS and photo evidence"),
                 subtitle: "Points are credited only after the on-site report is approved",
               ),
             ]),

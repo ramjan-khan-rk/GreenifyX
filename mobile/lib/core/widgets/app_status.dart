@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class AppLoading extends StatelessWidget {
   const AppLoading({super.key});
@@ -78,7 +79,7 @@ class AppErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppEmptyState(
       icon: Icons.cloud_off_outlined,
-      title: "Couldn't load this page",
+      title: tr("Couldn't load this page"),
       message: message,
       actionLabel: onRetry == null ? null : "Try again",
       onAction: onRetry,
@@ -126,7 +127,7 @@ class BrandLockup extends StatelessWidget {
         const SizedBox(height: 12),
         Text("GreenifyX", style: AppTextStyles.heading.copyWith(fontSize: 26)),
         const SizedBox(height: 4),
-        Text("Small Actions Big Impact", style: AppTextStyles.tagline),
+        Text(tr("Small Actions Big Impact"), style: AppTextStyles.tagline),
       ],
     );
     return centered ? Center(child: column) : column;

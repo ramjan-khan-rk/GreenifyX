@@ -10,6 +10,7 @@ import 'org_api.dart';
 import 'org_dashboard_screen.dart';
 import 'org_widgets.dart';
 import 'register_org_screen.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class TeamsScreen extends ConsumerWidget {
   const TeamsScreen({super.key});
@@ -22,8 +23,8 @@ class TeamsScreen extends ConsumerWidget {
         backgroundColor: AppColors.background,
         appBar: AppBar(
           title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text("Teams", style: AppTextStyles.title),
-            Text("Your company, school or community, together", style: AppTextStyles.tagline),
+            Text(tr("Teams"), style: AppTextStyles.title),
+            Text(tr("Your company, school or community, together"), style: AppTextStyles.tagline),
           ]),
           bottom: const TabBar(
             labelColor: AppColors.primary,
@@ -77,13 +78,13 @@ class _MyTeams extends ConsumerWidget {
                       end: Alignment.bottomRight,
                     ),
                   ),
-                  child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Icon(Icons.groups_rounded, color: AppColors.sun, size: 34),
                     SizedBox(height: 10),
-                    Text("Make an impact as a team", style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800)),
+                    Text(tr("Make an impact as a team"), style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800)),
                     SizedBox(height: 6),
                     Text(
-                      "Join your company, school or community with its code. Your verified actions count towards your team's impact.",
+                      tr("Join your company, school or community with its code. Your verified actions count towards your team's impact."),
                       style: TextStyle(color: Color(0xCCFFFFFF), height: 1.45),
                     ),
                   ]),
@@ -96,7 +97,7 @@ class _MyTeams extends ConsumerWidget {
                     style: ElevatedButton.styleFrom(minimumSize: const Size(0, 50)),
                     onPressed: () => _join(context, ref),
                     icon: const Icon(Icons.key_rounded),
-                    label: const Text("Join with code"),
+                    label: Text(tr("Join with code")),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -108,7 +109,7 @@ class _MyTeams extends ConsumerWidget {
                       if (ok == true) ref.invalidate(myOrgsProvider);
                     },
                     icon: const Icon(Icons.add_business_rounded),
-                    label: const Text("Register"),
+                    label: Text(tr("Register")),
                   ),
                 ),
               ]),
@@ -160,15 +161,15 @@ class _Leaderboard extends ConsumerWidget {
           loading: () => const AppLoading(),
           error: (e, _) => AppErrorState(message: friendlyError(e), onRetry: () => ref.invalidate(orgLeaderboardProvider)),
           data: (rows) => rows.isEmpty
-              ? const AppEmptyState(icon: Icons.emoji_events_rounded, title: "No teams yet", message: "Verified organisations appear here.")
+              ? AppEmptyState(icon: Icons.emoji_events_rounded, title: tr("No teams yet"), message: tr("Verified organisations appear here."))
               : RefreshIndicator(
                   color: AppColors.primary,
                   onRefresh: () async => ref.invalidate(orgLeaderboardProvider),
                   child: ListView(padding: const EdgeInsets.all(16), children: [
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.only(bottom: 12),
                       child: Text(
-                        "Ranked by verified Eco Points per member over 90 days, so small and large teams compete fairly.",
+                        tr("Ranked by verified Eco Points per member over 90 days, so small and large teams compete fairly."),
                         style: TextStyle(color: AppColors.subtitle, fontSize: 13, height: 1.4),
                       ),
                     ),
@@ -224,7 +225,7 @@ class _RankRow extends StatelessWidget {
         ),
         Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
           Text(compactNumber(row["pointsPerMember"] as num?), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: AppColors.eco)),
-          const Text("pts / member", style: TextStyle(color: AppColors.subtitle, fontSize: 11)),
+          Text(tr("pts / member"), style: TextStyle(color: AppColors.subtitle, fontSize: 11)),
         ]),
       ]),
     );
@@ -250,7 +251,7 @@ class _JoinDialogState extends State<_JoinDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Join a team"),
+      title: Text(tr("Join a team")),
       content: TextField(
         controller: _c,
         autofocus: true,
@@ -259,15 +260,15 @@ class _JoinDialogState extends State<_JoinDialog> {
         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"[A-Za-z0-9]"))],
         style: const TextStyle(fontSize: 22, letterSpacing: 6, fontWeight: FontWeight.w800),
         textAlign: TextAlign.center,
-        decoration: const InputDecoration(hintText: "ABC234", helperText: "Ask your team manager for the code"),
+        decoration: InputDecoration(hintText: "ABC234", helperText: tr("Ask your team manager for the code")),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(tr("Cancel"))),
         FilledButton(
           onPressed: () {
             if (_c.text.trim().length == 6) Navigator.pop(context, _c.text.trim().toUpperCase());
           },
-          child: const Text("Join"),
+          child: Text(tr("Join")),
         ),
       ],
     );

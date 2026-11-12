@@ -19,6 +19,7 @@ import '../../../pickup/pickup_screen.dart';
 import '../../../rewards/rewards_screen.dart';
 import '../../application/providers/notification_provider.dart';
 import '../../domain/models/notification_model.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 ({IconData icon, Color color}) _style(String type) => switch (type) {
       "message" => (icon: Icons.chat_bubble_rounded, color: AppColors.primary),
@@ -88,14 +89,14 @@ class NotificationsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text("Updates", style: AppTextStyles.title),
+        title: Text(tr("Updates"), style: AppTextStyles.title),
         actions: [
           TextButton(
             onPressed: () async {
               await ref.read(notificationApiProvider).markAllRead();
               ref.invalidate(notificationsProvider);
             },
-            child: const Text("Mark all read"),
+            child: Text(tr("Mark all read")),
           ),
         ],
       ),
@@ -107,10 +108,10 @@ class NotificationsScreen extends ConsumerWidget {
           error: (error, _) => AppErrorState(message: friendlyError(error), onRetry: () => ref.invalidate(notificationsProvider)),
           data: (list) {
             if (list.isEmpty) {
-              return const AppEmptyState(
+              return AppEmptyState(
                 icon: Icons.notifications_none_outlined,
-                title: "You're all caught up",
-                message: "Messages, calls, friend requests, likes and points will show up here.",
+                title: tr("You're all caught up"),
+                message: tr("Messages, calls, friend requests, likes and points will show up here."),
               );
             }
             return ListView.builder(
@@ -189,7 +190,7 @@ class _Row extends StatelessWidget {
                       style: OutlinedButton.styleFrom(minimumSize: const Size(0, 34), padding: const EdgeInsets.symmetric(horizontal: 12)),
                       onPressed: onTap,
                       icon: const Icon(Icons.reply_rounded, size: 16),
-                      label: const Text("Reply"),
+                      label: Text(tr("Reply")),
                     ),
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
@@ -200,7 +201,7 @@ class _Row extends StatelessWidget {
                       ),
                       onPressed: () => startCall(context, userId: n.senderId, name: n.senderName, video: false),
                       icon: const Icon(Icons.call_rounded, size: 16),
-                      label: const Text("Call back"),
+                      label: Text(tr("Call back")),
                     ),
                   ]),
                 ],

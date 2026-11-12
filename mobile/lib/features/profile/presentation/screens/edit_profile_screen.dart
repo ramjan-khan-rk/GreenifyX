@@ -14,6 +14,7 @@ import '../../domain/models/profile_model.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_text_field.dart';
 import '../widgets/save_button.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 /// Edit an existing profile. Fields start with the saved values so nothing is lost.
 class EditProfileScreen extends ConsumerWidget {
@@ -24,11 +25,11 @@ class EditProfileScreen extends ConsumerWidget {
     final profile = ref.watch(myProfileProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text("Edit profile", style: AppTextStyles.title)),
+      appBar: AppBar(title: Text(tr("Edit profile"), style: AppTextStyles.title)),
       body: profile.when(
         loading: () => const AppLoading(),
         error: (e, _) => AppErrorState(
-          message: "Could not load your profile.",
+          message: tr("Could not load your profile."),
           onRetry: () => ref.invalidate(myProfileProvider),
         ),
         data: (p) => _EditForm(profile: p),
@@ -85,11 +86,11 @@ class _EditFormState extends ConsumerState<_EditForm> {
             emirate: _emirate,
           );
       ref.invalidate(myProfileProvider);
-      messenger.showSnackBar(const SnackBar(content: Text("Profile updated")));
+      messenger.showSnackBar(SnackBar(content: Text(tr("Profile updated"))));
       if (mounted) Navigator.of(context).pop();
     } catch (_) {
       messenger.showSnackBar(
-        const SnackBar(content: Text("Could not save. Check your connection and try again.")),
+        SnackBar(content: Text(tr("Could not save. Check your connection and try again."))),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -115,21 +116,21 @@ class _EditFormState extends ConsumerState<_EditForm> {
           const SizedBox(height: 16),
           ProfileTextField(
             controller: _name,
-            label: "Full name",
+            label: tr("Full name"),
             icon: Icons.person_outline_rounded,
             validator: (v) => (v == null || v.trim().length < 2) ? "Enter your name" : null,
           ),
           const SizedBox(height: 18),
           ProfileTextField(
             controller: _bio,
-            label: "Bio",
+            label: tr("Bio"),
             hint: "What do you do for the planet?",
             maxLines: 3,
             maxLength: 150,
             textInputAction: TextInputAction.newline,
           ),
           const SizedBox(height: 10),
-          Text("Emirate", style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w700)),
+          Text(tr("Emirate"), style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -147,11 +148,11 @@ class _EditFormState extends ConsumerState<_EditForm> {
           ),
           const SizedBox(height: 6),
           Text(
-            "Used for community stats by emirate. Not shown publicly with your location.",
+            tr("Used for community stats by emirate. Not shown publicly with your location."),
             style: AppTextStyles.subtitle.copyWith(fontSize: 12),
           ),
           const SizedBox(height: 28),
-          SaveButton(label: "Save changes", loading: _saving, onPressed: _save),
+          SaveButton(label: tr("Save changes"), loading: _saving, onPressed: _save),
         ],
       ),
     );

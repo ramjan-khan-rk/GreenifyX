@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 String formatDuration(Duration d) {
   final m = d.inMinutes.remainder(60).toString();
@@ -71,7 +72,7 @@ class _VoiceNotePlayerState extends State<VoiceNotePlayer> {
         _loaded = true;
       } catch (_) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Couldn't play this voice note")));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("Couldn't play this voice note"))));
         }
       } finally {
         if (mounted) setState(() => _loading = false);

@@ -15,6 +15,7 @@ import '../../application/providers/feed_provider.dart';
 import '../../domain/models/feed_model.dart';
 import 'moment_media.dart';
 import 'report_post_sheet.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 String _ago(DateTime? t) {
   if (t == null) return "";
@@ -214,7 +215,7 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
               ]),
             ),
             PopupMenuButton<String>(
-              tooltip: "More",
+              tooltip: tr("More"),
               icon: const Icon(Icons.more_horiz_rounded, color: AppColors.ink),
               onSelected: (v) {
                 if (v == "report") _report();
@@ -222,7 +223,7 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
               },
               itemBuilder: (_) => [
                 PopupMenuItem(value: "save", child: Text(_saved ? "Remove from saved" : "Save post")),
-                if (!mine) const PopupMenuItem(value: "report", child: Text("Report post")),
+                if (!mine) PopupMenuItem(value: "report", child: Text(tr("Report post"))),
               ],
             ),
           ]),
@@ -308,7 +309,7 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
                   ),
                   onPressed: _verifying ? null : _verify,
                   icon: const Icon(Icons.verified_outlined, size: 18),
-                  label: const Text("Verify"),
+                  label: Text(tr("Verify")),
                 ),
               ),
             _Action(icon: _saved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded, onTap: _toggleSave, pop: _saved),

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/media_url.dart';
 import '../../domain/campaign_model.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class CategoryStyle {
   final IconData icon;
@@ -45,11 +46,11 @@ String campaignDates(CampaignModel c) {
 }
 
 ({String label, Color color}) phaseBadge(CampaignModel c) => switch (c.phase) {
-      'live' => (label: 'Happening now', color: AppColors.eco),
-      'upcoming' => (label: 'Upcoming', color: AppColors.sun),
-      'ended' => (label: 'Ended', color: AppColors.subtitle),
-      'completed' => (label: 'Completed', color: const Color(0xFF4A78B5)),
-      'cancelled' => (label: 'Cancelled', color: AppColors.error),
+      'live' => (label: tr('Happening now'), color: AppColors.eco),
+      'upcoming' => (label: tr('Upcoming'), color: AppColors.sun),
+      'ended' => (label: tr('Ended'), color: AppColors.subtitle),
+      'completed' => (label: tr('Completed'), color: const Color(0xFF4A78B5)),
+      'cancelled' => (label: tr('Cancelled'), color: AppColors.error),
       _ => (label: c.phase, color: AppColors.subtitle),
     };
 
@@ -249,7 +250,7 @@ class CampaignCard extends StatelessWidget {
                   ]),
                   const SizedBox(height: 14),
                   ProgressMeter(
-                    label: 'Volunteers',
+                    label: tr('Volunteers'),
                     value: '${c.participantCount} / ${c.targetParticipants}',
                     progress: c.participantProgress,
                     color: AppColors.primary,

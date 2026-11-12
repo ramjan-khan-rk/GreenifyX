@@ -20,6 +20,7 @@ import 'package:video_player/video_player.dart';
 import '../../../../core/services/media_upload.dart';
 import '../../data/repositories/post_repository.dart';
 import '../../../../core/utils/friendly_error.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -65,7 +66,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
     if (!mounted) return;
     if (friends.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Add friends first to tag them")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("Add friends first to tag them"))));
       return;
     }
     final picked = {for (final t in tagged) t.id};
@@ -78,12 +79,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           child: SizedBox(
             height: MediaQuery.of(ctx).size.height * 0.6,
             child: Column(children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
                 child: Row(children: [
                   Icon(Icons.person_add_alt_1_rounded, color: AppColors.joy),
                   SizedBox(width: 10),
-                  Text("Who was with you?", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                  Text(tr("Who was with you?"), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                 ]),
               ),
               Expanded(
@@ -215,7 +216,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Future<void> submit() async {
     if (selectedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Add a photo or a short video")),
+        SnackBar(content: Text(tr("Add a photo or a short video"))),
       );
       return;
     }
@@ -253,15 +254,15 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         context: context,
         builder: (context) => AlertDialog(
           backgroundColor: AppColors.card,
-          title: Text("You put something good out there", style: AppTextStyles.title),
+          title: Text(tr("You put something good out there"), style: AppTextStyles.title),
           content: Text(
-            "Friends can feel it now. Eco Points arrive when one of them verifies it.",
+            tr("Friends can feel it now. Eco Points arrive when one of them verifies it."),
             style: AppTextStyles.body,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Love that"),
+              child: Text(tr("Love that")),
             ),
           ],
         ),
@@ -288,13 +289,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text("Share a moment", style: AppTextStyles.title),
+        title: Text(tr("Share a moment"), style: AppTextStyles.title),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
           Text(
-            "Planet, people, animals, or the feeling after you helped.",
+            tr("Planet, people, animals, or the feeling after you helped."),
             style: AppTextStyles.subtitle.copyWith(height: 1.4),
           ),
           const SizedBox(height: 16),
@@ -308,7 +309,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           ),
           if (selectedFile != null) ...[
             const SizedBox(height: 14),
-            Text("Filter", style: AppTextStyles.title.copyWith(fontSize: 16)),
+            Text(tr("Filter"), style: AppTextStyles.title.copyWith(fontSize: 16)),
             const SizedBox(height: 4),
             Text(
               isVideo ? "Applied when friends watch your clip." : "A cleaner finish on the photo. The original stays yours.",
@@ -335,7 +336,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           ],
           if (selectedFile != null) ...[
             const SizedBox(height: 18),
-            Text("Sound", style: AppTextStyles.title.copyWith(fontSize: 16)),
+            Text(tr("Sound"), style: AppTextStyles.title.copyWith(fontSize: 16)),
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(12),
@@ -357,8 +358,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       ),
                       child: const Icon(Icons.library_music_rounded, color: Colors.white),
                     ),
-                    title: const Text("Add music", style: TextStyle(fontWeight: FontWeight.w800)),
-                    subtitle: const Text("Pick a track from your phone"),
+                    title: Text(tr("Add music"), style: TextStyle(fontWeight: FontWeight.w800)),
+                    subtitle: Text(tr("Pick a track from your phone")),
                     trailing: const Icon(Icons.add_rounded),
                     onTap: pickMusic,
                   )
@@ -371,10 +372,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       icon: Icon(previewingMusic ? Icons.pause_rounded : Icons.play_arrow_rounded, color: Colors.white),
                     ),
                     title: Text(musicTitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
-                    subtitle: const Text("Tap play to preview"),
+                    subtitle: Text(tr("Tap play to preview")),
                     trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                      IconButton(tooltip: "Change", onPressed: pickMusic, icon: const Icon(Icons.swap_horiz_rounded)),
-                      IconButton(tooltip: "Remove", onPressed: removeMusic, icon: const Icon(Icons.close_rounded)),
+                      IconButton(tooltip: tr("Change"), onPressed: pickMusic, icon: const Icon(Icons.swap_horiz_rounded)),
+                      IconButton(tooltip: tr("Remove"), onPressed: removeMusic, icon: const Icon(Icons.close_rounded)),
                     ]),
                   ),
                 if (isVideo) ...[
@@ -382,7 +383,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     secondary: Icon(muteOriginal ? Icons.volume_off_rounded : Icons.volume_up_rounded, color: AppColors.navy),
-                    title: const Text("Original sound", style: TextStyle(fontWeight: FontWeight.w700)),
+                    title: Text(tr("Original sound"), style: TextStyle(fontWeight: FontWeight.w700)),
                     subtitle: Text(muteOriginal ? "Muted" : "On"),
                     value: !muteOriginal,
                     onChanged: (on) {
@@ -396,17 +397,17 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             if (musicFile != null)
               Padding(
                 padding: const EdgeInsets.only(top: 6, left: 4),
-                child: Text("Only use music you have the right to share.", style: AppTextStyles.subtitle.copyWith(fontSize: 12)),
+                child: Text(tr("Only use music you have the right to share."), style: AppTextStyles.subtitle.copyWith(fontSize: 12)),
               ),
           ],
           const SizedBox(height: 18),
-          Text("What did you do?", style: AppTextStyles.title.copyWith(fontSize: 16)),
+          Text(tr("What did you do?"), style: AppTextStyles.title.copyWith(fontSize: 16)),
           const SizedBox(height: 10),
           TextField(
             onChanged: (v) => setState(() => query = v),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               prefixIcon: Icon(Icons.search_rounded),
-              hintText: "Search: beach, metro, compost, e-waste…",
+              hintText: tr("Search: beach, metro, compost, e-waste…"),
             ),
           ),
           const SizedBox(height: 12),
@@ -464,7 +465,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: tagged.isEmpty
-                        ? Text("Tag friends", style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700))
+                        ? Text(tr("Tag friends"), style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700))
                         : Wrap(spacing: 6, runSpacing: 6, children: [
                             for (final t in tagged)
                               Chip(
@@ -503,7 +504,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       height: 22,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
-                  : const Text("Share the moment"),
+                  : Text(tr("Share the moment")),
             ),
           ),
         ],
@@ -547,7 +548,7 @@ class _MediaStage extends StatelessWidget {
                   const Icon(Icons.auto_awesome_rounded, color: AppColors.sun, size: 42),
                   const SizedBox(height: 8),
                   Text(
-                    "A photo or a short clip",
+                    tr("A photo or a short clip"),
                     style: AppTextStyles.body.copyWith(color: Colors.white),
                   ),
                 ],
@@ -581,9 +582,9 @@ class _MediaStage extends StatelessWidget {
               bottom: 12,
               child: Row(
                 children: [
-                  _PickButton(label: "Photo", icon: Icons.photo_rounded, onTap: onPhoto),
+                  _PickButton(label: tr("Photo"), icon: Icons.photo_rounded, onTap: onPhoto),
                   const SizedBox(width: 8),
-                  _PickButton(label: "Video", icon: Icons.videocam_rounded, onTap: onVideo),
+                  _PickButton(label: tr("Video"), icon: Icons.videocam_rounded, onTap: onVideo),
                 ],
               ),
             ),

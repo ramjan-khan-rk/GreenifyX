@@ -9,6 +9,7 @@ import '../../core/widgets/app_status.dart';
 import '../../core/widgets/user_avatar.dart';
 import 'org_api.dart';
 import 'org_widgets.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class OrgDashboardScreen extends ConsumerWidget {
   final String orgId;
@@ -18,11 +19,11 @@ class OrgDashboardScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Leave this team?"),
-        content: const Text("Your past verified actions stay in your own history."),
+        title: Text(tr("Leave this team?")),
+        content: Text(tr("Your past verified actions stay in your own history.")),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Stay")),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Leave")),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(tr("Stay"))),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(tr("Leave"))),
         ],
       ),
     );
@@ -41,7 +42,7 @@ class OrgDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text("Team impact", style: AppTextStyles.title)),
+      appBar: AppBar(title: Text(tr("Team impact"), style: AppTextStyles.title)),
       body: ref.watch(orgDashboardProvider(orgId)).when(
             loading: () => const AppLoading(),
             error: (e, _) => AppErrorState(message: friendlyError(e), onRetry: () => ref.invalidate(orgDashboardProvider(orgId))),
@@ -79,8 +80,8 @@ class OrgDashboardScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(color: AppColors.sun.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(14)),
-                      child: const Text(
-                        "Awaiting verification. You can invite members now; the trusted badge and leaderboard place appear once GreenifyX verifies you.",
+                      child: Text(
+                        tr("Awaiting verification. You can invite members now; the trusted badge and leaderboard place appear once GreenifyX verifies you."),
                         style: TextStyle(height: 1.4, fontWeight: FontWeight.w600),
                       ),
                     ),
@@ -118,15 +119,15 @@ class OrgDashboardScreen extends ConsumerWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            const Text("Invite code", style: TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
+                            Text(tr("Invite code"), style: TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
                             Text(code, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 22, letterSpacing: 4)),
                           ]),
                         ),
                         IconButton.filledTonal(
-                          tooltip: "Copy",
+                          tooltip: tr("Copy"),
                           onPressed: () {
                             Clipboard.setData(ClipboardData(text: code));
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Code copied. Share it with your team.")));
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("Code copied. Share it with your team."))));
                           },
                           icon: const Icon(Icons.copy_rounded),
                         ),
@@ -135,7 +136,7 @@ class OrgDashboardScreen extends ConsumerWidget {
                   ],
                   if (sponsored.isNotEmpty) ...[
                     const SizedBox(height: 20),
-                    Text("Our campaigns", style: AppTextStyles.title.copyWith(fontSize: 17)),
+                    Text(tr("Our campaigns"), style: AppTextStyles.title.copyWith(fontSize: 17)),
                     const SizedBox(height: 8),
                     for (final c in sponsored)
                       Container(
@@ -151,7 +152,7 @@ class OrgDashboardScreen extends ConsumerWidget {
                       ),
                   ],
                   const SizedBox(height: 20),
-                  Text("Top members", style: AppTextStyles.title.copyWith(fontSize: 17)),
+                  Text(tr("Top members"), style: AppTextStyles.title.copyWith(fontSize: 17)),
                   const SizedBox(height: 8),
                   Container(
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
@@ -170,7 +171,7 @@ class OrgDashboardScreen extends ConsumerWidget {
                     style: TextButton.styleFrom(foregroundColor: AppColors.error),
                     onPressed: () => _leave(context, ref),
                     icon: const Icon(Icons.logout_rounded),
-                    label: const Text("Leave team"),
+                    label: Text(tr("Leave team")),
                   ),
                 ]),
               );

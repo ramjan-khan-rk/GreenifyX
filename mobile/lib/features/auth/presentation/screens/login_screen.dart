@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_status.dart';
 import '../../application/providers/auth_provider.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -33,7 +34,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (identifier.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enter your email and password")),
+        SnackBar(content: Text(tr("Enter your email and password"))),
       );
       return;
     }
@@ -75,7 +76,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const BrandLockup(markSize: 88),
               const SizedBox(height: 28),
               Text(
-                "Sign in to track Eco Points, challenges, and your community.",
+                tr("Sign in to track Eco Points, challenges, and your community."),
                 style: AppTextStyles.subtitle,
                 textAlign: TextAlign.center,
               ),
@@ -84,10 +85,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 controller: identifierController,
                 keyboardType: TextInputType.emailAddress,
                 autocorrect: false,
-                decoration: const InputDecoration(
-                  labelText: "Email",
+                decoration: InputDecoration(
+                  labelText: tr("Email"),
                   helperText:
-                      "Existing phone accounts work too (+971 default; +91 still accepted)",
+                      tr("Existing phone accounts work too (+971 default; +91 still accepted)"),
                 ),
               ),
               const SizedBox(height: 16),
@@ -95,7 +96,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 controller: passwordController,
                 obscureText: obscurePassword,
                 decoration: InputDecoration(
-                  labelText: "Password",
+                  labelText: tr("Password"),
                   suffixIcon: IconButton(
                     icon: Icon(
                       obscurePassword
@@ -115,7 +116,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => context.push(AppRoutes.forgotPassword),
-                  child: const Text("Forgot password?"),
+                  child: Text(tr("Forgot password?")),
                 ),
               ),
               const SizedBox(height: 8),
@@ -133,13 +134,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text("Log in"),
+                      : Text(tr("Log in")),
                 ),
               ),
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () => context.push(AppRoutes.register),
-                child: const Text("Create an account with email"),
+                child: Text(tr("Create an account with email")),
               ),
             ],
           ),

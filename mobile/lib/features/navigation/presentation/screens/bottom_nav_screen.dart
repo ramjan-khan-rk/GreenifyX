@@ -58,7 +58,7 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
       duration: const Duration(seconds: 5),
       content: Text("$name: $preview", maxLines: 2, overflow: TextOverflow.ellipsis),
       action: SnackBarAction(
-        label: "Reply",
+        label: tr("Reply"),
         textColor: AppColors.sun,
         onPressed: () => openChat(context, userId: id, name: name, profileImage: image),
       ),

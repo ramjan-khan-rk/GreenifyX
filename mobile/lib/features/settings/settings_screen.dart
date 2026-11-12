@@ -111,17 +111,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(ctx).viewInsets.bottom + 24),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          const Text("Change password", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+          Text(tr("Change password"), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
           const SizedBox(height: 16),
-          TextField(controller: cur, obscureText: true, decoration: const InputDecoration(labelText: "Current password")),
+          TextField(controller: cur, obscureText: true, decoration: InputDecoration(labelText: tr("Current password"))),
           const SizedBox(height: 12),
           TextField(
             controller: next,
             obscureText: true,
-            decoration: const InputDecoration(labelText: "New password", helperText: "At least 8 characters with letters and a number"),
+            decoration: InputDecoration(labelText: tr("New password"), helperText: tr("At least 8 characters with letters and a number")),
           ),
           const SizedBox(height: 18),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("Update password")),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr("Update password"))),
         ]),
       ),
     );
@@ -139,18 +139,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Delete your account?"),
+        title: Text(tr("Delete your account?")),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text("Your profile, posts and points will be removed. This can't be undone."),
+          Text(tr("Your profile, posts and points will be removed. This can't be undone.")),
           const SizedBox(height: 14),
-          TextField(controller: pw, obscureText: true, decoration: const InputDecoration(labelText: "Confirm with your password")),
+          TextField(controller: pw, obscureText: true, decoration: InputDecoration(labelText: tr("Confirm with your password"))),
         ]),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Cancel")),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr("Cancel"))),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text("Delete"),
+            child: Text(tr("Delete")),
           ),
         ],
       ),
@@ -187,8 +187,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const _Label("Account"),
           _Card(children: [
-            _Row(icon: Icons.person_outline_rounded, title: "Edit profile", onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen()))),
-            _Row(icon: Icons.lock_outline_rounded, title: "Change password", onTap: _changePassword),
+            _Row(icon: Icons.person_outline_rounded, title: tr("Edit profile"), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen()))),
+            _Row(icon: Icons.lock_outline_rounded, title: tr("Change password"), onTap: _changePassword),
           ]),
           const _Label("Notifications"),
           _Card(children: [
@@ -212,14 +212,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ]),
           const _Label("About"),
           _Card(children: [
-            _Row(icon: Icons.privacy_tip_outlined, title: "Privacy policy", onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => LegalScreen.privacy))),
-            _Row(icon: Icons.description_outlined, title: "Terms of use", onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => LegalScreen.terms))),
+            _Row(icon: Icons.privacy_tip_outlined, title: tr("Privacy policy"), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => LegalScreen.privacy))),
+            _Row(icon: Icons.description_outlined, title: tr("Terms of use"), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => LegalScreen.terms))),
             ListTile(leading: const Icon(Icons.info_outline_rounded), title: Text(tr("Version")), trailing: const Text("1.0.0")),
           ]),
           const SizedBox(height: 20),
           _Card(children: [
-            _Row(icon: Icons.logout_rounded, title: "Log out", onTap: _logout),
-            _Row(icon: Icons.delete_outline_rounded, title: "Delete account", danger: true, onTap: _deleteAccount),
+            _Row(icon: Icons.logout_rounded, title: tr("Log out"), onTap: _logout),
+            _Row(icon: Icons.delete_outline_rounded, title: tr("Delete account"), danger: true, onTap: _deleteAccount),
           ]),
         ],
       ),

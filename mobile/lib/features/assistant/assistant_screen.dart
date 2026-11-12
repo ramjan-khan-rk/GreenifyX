@@ -7,6 +7,7 @@ import '../../core/utils/friendly_error.dart';
 import 'assistant_api.dart';
 import 'assistant_cards.dart';
 import 'snap_sort_screen.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 const _suggestions = [
   "Campaigns I can join this weekend",
@@ -93,13 +94,13 @@ class _AssistantScreenState extends State<AssistantScreen> {
           ),
           const SizedBox(width: 10),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text("Ask GreenifyX", style: AppTextStyles.title.copyWith(fontSize: 18)),
-            Text("Answers from live campaigns, places and your activity", style: AppTextStyles.tagline.copyWith(fontSize: 11)),
+            Text(tr("Ask GreenifyX"), style: AppTextStyles.title.copyWith(fontSize: 18)),
+            Text(tr("Answers from live campaigns, places and your activity"), style: AppTextStyles.tagline.copyWith(fontSize: 11)),
           ]),
         ]),
         actions: [
           IconButton(
-            tooltip: "Snap & Sort",
+            tooltip: tr("Snap & Sort"),
             icon: const Icon(Icons.camera_alt_rounded),
             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SnapSortScreen())),
           ),
@@ -133,7 +134,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
                   minLines: 1,
                   maxLines: 4,
                   decoration: InputDecoration(
-                    hintText: "Ask about campaigns, recycling, your points…",
+                    hintText: tr("Ask about campaigns, recycling, your points…"),
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: const BorderSide(color: AppColors.border)),
@@ -175,10 +176,10 @@ class _Welcome extends StatelessWidget {
         ),
       ),
       const SizedBox(height: 16),
-      Text("How can I help you go green today?", textAlign: TextAlign.center, style: AppTextStyles.title),
+      Text(tr("How can I help you go green today?"), textAlign: TextAlign.center, style: AppTextStyles.title),
       const SizedBox(height: 6),
       Text(
-        "I know the live campaigns, recycling and refill points, and your own points and reports.",
+        tr("I know the live campaigns, recycling and refill points, and your own points and reports."),
         textAlign: TextAlign.center,
         style: AppTextStyles.subtitle,
       ),
@@ -189,15 +190,15 @@ class _Welcome extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SnapSortScreen())),
-          child: const Padding(
+          child: Padding(
             padding: EdgeInsets.all(16),
             child: Row(children: [
               Icon(Icons.camera_alt_rounded, color: AppColors.sun),
               SizedBox(width: 12),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text("Snap & Sort", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
-                  Text("Point your camera at an item to see where it goes",
+                  Text(tr("Snap & Sort"), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                  Text(tr("Point your camera at an item to see where it goes"),
                       style: TextStyle(color: Color(0xB3FFFFFF), fontSize: 12.5)),
                 ]),
               ),
@@ -271,10 +272,10 @@ class _Typing extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: AppColors.border),
         ),
-        child: const Row(mainAxisSize: MainAxisSize.min, children: [
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
           SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
           SizedBox(width: 10),
-          Text("Looking that up…", style: TextStyle(color: AppColors.subtitle)),
+          Text(tr("Looking that up…"), style: TextStyle(color: AppColors.subtitle)),
         ]),
       ),
     );

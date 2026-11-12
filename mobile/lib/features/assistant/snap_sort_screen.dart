@@ -8,6 +8,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/friendly_error.dart';
 import 'assistant_api.dart';
 import 'assistant_cards.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class SnapSortScreen extends StatefulWidget {
   const SnapSortScreen({super.key});
@@ -68,7 +69,7 @@ class _SnapSortScreenState extends State<SnapSortScreen> {
     final confidence = (result?["confidence"] as num?)?.toDouble();
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text("Snap & Sort", style: AppTextStyles.title)),
+      appBar: AppBar(title: Text(tr("Snap & Sort"), style: AppTextStyles.title)),
       body: ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 120), children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(22),
@@ -82,21 +83,21 @@ class _SnapSortScreenState extends State<SnapSortScreen> {
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(colors: [AppColors.ink, Color(0xFF3A3256)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                   ),
-                  child: const Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                     Icon(Icons.camera_alt_rounded, color: AppColors.sun, size: 48),
                     SizedBox(height: 10),
-                    Text("Point at a bottle, battery, box…", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                    Text(tr("Point at a bottle, battery, box…"), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
                     SizedBox(height: 4),
-                    Text("We'll tell you which bin and where to drop it", style: TextStyle(color: Color(0xB3FFFFFF), fontSize: 12.5)),
+                    Text(tr("We'll tell you which bin and where to drop it"), style: TextStyle(color: Color(0xB3FFFFFF), fontSize: 12.5)),
                   ]),
                 ),
               if (_busy)
                 Container(
                   color: Colors.black45,
-                  child: const Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                     CircularProgressIndicator(color: Colors.white),
                     SizedBox(height: 12),
-                    Text("Identifying…", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                    Text(tr("Identifying…"), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
                   ]),
                 ),
             ]),
@@ -120,15 +121,15 @@ class _SnapSortScreenState extends State<SnapSortScreen> {
           GuideCard(data: result),
           if (_outcome!.places.isNotEmpty) ...[
             const SizedBox(height: 18),
-            Text("Where to take it", style: AppTextStyles.title.copyWith(fontSize: 17)),
+            Text(tr("Where to take it"), style: AppTextStyles.title.copyWith(fontSize: 17)),
             for (final p in _outcome!.places) AssistantCard(card: p),
           ],
         ],
         if (_manualItems != null && result == null) ...[
           const SizedBox(height: 16),
-          Text("What is it?", style: AppTextStyles.title.copyWith(fontSize: 17)),
+          Text(tr("What is it?"), style: AppTextStyles.title.copyWith(fontSize: 17)),
           const SizedBox(height: 4),
-          const Text("Pick the closest match and we'll show how to sort it.", style: TextStyle(color: AppColors.subtitle)),
+          Text(tr("Pick the closest match and we'll show how to sort it."), style: TextStyle(color: AppColors.subtitle)),
           const SizedBox(height: 10),
           Wrap(spacing: 8, runSpacing: 8, children: [
             for (final item in _manualItems!)

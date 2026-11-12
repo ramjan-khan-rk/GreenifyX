@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class SparkCard extends StatelessWidget {
   final VoidCallback onShare;
@@ -33,7 +34,7 @@ class SparkCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Today",
+            tr("Today"),
             style: AppTextStyles.subtitle.copyWith(
               color: Colors.white70,
               fontWeight: FontWeight.w700,
@@ -51,7 +52,7 @@ class SparkCard extends StatelessWidget {
               backgroundColor: Colors.white,
               foregroundColor: AppColors.ink,
             ),
-            child: const Text("Share a moment"),
+            child: Text(tr("Share a moment")),
           ),
         ],
       ),

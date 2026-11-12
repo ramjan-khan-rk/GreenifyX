@@ -7,6 +7,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/brand_icons.dart';
 import '../../application/providers/auth_provider.dart';
 import 'set_password_screen.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
   final String email;
@@ -51,7 +52,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     if (!ok || !mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Email verified")),
+      SnackBar(content: Text(tr("Email verified"))),
     );
 
     Navigator.pushReplacement(
@@ -99,7 +100,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             if (kDebugMode && widget.devOtp != null) ...[
               const SizedBox(height: 12),
               Text(
-                "Development shortcut is enabled on this non-production API.",
+                tr("Development shortcut is enabled on this non-production API."),
                 textAlign: TextAlign.center,
                 style: AppTextStyles.subtitle,
               ),
@@ -109,8 +110,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               controller: otpController,
               keyboardType: TextInputType.number,
               maxLength: 6,
-              decoration: const InputDecoration(
-                labelText: "Verification code",
+              decoration: InputDecoration(
+                labelText: tr("Verification code"),
               ),
             ),
             const SizedBox(height: 20),
@@ -128,7 +129,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                           color: Colors.white,
                         ),
                       )
-                    : const Text("Verify code"),
+                    : Text(tr("Verify code")),
               ),
             ),
           ],

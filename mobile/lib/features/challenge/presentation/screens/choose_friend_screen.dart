@@ -8,6 +8,7 @@ import '../../../friends/application/providers/friend_provider.dart';
 import '../../../friends/domain/models/friend_model.dart';
 import '../../application/providers/challenge_provider.dart';
 import '../../../../core/utils/friendly_error.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class ChooseFriendScreen extends ConsumerStatefulWidget {
   final String title;
@@ -65,7 +66,7 @@ class _ChooseFriendScreenState extends ConsumerState<ChooseFriendScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Challenge sent")),
+        SnackBar(content: Text(tr("Challenge sent"))),
       );
 
       ref.invalidate(challengesProvider);
@@ -90,7 +91,7 @@ class _ChooseFriendScreenState extends ConsumerState<ChooseFriendScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         title: Text(
-          "Choose opponent",
+          tr("Choose opponent"),
           style: AppTextStyles.title.copyWith(fontSize: 20),
         ),
       ),
@@ -113,7 +114,7 @@ class _ChooseFriendScreenState extends ConsumerState<ChooseFriendScreen> {
                 child: TextField(
                   controller: searchController,
                   decoration: InputDecoration(
-                    hintText: "Search friends",
+                    hintText: tr("Search friends"),
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
                     fillColor: Colors.white,
@@ -133,7 +134,7 @@ class _ChooseFriendScreenState extends ConsumerState<ChooseFriendScreen> {
                 child: filtered.isEmpty
                     ? Center(
                         child: Text(
-                          "No friends match your search",
+                          tr("No friends match your search"),
                           style: AppTextStyles.subtitle,
                         ),
                       )

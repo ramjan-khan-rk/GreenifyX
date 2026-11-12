@@ -126,11 +126,11 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
         icon: const Icon(Icons.celebration_rounded, color: AppColors.joy, size: 40),
         title: Text(title, textAlign: TextAlign.center),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text("Show this code at the partner counter", textAlign: TextAlign.center),
+          Text(tr("Show this code at the partner counter"), textAlign: TextAlign.center),
           const SizedBox(height: 16),
           _CodeBox(code: code),
         ]),
-        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Done"))],
+        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr("Done")))],
       ),
     );
   }
@@ -178,7 +178,7 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
                 ? Center(child: Padding(padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [
                     Text(_error!, textAlign: TextAlign.center),
                     const SizedBox(height: 12),
-                    FilledButton(onPressed: _load, child: const Text("Try again")),
+                    FilledButton(onPressed: _load, child: Text(tr("Try again"))),
                   ])))
                 : TabBarView(controller: _tabs, children: [
                     RefreshIndicator(
@@ -201,18 +201,18 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
                         ),
                         const SizedBox(height: 14),
                         if (list.isEmpty)
-                          const Padding(padding: EdgeInsets.all(40), child: Center(child: Text("No rewards here yet — check back soon."))),
+                          Padding(padding: EdgeInsets.all(40), child: Center(child: Text(tr("No rewards here yet — check back soon.")))),
                         for (final r in list) _RewardCard(reward: r, balance: _balance, onTap: () => _redeem(r)),
                       ]),
                     ),
                     RefreshIndicator(
                       onRefresh: _load,
                       child: _mine.isEmpty
-                          ? ListView(children: const [
+                          ? ListView(children: [
                               SizedBox(height: 80),
                               Icon(Icons.confirmation_number_outlined, size: 56, color: AppColors.subtitle),
                               SizedBox(height: 12),
-                              Center(child: Text("Your reward codes will appear here")),
+                              Center(child: Text(tr("Your reward codes will appear here"))),
                             ])
                           : ListView.separated(
                               padding: const EdgeInsets.fromLTRB(16, 14, 16, 30),
@@ -339,7 +339,7 @@ class _CodeBox extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
       onTap: () {
         Clipboard.setData(ClipboardData(text: code));
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Code copied")));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("Code copied"))));
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),

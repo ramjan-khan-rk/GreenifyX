@@ -11,6 +11,7 @@ import '../../../../core/widgets/user_avatar.dart';
 import '../../../friends/application/providers/friend_provider.dart';
 import '../../application/providers/chats_provider.dart';
 import '../../domain/models/chat_model.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 String _when(DateTime t) {
   final now = DateTime.now();
@@ -39,12 +40,12 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text("Messages", style: AppTextStyles.title),
-          Text("Chat, voice notes and calls with friends", style: AppTextStyles.tagline),
+          Text(tr("Messages"), style: AppTextStyles.title),
+          Text(tr("Chat, voice notes and calls with friends"), style: AppTextStyles.tagline),
         ]),
       ),
       floatingActionButton: FloatingActionButton(
-        tooltip: "New message",
+        tooltip: tr("New message"),
         onPressed: () => _pickFriend(context),
         child: const Icon(Icons.edit_rounded),
       ),
@@ -59,8 +60,8 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
             child: TextField(
               onChanged: (v) => setState(() => _q = v.trim().toLowerCase()),
-              decoration: const InputDecoration(
-                hintText: "Search",
+              decoration: InputDecoration(
+                hintText: tr("Search"),
                 prefixIcon: Icon(Icons.search_rounded),
                 contentPadding: EdgeInsets.symmetric(vertical: 12),
               ),
@@ -112,12 +113,12 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
             data: (list) {
               final shown = _q.isEmpty ? list : list.where((c) => c.userName.toLowerCase().contains(_q)).toList();
               if (shown.isEmpty) {
-                return const Padding(
+                return Padding(
                   padding: EdgeInsets.only(top: 40),
                   child: AppEmptyState(
                     icon: Icons.chat_bubble_rounded,
-                    title: "No conversations yet",
-                    message: "Tap a friend above or the pencil button to start chatting.",
+                    title: tr("No conversations yet"),
+                    message: tr("Tap a friend above or the pencil button to start chatting."),
                   ),
                 );
               }
@@ -143,11 +144,11 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
               loading: () => const AppLoading(),
               error: (e, _) => Center(child: Text(friendlyError(e))),
               data: (list) => list.isEmpty
-                  ? const AppEmptyState(icon: Icons.group_add_rounded, title: "No friends yet", message: "Add friends to start chatting.")
+                  ? AppEmptyState(icon: Icons.group_add_rounded, title: tr("No friends yet"), message: tr("Add friends to start chatting."))
                   : ListView(children: [
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
-                        child: Text("New message", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                        child: Text(tr("New message"), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                       ),
                       for (final f in list)
                         ListTile(
@@ -155,7 +156,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
                           title: Text(f.name, style: const TextStyle(fontWeight: FontWeight.w700)),
                           trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                             IconButton(
-                              tooltip: "Voice call",
+                              tooltip: tr("Voice call"),
                               icon: const Icon(Icons.call_rounded, color: AppColors.eco),
                               onPressed: () {
                                 Navigator.pop(context);
@@ -163,7 +164,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
                               },
                             ),
                             IconButton(
-                              tooltip: "Video call",
+                              tooltip: tr("Video call"),
                               icon: const Icon(Icons.videocam_rounded, color: AppColors.eco),
                               onPressed: () {
                                 Navigator.pop(context);

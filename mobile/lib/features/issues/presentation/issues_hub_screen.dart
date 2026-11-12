@@ -8,6 +8,7 @@ import '../../../core/widgets/app_status.dart';
 import '../data/issue_api.dart';
 import 'issue_widgets.dart';
 import 'report_issue_screen.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class IssuesHubScreen extends ConsumerWidget {
   const IssuesHubScreen({super.key});
@@ -20,8 +21,8 @@ class IssuesHubScreen extends ConsumerWidget {
         backgroundColor: AppColors.background,
         appBar: AppBar(
           title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text("Report & Restore", style: AppTextStyles.title),
-            Text("Spot it. Report it. Track it.", style: AppTextStyles.tagline),
+            Text(tr("Report & Restore"), style: AppTextStyles.title),
+            Text(tr("Spot it. Report it. Track it."), style: AppTextStyles.tagline),
           ]),
           bottom: const TabBar(
             labelColor: AppColors.primary,
@@ -35,7 +36,7 @@ class IssuesHubScreen extends ConsumerWidget {
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportIssueScreen())),
           icon: const Icon(Icons.add_a_photo_rounded),
-          label: const Text("Report a problem"),
+          label: Text(tr("Report a problem")),
         ),
         body: const TabBarView(children: [_Mine(), _Nearby()]),
       ),
@@ -55,10 +56,10 @@ class _Mine extends ConsumerWidget {
             onRetry: () => ref.invalidate(myIssuesProvider),
           ),
           data: (items) => items.isEmpty
-              ? const AppEmptyState(
+              ? AppEmptyState(
                   icon: Icons.report_gmailerrorred_rounded,
-                  title: "Nothing reported yet",
-                  message: "Seen illegal dumping, an overflowing bin or pollution? Snap a photo and we'll track it to resolution.",
+                  title: tr("Nothing reported yet"),
+                  message: tr("Seen illegal dumping, an overflowing bin or pollution? Snap a photo and we'll track it to resolution."),
                 )
               : RefreshIndicator(
                   color: AppColors.primary,
@@ -105,10 +106,10 @@ class _NearbyState extends ConsumerState<_Nearby> {
           data: (items) {
             final others = items.where((r) => !r.isMine).toList();
             if (others.isEmpty) {
-              return const AppEmptyState(
+              return AppEmptyState(
                 icon: Icons.check_circle_rounded,
-                title: "All clear around you",
-                message: "No open reports from other residents right now.",
+                title: tr("All clear around you"),
+                message: tr("No open reports from other residents right now."),
               );
             }
             return RefreshIndicator(

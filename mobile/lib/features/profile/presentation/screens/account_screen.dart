@@ -30,6 +30,7 @@ import '../../../map/eco_map_screen.dart';
 import '../../../orgs/teams_screen.dart';
 import '../../../../core/utils/friendly_error.dart';
 import '../../../../core/services/push_service.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -44,7 +45,7 @@ class AccountScreen extends ConsumerWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Profile", style: AppTextStyles.title),
+            Text(tr("Profile"), style: AppTextStyles.title),
             Text(BrandCopy.tagline, style: AppTextStyles.tagline),
           ],
         ),
@@ -129,12 +130,12 @@ class AccountScreen extends ConsumerWidget {
                     color: AppColors.eco,
                     child: ListTile(
                       leading: const Icon(Icons.verified_user_rounded, color: Colors.white),
-                      title: const Text(
-                        "Field verification",
+                      title: Text(
+                        tr("Field verification"),
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
                       ),
                       subtitle: Text(
-                        "Your assignments and on-site reports",
+                        tr("Your assignments and on-site reports"),
                         style: TextStyle(color: Colors.white.withValues(alpha: 0.85)),
                       ),
                       trailing: const Icon(Icons.chevron_right, color: Colors.white),
@@ -148,7 +149,7 @@ class AccountScreen extends ConsumerWidget {
                   ),
                 _ProfileLink(
                   icon: Icons.stars_rounded,
-                  title: "Eco Points",
+                  title: tr("Eco Points"),
                   subtitle: "Balance and full history",
                   onTap: () {
                     Navigator.push(
@@ -159,25 +160,25 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: Icons.redeem_rounded,
-                  title: "Rewards",
+                  title: tr("Rewards"),
                   subtitle: "Spend Eco Points on vouchers and experiences",
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RewardsScreen())),
                 ),
                 _ProfileLink(
                   icon: Icons.event_rounded,
-                  title: "Green events",
+                  title: tr("Green events"),
                   subtitle: "Clean-ups, plantings and workshops near you",
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EventsScreen())),
                 ),
                 _ProfileLink(
                   icon: Icons.local_shipping_rounded,
-                  title: "Recycling pickup",
+                  title: tr("Recycling pickup"),
                   subtitle: "Book a doorstep collection",
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PickupScreen())),
                 ),
                 _ProfileLink(
                   icon: Icons.groups_rounded,
-                  title: "Teams",
+                  title: tr("Teams"),
                   subtitle: "Your company, school or community impact",
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const TeamsScreen()));
@@ -185,7 +186,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: Icons.map_rounded,
-                  title: "Smart Eco Map",
+                  title: tr("Smart Eco Map"),
                   subtitle: "Campaigns, recycling and refill points near you",
                   onTap: () {
                     Navigator.push(
@@ -196,7 +197,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: Icons.report_gmailerrorred_rounded,
-                  title: "My environmental reports",
+                  title: tr("My environmental reports"),
                   subtitle: "Track what you reported",
                   onTap: () {
                     Navigator.push(
@@ -207,7 +208,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: BrandGlyph.challenges,
-                  title: "Challenges",
+                  title: tr("Challenges"),
                   subtitle: "Friendly eco challenges",
                   onTap: () {
                     Navigator.push(
@@ -218,7 +219,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: BrandGlyph.settings,
-                  title: "Settings",
+                  title: tr("Settings"),
                   subtitle: "Profile, password, notifications, language",
                   onTap: () {
                     Navigator.push(
@@ -231,7 +232,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: BrandGlyph.friends,
-                  title: "Friends",
+                  title: tr("Friends"),
                   subtitle: "${user.friendsCount} connections",
                   onTap: () {
                     Navigator.push(
@@ -244,7 +245,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: BrandGlyph.leaderboard,
-                  title: "Leaderboard",
+                  title: tr("Leaderboard"),
                   subtitle: "Verified Eco Points ranking",
                   onTap: () {
                     Navigator.push(
@@ -257,7 +258,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: BrandGlyph.post,
-                  title: "Posts",
+                  title: tr("Posts"),
                   subtitle: "Community feed and verify",
                   onTap: () {
                     Navigator.push(
@@ -270,7 +271,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: BrandGlyph.chat,
-                  title: "Chat",
+                  title: tr("Chat"),
                   subtitle: "Friends-only messages",
                   onTap: () {
                     Navigator.push(
@@ -303,7 +304,7 @@ class AccountScreen extends ConsumerWidget {
                       }
                     },
                     icon: const Icon(Icons.logout),
-                    label: const Text("Log out"),
+                    label: Text(tr("Log out")),
                   ),
                 ),
               ],

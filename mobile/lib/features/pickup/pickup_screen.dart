@@ -90,9 +90,9 @@ class _PickupScreenState extends State<PickupScreen> {
             child: Row(children: [
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text("Doorstep recycling", style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800)),
+                  Text(tr("Doorstep recycling"), style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 6),
-                  Text("We collect it, weigh it and credit 10 Eco Points per kg.",
+                  Text(tr("We collect it, weigh it and credit 10 Eco Points per kg."),
                       style: TextStyle(color: Colors.white.withValues(alpha: 0.9), height: 1.4)),
                   const SizedBox(height: 12),
                   Text("${_collectedKg.toStringAsFixed(1)} kg recycled so far",
@@ -103,13 +103,13 @@ class _PickupScreenState extends State<PickupScreen> {
             ]),
           ),
           const SizedBox(height: 20),
-          const Text("Your pickups", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          Text(tr("Your pickups"), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           const SizedBox(height: 10),
           if (_loading) const Padding(padding: EdgeInsets.all(30), child: Center(child: CircularProgressIndicator())),
           if (!_loading && _pickups.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(30),
-              child: Center(child: Text("No pickups yet. Book your first one!", style: TextStyle(color: AppColors.subtitle))),
+              child: Center(child: Text(tr("No pickups yet. Book your first one!"), style: TextStyle(color: AppColors.subtitle))),
             ),
           for (final p in _pickups) _PickupTile(p: p, onCancel: () => _cancel(p)),
         ]),
@@ -170,7 +170,7 @@ class _PickupTile extends StatelessWidget {
           Text(p["adminNote"], style: const TextStyle(color: AppColors.subtitle, fontSize: 13)),
         ],
         if (status == "requested" || status == "scheduled")
-          Align(alignment: Alignment.centerRight, child: TextButton(onPressed: onCancel, child: const Text("Cancel pickup"))),
+          Align(alignment: Alignment.centerRight, child: TextButton(onPressed: onCancel, child: Text(tr("Cancel pickup")))),
       ]),
     );
   }
@@ -220,7 +220,7 @@ class _NewPickupScreenState extends State<_NewPickupScreen> {
         if (_pos != null) "location": {"lat": _pos!.latitude, "lng": _pos!.longitude},
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Pickup booked! We'll confirm the time soon.")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("Pickup booked! We'll confirm the time soon."))));
       Navigator.pop(context, true);
     } catch (e) {
       _snack(friendlyError(e));
@@ -238,7 +238,7 @@ class _NewPickupScreenState extends State<_NewPickupScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(tr("Book a pickup"))),
       body: ListView(padding: const EdgeInsets.fromLTRB(18, 8, 18, 30), children: [
-        const Text("What are you recycling?", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+        Text(tr("What are you recycling?"), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
         const SizedBox(height: 10),
         Wrap(spacing: 8, runSpacing: 8, children: [
           for (final m in _materials.entries)
@@ -259,7 +259,7 @@ class _NewPickupScreenState extends State<_NewPickupScreen> {
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
           initialValue: _emirate,
-          decoration: const InputDecoration(labelText: "Emirate"),
+          decoration: InputDecoration(labelText: tr("Emirate")),
           items: [for (final e in _emirates) DropdownMenuItem(value: e, child: Text(e))],
           onChanged: (v) => setState(() => _emirate = v ?? _emirate),
         ),
@@ -267,10 +267,10 @@ class _NewPickupScreenState extends State<_NewPickupScreen> {
         TextField(
           controller: _address,
           decoration: InputDecoration(
-            labelText: "Address",
-            hintText: "Building, street, area",
+            labelText: tr("Address"),
+            hintText: tr("Building, street, area"),
             suffixIcon: IconButton(
-              tooltip: "Use my location",
+              tooltip: tr("Use my location"),
               onPressed: _locate,
               icon: Icon(_pos == null ? Icons.my_location_rounded : Icons.check_circle_rounded, color: _pos == null ? null : AppColors.eco),
             ),
@@ -280,7 +280,7 @@ class _NewPickupScreenState extends State<_NewPickupScreen> {
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.event_rounded),
-          title: const Text("Pickup date"),
+          title: Text(tr("Pickup date")),
           subtitle: Text(DateFormat("EEEE, d MMMM").format(_date)),
           trailing: const Icon(Icons.edit_calendar_rounded),
           onTap: () async {
@@ -294,23 +294,23 @@ class _NewPickupScreenState extends State<_NewPickupScreen> {
           },
         ),
         SegmentedButton<String>(
-          segments: const [
-            ButtonSegment(value: "morning", label: Text("Morning"), icon: Icon(Icons.wb_twilight_rounded)),
-            ButtonSegment(value: "afternoon", label: Text("Afternoon"), icon: Icon(Icons.wb_sunny_rounded)),
-            ButtonSegment(value: "evening", label: Text("Evening"), icon: Icon(Icons.nights_stay_rounded)),
+          segments: [
+            ButtonSegment(value: "morning", label: Text(tr("Morning")), icon: Icon(Icons.wb_twilight_rounded)),
+            ButtonSegment(value: "afternoon", label: Text(tr("Afternoon")), icon: Icon(Icons.wb_sunny_rounded)),
+            ButtonSegment(value: "evening", label: Text(tr("Evening")), icon: Icon(Icons.nights_stay_rounded)),
           ],
           selected: {_slot},
           onSelectionChanged: (s) => setState(() => _slot = s.first),
         ),
         const SizedBox(height: 12),
-        TextField(controller: _notes, maxLines: 2, decoration: const InputDecoration(labelText: "Notes for the driver (optional)")),
+        TextField(controller: _notes, maxLines: 2, decoration: InputDecoration(labelText: tr("Notes for the driver (optional)"))),
         const SizedBox(height: 22),
         FilledButton.icon(
           onPressed: _saving ? null : _submit,
           icon: _saving
               ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
               : const Icon(Icons.local_shipping_rounded),
-          label: const Text("Book pickup"),
+          label: Text(tr("Book pickup")),
         ),
       ]),
     );
