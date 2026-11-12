@@ -9,6 +9,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/deeds.dart';
 import '../../domain/looks.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:video_player/video_player.dart';
+import '../../../../core/services/media_upload.dart';
 import '../../data/repositories/post_repository.dart';
 import '../../../../core/utils/friendly_error.dart';
 
@@ -31,10 +35,67 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   String activity = deeds.first.name;
   String look = "hd";
 
+  // Sound
+  File? musicFile;
+  String musicTitle = "";
+  bool muteOriginal = false;
+  final AudioPlayer musicPreview = AudioPlayer();
+  bool previewingMusic = false;
+  VideoPlayerController? videoPreview;
+
   @override
   void dispose() {
     descriptionController.dispose();
+    musicPreview.dispose();
+    videoPreview?.dispose();
     super.dispose();
+  }
+
+  Future<void> _setupVideoPreview(File file) async {
+    await videoPreview?.dispose();
+    final c = VideoPlayerController.file(file);
+    videoPreview = c;
+    await c.initialize();
+    await c.setLooping(true);
+    await c.setVolume(muteOriginal ? 0 : 1);
+    if (mounted) setState(() {});
+  }
+
+  Future<void> pickMusic() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+    final path = result?.files.single.path;
+    if (path == null) return;
+    final name = result!.files.single.name;
+    final title = name.contains(".") ? name.substring(0, name.lastIndexOf(".")) : name;
+    await musicPreview.stop();
+    setState(() {
+      musicFile = File(path);
+      musicTitle = title.replaceAll(RegExp(r"[_-]+"), " ").trim();
+      previewingMusic = false;
+    });
+  }
+
+  Future<void> toggleMusicPreview() async {
+    if (musicFile == null) return;
+    if (previewingMusic) {
+      await musicPreview.pause();
+      videoPreview?.pause();
+      setState(() => previewingMusic = false);
+      return;
+    }
+    await musicPreview.setFilePath(musicFile!.path);
+    setState(() => previewingMusic = true);
+    videoPreview?.play();
+    await musicPreview.play();
+  }
+
+  Future<void> removeMusic() async {
+    await musicPreview.stop();
+    setState(() {
+      musicFile = null;
+      musicTitle = "";
+      previewingMusic = false;
+    });
   }
 
   Future<void> pick(bool video) async {
@@ -53,8 +114,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     setState(() {
       selectedFile = File(file.path);
       isVideo = video;
-      if (video) look = "natural";
     });
+    if (video) {
+      await _setupVideoPreview(File(file.path));
+    } else {
+      await videoPreview?.dispose();
+      setState(() {
+        videoPreview = null;
+        muteOriginal = false;
+      });
+    }
   }
 
   Future<void> submit() async {
@@ -73,11 +142,17 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           ? MediaType("video", name.toLowerCase().endsWith(".mov") ? "quicktime" : "mp4")
           : MediaType("image", "jpeg");
 
+      await musicPreview.stop();
+      videoPreview?.pause();
+      final musicUrl = musicFile == null ? null : await uploadAudioFile(musicFile!);
       final formData = FormData.fromMap({
         "description": descriptionController.text.trim(),
         "activity": activity,
         "cause": lane,
         "look": look,
+        "musicUrl": ?musicUrl,
+        if (musicUrl != null) "musicTitle": musicTitle,
+        "muteOriginal": isVideo && muteOriginal ? "true" : "false",
         "image": await MultipartFile.fromFile(
           selectedFile!.path,
           filename: name,
@@ -141,15 +216,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             file: selectedFile,
             isVideo: isVideo,
             look: selectedLook,
+            video: videoPreview,
             onPhoto: () => pick(false),
             onVideo: () => pick(true),
           ),
-          if (!isVideo && selectedFile != null) ...[
+          if (selectedFile != null) ...[
             const SizedBox(height: 14),
-            Text("Look", style: AppTextStyles.title.copyWith(fontSize: 16)),
+            Text("Filter", style: AppTextStyles.title.copyWith(fontSize: 16)),
             const SizedBox(height: 4),
             Text(
-              "A cleaner finish on the photo. The original stays yours.",
+              isVideo ? "Applied when friends watch your clip." : "A cleaner finish on the photo. The original stays yours.",
               style: AppTextStyles.subtitle,
             ),
             const SizedBox(height: 10),
@@ -170,6 +246,72 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 ],
               ),
             ),
+          ],
+          if (selectedFile != null) ...[
+            const SizedBox(height: 18),
+            Text("Sound", style: AppTextStyles.title.copyWith(fontSize: 16)),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(children: [
+                if (musicFile == null)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [AppColors.joy, AppColors.sun]),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.library_music_rounded, color: Colors.white),
+                    ),
+                    title: const Text("Add music", style: TextStyle(fontWeight: FontWeight.w800)),
+                    subtitle: const Text("Pick a track from your phone"),
+                    trailing: const Icon(Icons.add_rounded),
+                    onTap: pickMusic,
+                  )
+                else
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: IconButton.filled(
+                      style: IconButton.styleFrom(backgroundColor: AppColors.joy),
+                      onPressed: toggleMusicPreview,
+                      icon: Icon(previewingMusic ? Icons.pause_rounded : Icons.play_arrow_rounded, color: Colors.white),
+                    ),
+                    title: Text(musicTitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
+                    subtitle: const Text("Tap play to preview"),
+                    trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                      IconButton(tooltip: "Change", onPressed: pickMusic, icon: const Icon(Icons.swap_horiz_rounded)),
+                      IconButton(tooltip: "Remove", onPressed: removeMusic, icon: const Icon(Icons.close_rounded)),
+                    ]),
+                  ),
+                if (isVideo) ...[
+                  const Divider(height: 16),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    secondary: Icon(muteOriginal ? Icons.volume_off_rounded : Icons.volume_up_rounded, color: AppColors.navy),
+                    title: const Text("Original sound", style: TextStyle(fontWeight: FontWeight.w700)),
+                    subtitle: Text(muteOriginal ? "Muted" : "On"),
+                    value: !muteOriginal,
+                    onChanged: (on) {
+                      setState(() => muteOriginal = !on);
+                      videoPreview?.setVolume(on ? 1 : 0);
+                    },
+                  ),
+                ],
+              ]),
+            ),
+            if (musicFile != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 6, left: 4),
+                child: Text("Only use music you have the right to share.", style: AppTextStyles.subtitle.copyWith(fontSize: 12)),
+              ),
           ],
           const SizedBox(height: 18),
           Text("Who is this for?", style: AppTextStyles.title.copyWith(fontSize: 16)),
@@ -264,6 +406,7 @@ class _MediaStage extends StatelessWidget {
   final File? file;
   final bool isVideo;
   final MomentLook look;
+  final VideoPlayerController? video;
   final VoidCallback onPhoto;
   final VoidCallback onVideo;
 
@@ -273,6 +416,7 @@ class _MediaStage extends StatelessWidget {
     required this.look,
     required this.onPhoto,
     required this.onVideo,
+    this.video,
   });
 
   @override
@@ -298,10 +442,24 @@ class _MediaStage extends StatelessWidget {
                   ),
                 ],
               )
-            else if (isVideo)
-              const Center(
-                child: Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 64),
+            else if (isVideo && video != null && video!.value.isInitialized)
+              GestureDetector(
+                onTap: () => video!.value.isPlaying ? video!.pause() : video!.play(),
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.matrix(look.matrix),
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    clipBehavior: Clip.hardEdge,
+                    child: SizedBox(
+                      width: video!.value.size.width,
+                      height: video!.value.size.height,
+                      child: VideoPlayer(video!),
+                    ),
+                  ),
+                ),
               )
+            else if (isVideo)
+              const Center(child: CircularProgressIndicator(color: Colors.white))
             else
               ColorFiltered(
                 colorFilter: ColorFilter.matrix(look.matrix),

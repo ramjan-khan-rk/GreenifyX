@@ -15,6 +15,10 @@ class FeedModel {
   final String mediaType;
   final String cause;
   final String look;
+  final String musicUrl;
+  final String musicTitle;
+  final int musicStartSec;
+  final bool muteOriginal;
 
   FeedModel({
     required this.id,
@@ -33,6 +37,10 @@ class FeedModel {
     this.mediaType = "image",
     this.cause = "Planet",
     this.look = "natural",
+    this.musicUrl = "",
+    this.musicTitle = "",
+    this.musicStartSec = 0,
+    this.muteOriginal = false,
   });
 
   factory FeedModel.fromJson(Map<String, dynamic> json) {
@@ -58,6 +66,10 @@ class FeedModel {
       mediaType: json["mediaType"]?.toString() ?? "image",
       cause: json["cause"]?.toString() ?? "Planet",
       look: json["look"]?.toString() ?? "natural",
+      musicUrl: json["musicUrl"]?.toString() ?? "",
+      musicTitle: json["musicTitle"]?.toString() ?? "",
+      musicStartSec: (json["musicStartSec"] as num?)?.toInt() ?? 0,
+      muteOriginal: json["muteOriginal"] == true,
     );
   }
 }

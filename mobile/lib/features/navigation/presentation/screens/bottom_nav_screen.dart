@@ -16,6 +16,7 @@ import '../../../chat/presentation/screens/chats_screen.dart';
 import '../../../chat/presentation/screens/chat_screen.dart';
 import '../../../../core/utils/chat_launcher.dart';
 import '../../../feed/presentation/screens/feed_screen.dart';
+import '../../../feed/application/feed_audio.dart';
 import '../../../friends/application/providers/friend_provider.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../notifications/application/providers/notification_provider.dart';
@@ -128,6 +129,8 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
         selectedItemColor: AppColors.joy,
         unselectedItemColor: AppColors.ink,
         onTap: (index) {
+          // Feed soundtracks stop when you leave the feed.
+          if (index != currentIndex) FeedAudio.instance.stop();
           setState(() {
             currentIndex = index;
           });

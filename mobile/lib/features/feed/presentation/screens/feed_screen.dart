@@ -146,7 +146,15 @@ class FeedScreen extends ConsumerWidget {
                               )
                             : null,
                       ),
-                      MomentMedia(url: post.image, mediaType: post.mediaType),
+                      MomentMedia(
+                        url: post.image,
+                        mediaType: post.mediaType,
+                        look: post.look,
+                        musicUrl: post.musicUrl,
+                        musicTitle: post.musicTitle,
+                        musicStartSec: post.musicStartSec,
+                        muteOriginal: post.muteOriginal,
+                      ),
                       if (post.description.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.all(12),

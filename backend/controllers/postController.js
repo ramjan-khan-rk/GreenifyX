@@ -36,6 +36,10 @@ export const createPost = async (req, res) => {
     const { description, activity } = req.body;
     const cause = CAUSES.has(req.body.cause) ? req.body.cause : "Planet";
     const look = LOOKS.has(req.body.look) ? req.body.look : "hd";
+    const musicUrl = /^https:\/\/res\.cloudinary\.com\//.test(String(req.body.musicUrl || "")) ? String(req.body.musicUrl) : "";
+    const musicTitle = musicUrl ? String(req.body.musicTitle || "Soundtrack").trim().slice(0, 80) : "";
+    const musicStartSec = musicUrl ? Math.max(0, Math.min(600, Math.round(Number(req.body.musicStartSec) || 0))) : 0;
+    const muteOriginal = String(req.body.muteOriginal) === "true";
 
     if (!req.file) {
       return res.status(400).json({
@@ -69,7 +73,12 @@ export const createPost = async (req, res) => {
       activity,
       cause,
       mediaType,
-      look: mediaType === "video" ? "natural" : look,
+      // Videos keep the look as a client-side filter; photos get it baked in by the CDN.
+      look,
+      musicUrl,
+      musicTitle,
+      musicStartSec,
+      muteOriginal: mediaType === "video" ? muteOriginal : false,
       ecoPoints,
       isVerified: false,
       pointsAwarded: false,
@@ -148,6 +157,10 @@ export const getPosts = async (req, res) => {
         likes: post.likes,
         likesCount: post.likes.length,
         isLiked: post.likes.some((id) => id.toString() === currentUserId),
+        musicUrl: post.musicUrl || "",
+        musicTitle: post.musicTitle || "",
+        musicStartSec: post.musicStartSec || 0,
+        muteOriginal: post.muteOriginal === true,
         commentsCount: await Comment.countDocuments({
           post: post._id,
         }),

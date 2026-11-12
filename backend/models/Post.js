@@ -40,6 +40,31 @@ const postSchema = new mongoose.Schema(
       default: "natural",
     },
 
+    // Optional soundtrack chosen by the author (uploaded audio).
+    musicUrl: {
+      type: String,
+      default: "",
+    },
+
+    musicTitle: {
+      type: String,
+      default: "",
+      maxlength: 80,
+    },
+
+    // Seconds into the track where playback starts.
+    musicStartSec: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    // Video posts: play without the clip's own sound.
+    muteOriginal: {
+      type: Boolean,
+      default: false,
+    },
+
     ecoPoints: {
       type: Number,
       default: 10,
