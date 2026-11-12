@@ -3,7 +3,8 @@ import { isProduction } from "./jwtConfig.js";
 export const corsOriginList = () =>
   String(process.env.CORS_ORIGIN || "")
     .split(",")
-    .map((origin) => origin.trim())
+    // Browsers send origins without a trailing slash; tolerate one in the setting.
+    .map((origin) => origin.trim().replace(/\/+$/, "").toLowerCase())
     .filter(Boolean);
 
 export const corsOriginDelegate = (origin, callback) => {
@@ -20,7 +21,7 @@ export const corsOriginDelegate = (origin, callback) => {
     return;
   }
 
-  if (allowed.includes(origin)) {
+  if (allowed.includes(String(origin).toLowerCase())) {
     callback(null, true);
     return;
   }
