@@ -251,4 +251,34 @@ class AdminApi {
         }));
     return _paged(data, 'challenges');
   }
+
+  // ---- Rewards ----
+  List<Json> _maps(dynamic v) => List<Json>.from((v as List? ?? const []).map((e) => Json.from(e as Map)));
+
+  Future<Json> rewards() async => await _send(() => _dio.get('/admin/rewards'));
+
+  Future<void> createReward(Json body) async => _send(() => _dio.post('/admin/rewards', data: body));
+
+  Future<void> updateReward(String id, Json body) async => _send(() => _dio.patch('/admin/rewards/$id', data: body));
+
+  Future<List<Json>> redemptions({String status = '', String code = ''}) async => _maps((await _send(() => _dio.get(
+        '/admin/redemptions',
+        queryParameters: {if (status.isNotEmpty) 'status': status, if (code.isNotEmpty) 'code': code},
+      )))['redemptions']);
+
+  Future<void> updateRedemption(String id, String status) async =>
+      _send(() => _dio.patch('/admin/redemptions/$id', data: {'status': status}));
+
+  // ---- Recycling pickups ----
+  Future<Json> pickups({String status = ''}) async =>
+      await _send(() => _dio.get('/admin/pickups', queryParameters: {if (status.isNotEmpty) 'status': status}));
+
+  Future<void> updatePickup(String id, Json body) async => _send(() => _dio.patch('/admin/pickups/$id', data: body));
+
+  // ---- Events ----
+  Future<List<Json>> events() async => _maps((await _send(() => _dio.get('/admin/events')))['events']);
+
+  Future<void> createEvent(Json body) async => _send(() => _dio.post('/admin/events', data: body));
+
+  Future<void> updateEvent(String id, Json body) async => _send(() => _dio.patch('/admin/events/$id', data: body));
 }
