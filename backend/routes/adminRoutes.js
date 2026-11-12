@@ -27,12 +27,31 @@ import { adminListEnvReports, adminUpdateEnvReport } from "../controllers/envRep
 import { adminListPlaces, adminCreatePlace, adminUpdatePlace } from "../controllers/mapController.js";
 import { insights } from "../controllers/aiInsightsController.js";
 import { adminListOrgs, adminSetOrgStatus, adminOrgOptions } from "../controllers/orgController.js";
+import {
+  adminListRewards,
+  adminCreateReward,
+  adminUpdateReward,
+  adminListRedemptions,
+  adminUpdateRedemption,
+} from "../controllers/rewardController.js";
+import { adminListPickups, adminUpdatePickup } from "../controllers/pickupController.js";
+import { adminListEvents, adminCreateEvent, adminUpdateEvent } from "../controllers/eventController.js";
 
 const router = express.Router();
 
 router.use(protect, requireAdmin);
 
 router.get("/me", getAdminMe);
+router.get("/rewards", adminListRewards);
+router.post("/rewards", adminCreateReward);
+router.patch("/rewards/:id", adminUpdateReward);
+router.get("/redemptions", adminListRedemptions);
+router.patch("/redemptions/:id", adminUpdateRedemption);
+router.get("/pickups", adminListPickups);
+router.patch("/pickups/:id", adminUpdatePickup);
+router.get("/events", adminListEvents);
+router.post("/events", adminCreateEvent);
+router.patch("/events/:id", adminUpdateEvent);
 router.get("/stats", getStats);
 router.get("/users", listUsers);
 router.get("/users/:id", getUser);

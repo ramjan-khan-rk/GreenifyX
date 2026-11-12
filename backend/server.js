@@ -27,6 +27,9 @@ import mapRoutes from "./routes/mapRoutes.js";
 import assistantRoutes from "./routes/assistantRoutes.js";
 import callRoutes from "./routes/callRoutes.js";
 import orgRoutes from "./routes/orgRoutes.js";
+import rewardRoutes from "./routes/rewardRoutes.js";
+import pickupRoutes from "./routes/pickupRoutes.js";
+import eventRoutes from "./routes/eventRoutes.js";
 
 dotenv.config();
 assertJwtSecret();
@@ -60,6 +63,9 @@ app.use("/api/map", mapRoutes);
 app.use("/api/assistant", assistantRoutes);
 app.use("/api/calls", callRoutes);
 app.use("/api/orgs", orgRoutes);
+app.use("/api/rewards", rewardRoutes);
+app.use("/api/pickups", pickupRoutes);
+app.use("/api/events", eventRoutes);
 
 app.get("/", (req, res) => {
   res.send("GreenifyX API Running...");

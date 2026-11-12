@@ -55,6 +55,14 @@ const userSchema = new mongoose.Schema(
       min: 0,
     },
 
+    // Points spent on rewards. Spending never lowers ecoPoints (lifetime, drives level);
+    // the spendable balance is ecoPoints - pointsSpent.
+    pointsSpent: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
     // Legacy fields — read for migration only; prefer ecoPoints
     ecoScore: {
       type: Number,
