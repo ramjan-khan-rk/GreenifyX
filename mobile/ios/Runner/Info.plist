@@ -7,7 +7,7 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>GreenifyX checks your location to confirm field verification reports are made at the approved campaign site.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>GreenifyX uses the microphone for voice and video calls with friends.</string>
+	<string>GreenifyX uses the microphone for voice notes and for voice and video calls with friends.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
