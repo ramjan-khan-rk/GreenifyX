@@ -8,11 +8,13 @@ const rewardSchema = new mongoose.Schema(
     description: { type: String, default: "", trim: true, maxlength: 600 },
     partner: { type: String, default: "", trim: true, maxlength: 80 },
     category: { type: String, enum: REWARD_CATEGORIES, default: "voucher" },
-    cost: { type: Number, required: true, min: 1, max: 100000 },
+    cost: { type: Number, required: true, min: 0, max: 100000 },
     // null = unlimited
     stock: { type: Number, default: null, min: 0 },
     image: { type: String, default: "" },
     terms: { type: String, default: "", trim: true, maxlength: 600 },
+    // Paid partner rewards: member also pays this amount by card (0 = points only).
+    priceAed: { type: Number, default: 0, min: 0, max: 100000 },
     isActive: { type: Boolean, default: true },
     expiresAt: { type: Date },
     redeemedCount: { type: Number, default: 0 },

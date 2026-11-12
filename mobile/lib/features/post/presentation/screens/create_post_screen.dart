@@ -419,7 +419,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
-                      label: Text(item),
+                      label: Text(tr(item)),
                       selected: lane == item,
                       onSelected: (_) => setState(() => lane = item),
                     ),

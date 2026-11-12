@@ -129,7 +129,7 @@ class _RewardsPageState extends State<RewardsPage> {
                             ),
                           ]),
                         ),
-                        StatusPill('${r['cost']} pts', color: Brand.sun),
+                        StatusPill(((r['priceAed'] as num?) ?? 0) > 0 ? '${r['cost']} pts + AED ${r['priceAed']}' : '${r['cost']} pts', color: Brand.sun),
                         const SizedBox(width: 8),
                         Switch(
                           value: r['isActive'] != false,
@@ -157,7 +157,7 @@ class _RewardsPageState extends State<RewardsPage> {
               ),
             ),
             const SizedBox(width: 8),
-            for (final s in ['issued', 'used', 'cancelled'])
+            for (final s in ['issued', 'used', 'cancelled', 'needs_refund'])
               Padding(
                 padding: const EdgeInsets.only(left: 6),
                 child: ChoiceChip(
@@ -232,6 +232,7 @@ class _RewardDialogState extends State<_RewardDialog> {
   late final _terms = TextEditingController(text: widget.reward?['terms'] as String? ?? '');
   late final _image = TextEditingController(text: widget.reward?['image'] as String? ?? '');
   late final _cost = TextEditingController(text: '${widget.reward?['cost'] ?? 200}');
+  late final _price = TextEditingController(text: '${widget.reward?['priceAed'] ?? 0}');
   late final _stock = TextEditingController(text: widget.reward?['stock'] == null ? '' : '${widget.reward!['stock']}');
   late String _category = widget.reward?['category'] as String? ?? 'voucher';
   bool _saving = false;
@@ -251,6 +252,7 @@ class _RewardDialogState extends State<_RewardDialog> {
       'image': _image.text.trim(),
       'category': _category,
       'cost': int.tryParse(_cost.text.trim()) ?? 0,
+      'priceAed': double.tryParse(_price.text.trim()) ?? 0,
       'stock': _stock.text.trim().isEmpty ? null : int.tryParse(_stock.text.trim()),
     };
     try {
@@ -296,7 +298,15 @@ class _RewardDialogState extends State<_RewardDialog> {
                     controller: _cost,
                     inputFormatters: digits,
                     decoration: const InputDecoration(labelText: 'Cost (Eco Points)'),
-                    validator: (v) => (int.tryParse(v ?? '') ?? 0) < 1 ? 'Required' : null,
+                    validator: (v) => int.tryParse(v ?? '') == null ? 'Required' : null,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: _price,
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                    decoration: const InputDecoration(labelText: 'Card price (AED)', helperText: '0 = points only'),
                   ),
                 ),
                 const SizedBox(width: 12),

@@ -492,6 +492,19 @@ const seedRewardsEvents = async ({ users, now }) => {
       isDemo: true,
     }))
   );
+  // A paid partner reward: points plus a card payment (needs STRIPE_SECRET_KEY).
+  await Reward.create({
+    title: "Desert eco-camp night for two",
+    partner: "Hatta eco lodges (demo)",
+    category: "experience",
+    cost: 500,
+    priceAed: 149,
+    stock: 20,
+    image: image("reward-camp"),
+    description: "A solar-powered desert camp with a guided night-sky walk. Points cover the eco-guide; the card payment covers the stay.",
+    terms: "Demo reward. Booking confirmed by the partner within 48 hours.",
+    isDemo: true,
+  });
   const events = await Event.insertMany(
     DEMO_EVENTS.map(([title, category, emirate, venue, lat, lng, inDays, hour, hours, capacity], i) => {
       const startsAt = new Date(now.getTime() + inDays * DAY);

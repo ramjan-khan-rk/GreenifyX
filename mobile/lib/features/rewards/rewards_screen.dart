@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/services/api_service.dart';
 import '../../core/theme/app_colors.dart';
@@ -17,7 +18,7 @@ class RewardsScreen extends StatefulWidget {
   State<RewardsScreen> createState() => _RewardsScreenState();
 }
 
-class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProviderStateMixin {
+class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final TabController _tabs = TabController(length: 2, vsync: this);
   bool _loading = true;
   String? _error;
@@ -25,6 +26,8 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
   List<Json> _rewards = [];
   List<Json> _mine = [];
   String _category = "all";
+  bool _payments = false;
+  String? _pendingPayment; // redemption id waiting for Stripe
 
   static const _cats = {
     "all": ("All", Icons.apps_rounded),
@@ -38,11 +41,55 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _load();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _pendingPayment != null) _confirmPayment();
+  }
+
+  Future<void> _confirmPayment() async {
+    final id = _pendingPayment;
+    if (id == null) return;
+    try {
+      final r = await ApiService.dio.post("/rewards/checkout/$id/confirm");
+      if (!mounted) return;
+      if (r.data["paid"] == true && r.data["redemption"] != null) {
+        _pendingPayment = null;
+        await _load();
+        if (!mounted) return;
+        _tabs.animateTo(1);
+        final red = Json.from(r.data["redemption"] as Map);
+        _showCode(red["rewardTitle"]?.toString() ?? "Reward", red["code"]?.toString() ?? "");
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: const Text("Payment not completed yet"),
+          action: SnackBarAction(label: "Check again", onPressed: _confirmPayment),
+        ));
+      }
+    } catch (e) {
+      _pendingPayment = null;
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+    }
+  }
+
+  Future<void> _checkout(Json reward) async {
+    try {
+      final r = await ApiService.dio.post("/rewards/${reward["_id"]}/checkout");
+      _pendingPayment = r.data["redemptionId"]?.toString();
+      final url = Uri.parse(r.data["url"].toString());
+      final ok = await launchUrl(url, mode: LaunchMode.externalApplication);
+      if (!ok && mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Couldn't open the payment page")));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tabs.dispose();
     super.dispose();
   }
@@ -57,6 +104,7 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
       if (!mounted) return;
       setState(() {
         _balance = (r[0].data["balance"] as num?)?.toInt() ?? 0;
+        _payments = r[0].data["paymentsEnabled"] == true;
         _rewards = (r[0].data["rewards"] as List).map((e) => Json.from(e as Map)).toList();
         _mine = (r[1].data["redemptions"] as List).map((e) => Json.from(e as Map)).toList();
         _loading = false;
@@ -73,6 +121,8 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
 
   Future<void> _redeem(Json reward) async {
     final cost = (reward["cost"] as num).toInt();
+    final price = (reward["priceAed"] as num?)?.toDouble() ?? 0;
+    final paid = price > 0;
     final ok = await showModalBottomSheet<bool>(
       context: context,
       showDragHandle: true,
@@ -93,20 +143,41 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
             Row(children: [
               const Icon(Icons.stars_rounded, color: AppColors.sun),
               const SizedBox(width: 6),
-              Text("$cost points", style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+              Text(paid ? "AED ${price.toStringAsFixed(price % 1 == 0 ? 0 : 2)} + $cost pts" : "$cost points",
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
               const Spacer(),
               Text("You have $_balance", style: const TextStyle(color: AppColors.subtitle)),
             ]),
             const SizedBox(height: 14),
-            FilledButton(
-              onPressed: _balance >= cost ? () => Navigator.pop(ctx, true) : null,
-              child: Text(_balance >= cost ? "Redeem now" : "${cost - _balance} more points needed"),
+            if (paid && !_payments)
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Text("Card payments are coming soon for this partner.", style: TextStyle(color: AppColors.subtitle)),
+              ),
+            FilledButton.icon(
+              onPressed: _balance >= cost && (!paid || _payments) ? () => Navigator.pop(ctx, true) : null,
+              icon: Icon(paid ? Icons.credit_card_rounded : Icons.redeem_rounded),
+              label: Text(_balance < cost
+                  ? "${cost - _balance} more points needed"
+                  : paid
+                      ? "Pay AED ${price.toStringAsFixed(price % 1 == 0 ? 0 : 2)} securely"
+                      : "Redeem now"),
             ),
+            if (paid)
+              const Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Icon(Icons.lock_rounded, size: 14, color: AppColors.subtitle),
+                  SizedBox(width: 4),
+                  Text("Secure card payment by Stripe", style: TextStyle(fontSize: 12, color: AppColors.subtitle)),
+                ]),
+              ),
           ]),
         ),
       ),
     );
     if (ok != true) return;
+    if (paid) return _checkout(reward);
     try {
       final r = await ApiService.dio.post("/rewards/${reward["_id"]}/redeem");
       final code = r.data["redemption"]["code"].toString();
@@ -265,7 +336,10 @@ class _RewardCard extends StatelessWidget {
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
                       const Icon(Icons.stars_rounded, color: AppColors.sun, size: 16),
                       const SizedBox(width: 4),
-                      Text("$cost", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                      Text(
+                        ((reward["priceAed"] as num?) ?? 0) > 0 ? "$cost + AED ${(reward["priceAed"] as num).toStringAsFixed(0)}" : "$cost",
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+                      ),
                     ]),
                   ),
                 ),
