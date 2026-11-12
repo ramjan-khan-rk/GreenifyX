@@ -24,6 +24,7 @@ import Event from "../models/Event.js";
 import Community from "../models/Community.js";
 import Listing from "../models/Listing.js";
 import Checkpoint from "../models/Checkpoint.js";
+import SponsoredChallenge from "../models/SponsoredChallenge.js";
 import crypto from "crypto";
 import { makeJoinCode } from "../controllers/orgController.js";
 import { evaluateEvidence } from "../utils/geo.js";
@@ -616,7 +617,45 @@ const seedSocial = async ({ users, now }) => {
     partner: "Demo partner",
     isDemo: true,
   })));
-  return `${communities.length} communities, ${listings.length} Swap & Share listings, ${checkpoints.length} QR check-in points`;
+  await SponsoredChallenge.insertMany([
+    {
+      title: "Refill Rally",
+      description: "Skip single-use plastic: refill your bottle 5 times this month and post it with #RefillRally.",
+      sponsor: { name: "AquaPure (demo sponsor)", logo: image("sponsor-aqua"), website: "", color: "#0083B0" },
+      coverImage: image("sponsored-refill"),
+      activity: "Refilled, No Plastic",
+      hashtag: "refillrally",
+      target: 5,
+      rewardPoints: 150,
+      prize: "AED 25 voucher for the first 500 finishers",
+      maxWinners: 500,
+      startsAt: new Date(now.getTime() - 3 * DAY),
+      endsAt: new Date(now.getTime() + 25 * DAY),
+      budgetAed: 12500,
+      participants: users.slice(0, 9).map((u) => u._id),
+      impressions: 1840,
+      isDemo: true,
+    },
+    {
+      title: "Ride to Work Week",
+      description: "Cycle or take the metro to work 3 times this week.",
+      sponsor: { name: "GreenBank (demo sponsor)", logo: image("sponsor-bank"), website: "", color: "#1F8A70" },
+      coverImage: image("sponsored-ride"),
+      activity: "",
+      hashtag: "ridetowork",
+      target: 3,
+      rewardPoints: 100,
+      prize: "Free Nol top-up for winners",
+      maxWinners: 0,
+      startsAt: new Date(now.getTime() - DAY),
+      endsAt: new Date(now.getTime() + 6 * DAY),
+      budgetAed: 8000,
+      participants: users.slice(5, 12).map((u) => u._id),
+      impressions: 960,
+      isDemo: true,
+    },
+  ]);
+  return `${communities.length} communities, ${listings.length} Swap & Share listings, ${checkpoints.length} QR check-in points, 2 sponsored challenges`;
 };
 
 const clear = async () => {
@@ -638,6 +677,7 @@ const clear = async () => {
     Community.deleteMany({ isDemo: true }),
     Listing.deleteMany({ $or: [{ isDemo: true }, { user: { $in: ids } }] }),
     Checkpoint.deleteMany({ isDemo: true }),
+    SponsoredChallenge.deleteMany({ isDemo: true }),
     PointsTransaction.deleteMany({ $or: [{ isDemo: true }, { user: { $in: ids } }] }),
   ]);
   // Real users who joined a demo campaign are simply detached by the delete above.

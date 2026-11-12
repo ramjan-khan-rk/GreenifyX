@@ -178,6 +178,28 @@ const userSchema = new mongoose.Schema(
       updatedAt: { type: Date },
     },
 
+    onboardedAt: { type: Date },
+
+    // Referrals
+    referralCode: { type: String, unique: true, sparse: true, uppercase: true, trim: true },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    referralRewardedAt: { type: Date },
+
+    // Streak protection
+    streakFreezes: { type: Number, default: 1, min: 0, max: 3 },
+    streakReminderAt: { type: Date },
+
+    // Verified badge (blue tick)
+    verifiedBadge: { type: String, enum: ["", "creator", "organisation", "verifier", "official"], default: "" },
+    badgeRequest: {
+      type: { type: String, enum: ["creator", "organisation", "verifier", "official"] },
+      note: { type: String, maxlength: 500 },
+      links: { type: String, maxlength: 300 },
+      status: { type: String, enum: ["pending", "approved", "rejected"] },
+      requestedAt: Date,
+      decidedAt: Date,
+    },
+
     // Topics picked by the member (boost the For you feed).
     interests: [{ type: String, trim: true, maxlength: 40 }],
 

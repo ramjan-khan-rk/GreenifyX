@@ -34,6 +34,8 @@ import activityRoutes from "./routes/activityRoutes.js";
 import publicRoutes from "./routes/publicRoutes.js";
 import socialRoutes from "./routes/socialRoutes.js";
 import lifeRoutes from "./routes/lifeRoutes.js";
+import growthRoutes from "./routes/growthRoutes.js";
+import { startScheduler } from "./utils/scheduler.js";
 import mongoose from "mongoose";
 import { syncActivities } from "./utils/ecoActivities.js";
 
@@ -42,6 +44,7 @@ assertJwtSecret();
 connectDB();
 mongoose.connection.once("open", () => {
   syncActivities().catch((e) => console.error("Activity sync failed:", e.message));
+  startScheduler();
 });
 
 const app = express();
@@ -77,6 +80,7 @@ app.use("/api/pickups", pickupRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/public", publicRoutes);
+app.use("/api", growthRoutes);
 app.use("/api", lifeRoutes);
 app.use("/api", socialRoutes);
 

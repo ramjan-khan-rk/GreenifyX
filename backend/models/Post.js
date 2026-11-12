@@ -89,6 +89,22 @@ const postSchema = new mongoose.Schema(
     // Reel / post opens (rough reach for creator analytics).
     views: { type: Number, default: 0 },
 
+    hashtags: [{ type: String, lowercase: true, trim: true, index: true }],
+    mentions: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    pinnedComment: { type: mongoose.Schema.Types.ObjectId, ref: "Comment", default: null },
+
+    // Anti-cheat: content hash of the uploaded file and the automatic review.
+    mediaHash: { type: String, index: true },
+    duplicateOf: { type: mongoose.Schema.Types.ObjectId, ref: "Post" },
+    aiReview: {
+      status: { type: String, enum: ["pending", "clear", "flagged", "skipped"], default: "pending" },
+      reasons: [{ type: String }],
+      checkedAt: Date,
+    },
+
+    // Sponsored challenge this post counts towards.
+    sponsored: { type: mongoose.Schema.Types.ObjectId, ref: "SponsoredChallenge" },
+
     // Members who bookmarked the post.
     savedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 

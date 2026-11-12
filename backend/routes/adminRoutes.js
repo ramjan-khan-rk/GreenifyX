@@ -39,6 +39,8 @@ import { adminListEvents, adminCreateEvent, adminUpdateEvent } from "../controll
 import { adminListActivities, adminCreateActivity, adminUpdateActivity } from "../controllers/activityController.js";
 import { adminListEnquiries, adminUpdateEnquiry } from "../controllers/publicController.js";
 import { adminListCheckpoints, adminCreateCheckpoint, adminUpdateCheckpoint } from "../controllers/checkinController.js";
+import { adminBadgeRequests, adminDecideBadge, adminListSponsored, adminCreateSponsored, adminUpdateSponsored } from "../controllers/growthController.js";
+import { orgEsg } from "../controllers/esgController.js";
 
 const router = express.Router();
 
@@ -52,6 +54,12 @@ router.get("/redemptions", adminListRedemptions);
 router.patch("/redemptions/:id", adminUpdateRedemption);
 router.get("/pickups", adminListPickups);
 router.patch("/pickups/:id", adminUpdatePickup);
+router.get("/badges", adminBadgeRequests);
+router.patch("/badges/:userId", adminDecideBadge);
+router.get("/sponsored", adminListSponsored);
+router.post("/sponsored", adminCreateSponsored);
+router.patch("/sponsored/:id", adminUpdateSponsored);
+router.get("/orgs/:id/esg", orgEsg);
 router.get("/checkpoints", adminListCheckpoints);
 router.post("/checkpoints", adminCreateCheckpoint);
 router.patch("/checkpoints/:id", adminUpdateCheckpoint);

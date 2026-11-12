@@ -10,6 +10,10 @@ import { applyVerifyAward, pointsStatusFor } from "../utils/postPoints.js";
 import { creditPoints } from "../utils/ledger.js";
 import { CAUSES, LOOKS, presentMediaUrl } from "../utils/mediaLook.js";
 import { findActivity } from "../utils/ecoActivities.js";
+import crypto from "crypto";
+import { extractHashtags, extractMentionTokens, resolveMentions } from "../utils/textTags.js";
+import { reviewPost, REASON_TEXT } from "../utils/moderation.js";
+import { knownPeople } from "./commentController.js";
 
 const ecoPointsMap = {
   "Tree Plantation": 50,
@@ -60,6 +64,12 @@ export const createPost = async (req, res) => {
       ? "video"
       : "image";
 
+    // Anti-cheat: the same file can't be posted twice.
+    const mediaHash = crypto.createHash("sha256").update(req.file.buffer).digest("hex");
+    const duplicate = await Post.findOne({ mediaHash }).select("_id user");
+    const hashtags = extractHashtags(description);
+    const mentions = resolveMentions(extractMentionTokens(description), await knownPeople(req.user._id)).filter((id) => id !== String(req.user._id));
+
     const imageUrl = await uploadBufferToCloudinary(
       req.file.buffer,
       "GreenifyX/posts",
@@ -88,6 +98,11 @@ export const createPost = async (req, res) => {
       cause,
       mediaType,
       taggedUsers,
+      hashtags,
+      mentions,
+      mediaHash,
+      duplicateOf: duplicate?._id,
+      sponsored: /^[a-f\d]{24}$/i.test(String(req.body.sponsored || "")) ? req.body.sponsored : undefined,
       visibility: req.body.visibility === "friends" ? "friends" : "public",
       community: await (async () => {
         const id = String(req.body.community || "");
@@ -141,9 +156,39 @@ export const createPost = async (req, res) => {
       console.error("Post created but notification failed");
     }
 
+    // Mentions in the caption.
+    for (const m of mentions) {
+      if (taggedUsers.includes(m)) continue;
+      try {
+        const n = await Notification.create({ receiver: m, sender: req.user._id, type: "tag", title: "You were mentioned", message: `${req.user.name} mentioned you in a moment.`, referenceId: post._id });
+        emitToUser(m, "newNotification", n);
+      } catch {
+        /* best-effort */
+      }
+    }
+
+    // Automatic review runs after the reply so posting stays fast.
+    const file = { buffer: req.file.buffer, mimetype: req.file.mimetype };
+    setImmediate(async () => {
+      try {
+        const review = await reviewPost({ ...file, activity: post.activity, description, duplicate: Boolean(duplicate) });
+        const update = { aiReview: { status: review.status, reasons: review.reasons, checkedAt: new Date() } };
+        if (review.reasons.length) {
+          update.$push = { reports: { $each: review.reasons.map((r) => ({ reason: REASON_TEXT[r] || r })) } };
+          if (review.reasons.includes("unsafe_content")) update.isHidden = true;
+        }
+        await Post.updateOne({ _id: post._id }, update);
+      } catch (e) {
+        console.error("Post review failed:", e.message);
+      }
+    });
+
     res.status(201).json({
       success: true,
-      message: "Shared. Eco Points land after a friend verifies it.",
+      duplicate: Boolean(duplicate),
+      message: duplicate
+        ? "Shared — but this photo was posted before, so it can't earn points."
+        : "Shared. Eco Points land after a friend verifies it.",
       post,
       pointsStatus: pointsStatusFor(post),
     });
@@ -169,7 +214,7 @@ export const getPosts = async (req, res) => {
 
     const [posts, total] = await Promise.all([
       Post.find(filter)
-        .populate("user", "name profileImage ecoPoints level")
+        .populate("user", "name profileImage ecoPoints level verifiedBadge")
         .populate("taggedUsers", "name profileImage")
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -196,6 +241,7 @@ export const getPosts = async (req, res) => {
         isSaved: (post.savedBy || []).some((id) => id.toString() === currentUserId),
         taggedUsers: (post.taggedUsers || []).map((u) => ({ _id: u._id, name: u.name, profileImage: u.profileImage || "" })),
         activityIcon: findActivity(post.activity)?.icon || "eco",
+        hashtags: post.hashtags || [],
         musicUrl: post.musicUrl || "",
         musicTitle: post.musicTitle || "",
         musicStartSec: post.musicStartSec || 0,
@@ -311,6 +357,13 @@ export const verifyPost = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "You cannot verify your own post",
+      });
+    }
+
+    if (post.duplicateOf || post.aiReview?.status === "flagged" || post.isHidden) {
+      return res.status(400).json({
+        success: false,
+        message: "This post is under review and can't be verified right now.",
       });
     }
 

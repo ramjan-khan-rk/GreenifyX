@@ -38,7 +38,15 @@ export const badgesFor = (points, streak, existing = []) => {
 export const applyEcoAward = (user, points, now = new Date()) => {
   const add = Math.max(0, Number(points) || 0);
   const ecoPoints = (Number(user.ecoPoints) || 0) + add;
-  const streak = nextStreak(user.lastVerifiedAt, user.streak, now);
+  let streak = nextStreak(user.lastVerifiedAt, user.streak, now);
+  // Streak freeze: one missed day is forgiven if the member has a freeze left.
+  if (streak === 1 && user.lastVerifiedAt && (Number(user.streakFreezes) || 0) > 0) {
+    const twoDaysAgo = calendarDayStamp(new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000));
+    if (calendarDayStamp(user.lastVerifiedAt) === twoDaysAgo && (Number(user.streak) || 0) >= 2) {
+      streak = (Number(user.streak) || 0) + 1;
+      user.streakFreezes = Number(user.streakFreezes) - 1;
+    }
+  }
   const level = levelForPoints(ecoPoints);
   const badges = badgesFor(ecoPoints, streak, user.badges);
   user.ecoPoints = ecoPoints;

@@ -31,6 +31,7 @@ export const presentPosts = async (posts, meId) => {
     commentsCount: byId[String(post._id)] || 0,
     views: post.views || 0,
     visibility: post.visibility || "public",
+    hashtags: post.hashtags || [],
     community: post.community || null,
     isVerified: post.isVerified,
     pointsStatus: pointsStatusFor(post),

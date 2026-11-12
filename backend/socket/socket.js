@@ -66,6 +66,35 @@ export const initializeSocket = (server) => {
     onlineUsers.set(userId, socket.id);
     broadcastPresence(userId, true);
 
+    // Live broadcasts: chat and hearts in a room per session.
+    socket.on("live:join", (p) => {
+      if (/^[a-f\d]{24}$/i.test(String(p?.id || ""))) socket.join(`live:${p.id}`);
+    });
+    socket.on("live:leave", (p) => socket.leave(`live:${p?.id}`));
+    socket.on("live:comment", async (p) => {
+      try {
+        const id = String(p?.id || "");
+        const text = String(p?.text || "").trim().slice(0, 200);
+        if (!/^[a-f\d]{24}$/i.test(id) || !text) return;
+        socket.data.user ||= await User.findById(userId).select("name profileImage").lean();
+        io.to(`live:${id}`).emit("live:comment", { id, text, user: socket.data.user, at: Date.now() });
+        const { default: LiveSession } = await import("../models/LiveSession.js");
+        LiveSession.updateOne({ _id: id }, { $inc: { comments: 1 } }).catch(() => {});
+      } catch {
+        /* ignore */
+      }
+    });
+    socket.on("live:heart", async (p) => {
+      const id = String(p?.id || "");
+      if (!/^[a-f\d]{24}$/i.test(id)) return;
+      io.to(`live:${id}`).emit("live:heart", { id });
+      const { default: LiveSession } = await import("../models/LiveSession.js");
+      LiveSession.updateOne({ _id: id }, { $inc: { hearts: 1 } }).catch(() => {});
+    });
+    socket.on("live:ended", (p) => {
+      if (/^[a-f\d]{24}$/i.test(String(p?.id || ""))) io.to(`live:${p.id}`).emit("live:ended", { id: p.id });
+    });
+
     // Typing indicator, relayed to friends only.
     socket.on("typing", async (payload) => {
       try {

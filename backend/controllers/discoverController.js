@@ -41,7 +41,7 @@ export const forYou = async (req, res) => {
     const candidates = await Post.find({ ...visibleTo(friendIds, meId), createdAt: { $gte: new Date(Date.now() - 21 * DAY) } })
       .sort({ createdAt: -1 })
       .limit(400)
-      .populate("user", "name profileImage ecoPoints level")
+      .populate("user", "name profileImage ecoPoints level verifiedBadge")
       .populate("taggedUsers", "name profileImage");
     const pool = candidates.filter((p) => p.user && !blocked.has(String(p.user._id)));
     const ranked = rankFeed(pool, {
@@ -99,7 +99,7 @@ export const reels = async (req, res) => {
     const vids = await Post.find(filter)
       .sort({ createdAt: -1 })
       .limit(300)
-      .populate("user", "name profileImage level")
+      .populate("user", "name profileImage level verifiedBadge")
       .populate("taggedUsers", "name profileImage");
     const ranked = rankFeed(vids.filter((v) => v.user), { profile, friendIds: new Set(friendIds), followingIds: new Set(following), meId, now: new Date() });
     const size = 10;
@@ -140,14 +140,14 @@ export const creatorProfile = async (req, res) => {
   try {
     if (!isId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid profile" });
     const meId = String(req.user._id);
-    const user = await User.findById(req.params.id).select("name profileImage bio emirate ecoPoints level streak badges friends isSuspended");
+    const user = await User.findById(req.params.id).select("name profileImage bio emirate ecoPoints level streak badges friends isSuspended verifiedBadge");
     if (!user || user.isSuspended) return res.status(404).json({ success: false, message: "Profile not found" });
     const isFriend = (user.friends || []).some((f) => String(f) === meId);
     const isMe = String(user._id) === meId;
     const filter = { user: user._id, isHidden: { $ne: true } };
     if (!isFriend && !isMe) filter.visibility = { $ne: "friends" };
     const [posts, followers, following, amFollowing, communities] = await Promise.all([
-      Post.find(filter).sort({ createdAt: -1 }).limit(60).populate("user", "name profileImage level").populate("taggedUsers", "name profileImage"),
+      Post.find(filter).sort({ createdAt: -1 }).limit(60).populate("user", "name profileImage level verifiedBadge").populate("taggedUsers", "name profileImage"),
       Follow.countDocuments({ followee: user._id }),
       Follow.countDocuments({ follower: user._id }),
       Follow.exists({ follower: meId, followee: user._id }),
@@ -166,6 +166,7 @@ export const creatorProfile = async (req, res) => {
         level: user.level,
         streak: user.streak,
         badges: user.badges,
+        verifiedBadge: user.verifiedBadge || "",
         followers,
         following,
         posts: posts.length,

@@ -10,7 +10,7 @@ import { creditPoints } from "../utils/ledger.js";
 import { sendServerError } from "../utils/httpError.js";
 import { weekWindow, previousWeekWindow } from "../utils/week.js";
 
-const EARN_TYPES = ["campaign_verified", "post_verified", "challenge_won", "report_resolved", "pickup_collected", "community_challenge", "checkin", "swap_completed", "adjustment"];
+const EARN_TYPES = ["campaign_verified", "post_verified", "challenge_won", "report_resolved", "pickup_collected", "community_challenge", "checkin", "swap_completed", "referral", "sponsored_challenge", "adjustment"];
 const ORG_LEAGUES = { schools: "School", companies: "Company", universities: "University" };
 const PRIZES = [50, 30, 15]; // bonus Eco Points per member for 1st/2nd/3rd
 

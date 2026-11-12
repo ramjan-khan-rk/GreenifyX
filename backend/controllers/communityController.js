@@ -120,7 +120,7 @@ export const communityDetail = async (req, res) => {
     await c.populate([{ path: "owner", select: "name profileImage" }, { path: "members", select: "name profileImage level", options: { limit: 24 } }]);
     const me = req.user._id;
     const [posts, events] = await Promise.all([
-      Post.find({ community: c._id, isHidden: { $ne: true } }).sort({ createdAt: -1 }).limit(30).populate("user", "name profileImage level").populate("taggedUsers", "name profileImage"),
+      Post.find({ community: c._id, isHidden: { $ne: true } }).sort({ createdAt: -1 }).limit(30).populate("user", "name profileImage level verifiedBadge").populate("taggedUsers", "name profileImage"),
       Event.find({ community: c._id, isPublished: true, endsAt: { $gte: new Date() } }).sort({ startsAt: 1 }).limit(10),
     ]);
     const challenges = [];
