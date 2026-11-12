@@ -26,7 +26,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _api = SettingsApi();
-  Map<String, bool> _prefs = {"messages": true, "calls": true, "social": true, "campaigns": true, "points": true};
+  final Map<String, bool> _prefs = {"messages": true, "calls": true, "social": true, "campaigns": true, "points": true};
   String _language = "en";
   bool _loaded = false;
 
