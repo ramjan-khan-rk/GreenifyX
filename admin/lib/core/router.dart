@@ -18,8 +18,12 @@ import '../pages/rewards_page.dart';
 import '../pages/activities_page.dart';
 import '../pages/pickups_page.dart';
 import '../pages/events_page.dart';
+import '../pages/public_site_page.dart';
+import '../pages/enquiries_page.dart';
 import '../widgets/shell.dart';
 import 'session.dart';
+
+const publicPaths = {'/for-organisations', '/pay/success', '/pay/cancelled'};
 
 NoTransitionPage<void> _page(GoRouterState state, Widget child) =>
     NoTransitionPage<void>(key: state.pageKey, child: child);
@@ -30,6 +34,8 @@ final GoRouter adminRouter = GoRouter(
   redirect: (context, state) {
     final session = Session.instance;
     if (session.restoring) return null;
+    // Public pages: open to everyone, signed in or not.
+    if (publicPaths.contains(state.matchedLocation)) return null;
     final atLogin = state.matchedLocation == '/login';
     if (!session.signedIn) return atLogin ? null : '/login';
     if (atLogin) return '/';
@@ -37,6 +43,9 @@ final GoRouter adminRouter = GoRouter(
   },
   routes: [
     GoRoute(path: '/login', pageBuilder: (context, state) => _page(state, const LoginPage())),
+    GoRoute(path: '/for-organisations', pageBuilder: (context, state) => _page(state, const PublicSitePage())),
+    GoRoute(path: '/pay/success', pageBuilder: (context, state) => _page(state, const PaymentResultPage(success: true))),
+    GoRoute(path: '/pay/cancelled', pageBuilder: (context, state) => _page(state, const PaymentResultPage(success: false))),
     ShellRoute(
       builder: (context, state, child) => AdminShell(location: state.matchedLocation, child: child),
       routes: [
@@ -52,6 +61,7 @@ final GoRouter adminRouter = GoRouter(
         GoRoute(path: '/events', pageBuilder: (context, state) => _page(state, const EventsPage())),
         GoRoute(path: '/insights', pageBuilder: (context, state) => _page(state, const InsightsPage())),
         GoRoute(path: '/impact', pageBuilder: (context, state) => _page(state, const ImpactPage())),
+        GoRoute(path: '/enquiries', pageBuilder: (context, state) => _page(state, const EnquiriesPage())),
         GoRoute(path: '/orgs', pageBuilder: (context, state) => _page(state, const OrgsPage())),
         GoRoute(path: '/users', pageBuilder: (context, state) => _page(state, const UsersPage())),
         GoRoute(path: '/moderation', pageBuilder: (context, state) => _page(state, const ModerationPage())),

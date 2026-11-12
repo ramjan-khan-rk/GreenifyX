@@ -288,4 +288,15 @@ class AdminApi {
   Future<void> createActivity(Json body) async => _send(() => _dio.post('/admin/activities', data: body));
 
   Future<void> updateActivity(String id, Json body) async => _send(() => _dio.patch('/admin/activities/$id', data: body));
+
+  // ---- Public website (no login) ----
+  Future<Json> publicStats() async => await _send(() => _dio.get('/public/stats'));
+
+  Future<String> sendEnquiry(Json body) async =>
+      (await _send(() => _dio.post('/public/org-enquiry', data: body)))['message']?.toString() ?? 'Thank you!';
+
+  // ---- Website enquiries (admin) ----
+  Future<List<Json>> enquiries() async => _maps((await _send(() => _dio.get('/admin/enquiries')))['enquiries']);
+
+  Future<void> updateEnquiry(String id, Json body) async => _send(() => _dio.patch('/admin/enquiries/$id', data: body));
 }

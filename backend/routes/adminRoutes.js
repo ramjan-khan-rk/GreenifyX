@@ -37,6 +37,7 @@ import {
 import { adminListPickups, adminUpdatePickup } from "../controllers/pickupController.js";
 import { adminListEvents, adminCreateEvent, adminUpdateEvent } from "../controllers/eventController.js";
 import { adminListActivities, adminCreateActivity, adminUpdateActivity } from "../controllers/activityController.js";
+import { adminListEnquiries, adminUpdateEnquiry } from "../controllers/publicController.js";
 
 const router = express.Router();
 
@@ -50,6 +51,8 @@ router.get("/redemptions", adminListRedemptions);
 router.patch("/redemptions/:id", adminUpdateRedemption);
 router.get("/pickups", adminListPickups);
 router.patch("/pickups/:id", adminUpdatePickup);
+router.get("/enquiries", adminListEnquiries);
+router.patch("/enquiries/:id", adminUpdateEnquiry);
 router.get("/activities", adminListActivities);
 router.post("/activities", adminCreateActivity);
 router.patch("/activities/:id", adminUpdateActivity);
