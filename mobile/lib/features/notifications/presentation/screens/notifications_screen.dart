@@ -14,6 +14,9 @@ import '../../../challenge/presentation/screens/challenge_screen.dart';
 import '../../../feed/presentation/screens/feed_screen.dart';
 import '../../../friends/presentation/screens/friends_screen.dart';
 import '../../../issues/presentation/issues_hub_screen.dart';
+import '../../../events/events_screen.dart';
+import '../../../pickup/pickup_screen.dart';
+import '../../../rewards/rewards_screen.dart';
 import '../../application/providers/notification_provider.dart';
 import '../../domain/models/notification_model.dart';
 
@@ -26,6 +29,9 @@ import '../../domain/models/notification_model.dart';
       "points" => (icon: Icons.stars_rounded, color: const Color(0xFFB07A00)),
       "campaign" => (icon: Icons.forest_rounded, color: AppColors.eco),
       "verification" => (icon: Icons.verified_rounded, color: AppColors.eco),
+      "reward" => (icon: Icons.redeem_rounded, color: AppColors.joy),
+      "pickup" => (icon: Icons.local_shipping_rounded, color: AppColors.eco),
+      "event" => (icon: Icons.event_rounded, color: const Color(0xFF0083B0)),
       _ when type.startsWith("challenge") => (icon: Icons.emoji_events_rounded, color: const Color(0xFFB07A00)),
       _ => (icon: Icons.notifications_rounded, color: AppColors.subtitle),
     };
@@ -57,6 +63,12 @@ void openNotification(BuildContext context, AppNotification n) {
       page = const FeedScreen();
     case "points":
       page = const PointsHistoryScreen();
+    case "reward":
+      page = const RewardsScreen();
+    case "pickup":
+      page = const PickupScreen();
+    case "event":
+      page = const EventsScreen();
     case "campaign":
       page = const VerifierHomeScreen();
     case "verification":

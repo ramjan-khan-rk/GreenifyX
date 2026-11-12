@@ -27,6 +27,9 @@ import '../../../orgs/teams_screen.dart';
 import '../../../post/presentation/screens/create_post_screen.dart';
 import '../../../profile/application/providers/my_profile_provider.dart';
 import '../../../settings/settings_screen.dart';
+import '../../../rewards/rewards_screen.dart';
+import '../../../events/events_screen.dart';
+import '../../../pickup/pickup_screen.dart';
 import '../widgets/home_actions.dart';
 import '../widgets/impact_hero.dart';
 import '../widgets/quote_card.dart';
@@ -72,6 +75,10 @@ class HomeScreen extends ConsumerWidget {
               HomeAction(Icons.map_rounded, "Eco Map", const [Color(0xFF11998E), Color(0xFF38EF7D)], () => _go(context, const EcoMapScreen())),
               HomeAction(Icons.groups_rounded, "Teams", const [Color(0xFF2B2440), Color(0xFF5B4E7A)], () => _go(context, const TeamsScreen())),
               HomeAction(Icons.emoji_events_rounded, "Challenges", const [Color(0xFFF7971E), Color(0xFFFFD200)], () => _go(context, const ChallengeScreen())),
+              HomeAction(Icons.redeem_rounded, "Rewards", const [Color(0xFFE36A4A), Color(0xFFFF5E9C)], () => _go(context, const RewardsScreen())),
+              HomeAction(Icons.event_rounded, "Events", const [Color(0xFF00B4DB), Color(0xFF0083B0)], () => _go(context, const EventsScreen())),
+              HomeAction(Icons.local_shipping_rounded, "Pickup", const [Color(0xFF56AB2F), Color(0xFFA8E063)], () => _go(context, const PickupScreen())),
+              HomeAction(Icons.people_alt_rounded, "Friends", const [Color(0xFFFF8008), Color(0xFFFFC837)], () => _go(context, const FriendsScreen())),
             ];
             return RefreshIndicator(
               color: AppColors.primary,
@@ -129,7 +136,7 @@ class HomeScreen extends ConsumerWidget {
                     level: user.level,
                     streak: user.streak,
                     onHistory: () => _go(context, const PointsHistoryScreen()),
-                    onRewards: () => _go(context, const PointsHistoryScreen()),
+                    onRewards: () => _go(context, const RewardsScreen()),
                   ),
                   const SizedBox(height: 16),
                   HomeActionGrid(actions: actions),

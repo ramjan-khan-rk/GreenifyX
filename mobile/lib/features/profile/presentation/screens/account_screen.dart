@@ -19,6 +19,9 @@ import '../../../home/presentation/widgets/eco_points_card.dart';
 import '../../application/providers/my_profile_provider.dart';
 import '../../application/providers/profile_provider.dart';
 import '../../../settings/settings_screen.dart';
+import '../../../rewards/rewards_screen.dart';
+import '../../../events/events_screen.dart';
+import '../../../pickup/pickup_screen.dart';
 import '../../../campaign/presentation/screens/points_history_screen.dart';
 import '../../../campaign/presentation/screens/verifier_home_screen.dart';
 import '../../../challenge/presentation/screens/challenge_screen.dart';
@@ -154,6 +157,24 @@ class AccountScreen extends ConsumerWidget {
                   },
                 ),
                 _ProfileLink(
+                  icon: Icons.redeem_rounded,
+                  title: "Rewards",
+                  subtitle: "Spend Eco Points on vouchers and experiences",
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RewardsScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.event_rounded,
+                  title: "Green events",
+                  subtitle: "Clean-ups, plantings and workshops near you",
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EventsScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.local_shipping_rounded,
+                  title: "Recycling pickup",
+                  subtitle: "Book a doorstep collection",
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PickupScreen())),
+                ),
+                _ProfileLink(
                   icon: Icons.groups_rounded,
                   title: "Teams",
                   subtitle: "Your company, school or community impact",
@@ -197,7 +218,7 @@ class AccountScreen extends ConsumerWidget {
                 _ProfileLink(
                   icon: BrandGlyph.settings,
                   title: "Settings",
-                  subtitle: "Name, photo, bio and emirate",
+                  subtitle: "Profile, password, notifications, language",
                   onTap: () {
                     Navigator.push(
                       context,
