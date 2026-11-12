@@ -18,6 +18,7 @@ const navItems = [
   NavItem('/verification', 'Verification', Icons.fact_check_rounded),
   NavItem('/issues', 'Report & Restore', Icons.report_gmailerrorred_rounded),
   NavItem('/places', 'Eco places', Icons.place_rounded),
+  NavItem('/checkpoints', 'QR check-ins', Icons.qr_code_2_rounded),
   NavItem('/impact', 'Impact', Icons.eco_rounded),
   NavItem('/insights', 'AI insights', Icons.auto_awesome_rounded),
   NavItem('/activities', 'Eco activities', Icons.eco_rounded),

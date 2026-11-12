@@ -19,6 +19,14 @@ import '../../../home/presentation/widgets/eco_points_card.dart';
 import '../../application/providers/my_profile_provider.dart';
 import '../../application/providers/profile_provider.dart';
 import '../../../settings/settings_screen.dart';
+import '../../../social/creator_profile_screen.dart';
+import '../../../communities/community_screens.dart';
+import '../../../impact/impact_screen.dart';
+import '../../../carbon/carbon_screen.dart';
+import '../../../battles/battles_screen.dart';
+import '../../../market/market_screens.dart';
+import '../../../checkin/scan_screen.dart';
+import '../../../companion/companion_screen.dart';
 import '../../../rewards/rewards_screen.dart';
 import '../../../events/events_screen.dart';
 import '../../../pickup/pickup_screen.dart';
@@ -157,6 +165,60 @@ class AccountScreen extends ConsumerWidget {
                       MaterialPageRoute(builder: (_) => const PointsHistoryScreen()),
                     );
                   },
+                ),
+                _ProfileLink(
+                  icon: Icons.person_pin_rounded,
+                  title: tr("My creator profile"),
+                  subtitle: tr("How others see you: posts, followers, likes"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CreatorProfileScreen(userId: user.id, meId: user.id))),
+                ),
+                _ProfileLink(
+                  icon: Icons.insights_rounded,
+                  title: tr("Creator analytics"),
+                  subtitle: tr("Reach, likes and followers over 30 days"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreatorAnalyticsScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.workspace_premium_rounded,
+                  title: tr("My impact & certificate"),
+                  subtitle: tr("Verified totals and a shareable certificate"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ImpactScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.co2_rounded,
+                  title: tr("Carbon footprint"),
+                  subtitle: tr("Your yearly CO₂ and how much you've cut"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CarbonScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.sports_kabaddi_rounded,
+                  title: tr("Weekly battles"),
+                  subtitle: tr("Live rankings for friends, schools and companies"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BattlesScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.groups_rounded,
+                  title: tr("Communities"),
+                  subtitle: tr("Join, host challenges and group chat"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunitiesScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.autorenew_rounded,
+                  title: tr("Swap & Share"),
+                  subtitle: tr("Give away, swap or sell second-hand"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MarketScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.qr_code_scanner_rounded,
+                  title: tr("Scan QR check-in"),
+                  subtitle: tr("At bins, refill stations and events"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.auto_awesome_rounded,
+                  title: tr("Eco companion"),
+                  subtitle: tr("Your daily plan and weekly goal"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CompanionScreen())),
                 ),
                 _ProfileLink(
                   icon: Icons.redeem_rounded,

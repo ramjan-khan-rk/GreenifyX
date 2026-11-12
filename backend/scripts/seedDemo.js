@@ -21,6 +21,10 @@ import Reward from "../models/Reward.js";
 import Redemption from "../models/Redemption.js";
 import PickupRequest from "../models/PickupRequest.js";
 import Event from "../models/Event.js";
+import Community from "../models/Community.js";
+import Listing from "../models/Listing.js";
+import Checkpoint from "../models/Checkpoint.js";
+import crypto from "crypto";
 import { makeJoinCode } from "../controllers/orgController.js";
 import { evaluateEvidence } from "../utils/geo.js";
 import { creditPoints } from "../utils/ledger.js";
@@ -539,6 +543,82 @@ const seedRewardsEvents = async ({ users, now }) => {
   return `${rewards.length} rewards, ${events.length} events, ${pickups.length} recycling pickups`;
 };
 
+const seedSocial = async ({ users, now }) => {
+  const pickUsers = (from, n) => users.slice(from, from + n).map((u) => u._id);
+  const communities = await Community.insertMany([
+    ["Dubai Beach Guardians", "Beach & Ocean", "Dubai", "Weekly sunrise clean-ups from JBR to Kite Beach."],
+    ["Abu Dhabi Ghaf Growers", "Trees & Gardens", "Abu Dhabi", "Planting and caring for native Ghaf and Sidr trees."],
+    ["Sharjah Zero Waste Families", "Zero Waste", "Sharjah", "Tips, swaps and refill runs for low-waste homes."],
+    ["UAE Cycle Commuters", "Cycling & Transport", "Dubai", "Ride to work, share safe routes, log your km."],
+  ].map(([name, category, emirate, description], i) => {
+    const members = pickUsers(i * 5, 12);
+    return {
+      name,
+      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      category,
+      emirate,
+      description,
+      coverImage: image(`community-${i}`),
+      owner: members[0],
+      moderators: [members[1]],
+      members,
+      challenges: [
+        {
+          title: ["Plastic-free beach week", "Plant 3 trees this month", "Zero-waste week", "Ride 5 times"][i],
+          description: "Post each action with a photo. Finish to earn bonus points.",
+          activity: ["Beach Clean-up", "Planted a Tree", "Refilled, No Plastic", "Cycled Instead of Driving"][i],
+          target: [3, 3, 5, 5][i],
+          rewardPoints: 50,
+          startsAt: new Date(now.getTime() - 2 * DAY),
+          endsAt: new Date(now.getTime() + 10 * DAY),
+          createdBy: members[0],
+          participants: members.slice(0, 6),
+        },
+      ],
+      isDemo: true,
+    };
+  }));
+  const listings = await Listing.insertMany([
+    ["Kids bicycle 16 inch", "Sports & Bikes", "give", 0, "good"],
+    ["Grade 7 school books (British curriculum)", "Books & School", "give", 0, "good"],
+    ["IKEA bookshelf", "Furniture", "sell", 80, "like-new"],
+    ["Baby stroller", "Kids & Baby", "swap", 0, "good"],
+    ["Old laptop for parts", "Electronics", "give", 0, "fair"],
+    ["Potted aloe vera plants", "Plants & Garden", "give", 0, "new"],
+  ].map(([title, category, type, priceAed, condition], i) => ({
+    user: users[i]._id,
+    title,
+    category,
+    type,
+    priceAed,
+    condition,
+    swapFor: type === "swap" ? "Kids car seat" : "",
+    description: "Demo listing. Pick up any evening this week.",
+    images: [image(`listing-${i}`)],
+    emirate: users[i].emirate || "Dubai",
+    area: ["JLT", "Al Reem", "Al Nahda", "Mirdif", "Al Khan", "Khalifa City"][i],
+    interested: users.slice(10 + i, 12 + i).map((u) => u._id),
+    isDemo: true,
+  })));
+  const checkpoints = await Checkpoint.insertMany([
+    ["Marina Walk recycling bins", "recycling_bin", "Dubai", 10, 25.0805, 55.1403],
+    ["Al Qasba refill station", "refill_station", "Sharjah", 5, 25.3238, 55.3786],
+    ["Corniche e-waste point", "recycling_bin", "Abu Dhabi", 15, 24.4764, 54.3213],
+    ["Zero-Waste Market entrance", "event", "Dubai", 20, 24.96, 55.15],
+  ].map(([name, type, emirate, points, lat, lng]) => ({
+    name,
+    type,
+    emirate,
+    points,
+    location: { lat, lng },
+    radiusM: 0,
+    code: `GXQ-${crypto.randomBytes(5).toString("hex").toUpperCase()}`,
+    partner: "Demo partner",
+    isDemo: true,
+  })));
+  return `${communities.length} communities, ${listings.length} Swap & Share listings, ${checkpoints.length} QR check-in points`;
+};
+
 const clear = async () => {
   const demoUsers = await User.find({ isDemo: true }).select("_id");
   const ids = demoUsers.map((u) => u._id);
@@ -555,6 +635,9 @@ const clear = async () => {
     Redemption.deleteMany({ user: { $in: ids } }),
     PickupRequest.deleteMany({ $or: [{ isDemo: true }, { user: { $in: ids } }] }),
     Event.deleteMany({ isDemo: true }),
+    Community.deleteMany({ isDemo: true }),
+    Listing.deleteMany({ $or: [{ isDemo: true }, { user: { $in: ids } }] }),
+    Checkpoint.deleteMany({ isDemo: true }),
     PointsTransaction.deleteMany({ $or: [{ isDemo: true }, { user: { $in: ids } }] }),
   ]);
   // Real users who joined a demo campaign are simply detached by the delete above.
@@ -581,6 +664,10 @@ const clear = async () => {
 
 const create = async () => {
   if (await User.exists({ isDemo: true })) {
+    if (!(await Community.exists({ isDemo: true }))) {
+      const users = await User.find({ isDemo: true, role: "user" }).limit(40);
+      console.log(`Added ${await seedSocial({ users, now: new Date() })} to the existing demo data.`);
+    }
     // Older demo sets predate rewards/events/pickups: top them up without touching the rest.
     if (!(await Reward.exists({ isDemo: true }))) {
       const users = await User.find({ isDemo: true, role: "user" }).limit(30);
@@ -737,9 +824,11 @@ const create = async () => {
   );
 
   const rewardSummary = await seedRewardsEvents({ users, now: new Date() });
+  const socialSummary = await seedSocial({ users, now: new Date() });
 
   console.log("Demo data ready:");
   console.log(`  ${rewardSummary}`);
+  console.log(`  ${socialSummary}`);
   console.log(`  ${users.length} users across all 7 emirates, ${savedPosts.length} posts, ${challenges.length} challenges, ${comments.length} comments`);
   console.log(`  ${campaignSummary}`);
   console.log(`  ${issueSummary}`);

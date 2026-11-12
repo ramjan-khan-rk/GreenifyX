@@ -7,8 +7,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/friendly_error.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../comment/presentation/widgets/comment_bottom_sheet.dart';
-import '../../../friends/domain/models/friend_model.dart';
-import '../../../friends/presentation/screens/friend_profile_screen.dart';
+import 'package:share_plus/share_plus.dart';
+
+import '../../../../core/utils/media_url.dart';
+import '../../../social/creator_profile_screen.dart';
 import '../../../post/domain/eco_activity.dart';
 import '../../../profile/application/providers/my_profile_provider.dart';
 import '../../application/providers/feed_provider.dart';
@@ -136,14 +138,10 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
   }
 
   void _openUser(String id, String name, String image) {
-    if (id.isEmpty || id == widget.meId) return;
+    if (id.isEmpty) return;
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => FriendProfileScreen(
-          friend: FriendModel(id: id, name: name, bio: "", profileImage: image, ecoPoints: 0, level: 1, streak: 0),
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => CreatorProfileScreen(userId: id, meId: widget.meId)),
     );
   }
 
@@ -296,6 +294,12 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
               pop: _liked,
             ),
             _Action(icon: Icons.mode_comment_outlined, onTap: _comments),
+            _Action(
+              icon: Icons.send_outlined,
+              onTap: () => SharePlus.instance.share(ShareParams(
+                text: "${p.name} on GreenifyX: ${p.activity} 🌱${p.description.isEmpty ? "" : "\n${p.description}"}\n${resolveMediaUrl(p.image) ?? ""}",
+              )),
+            ),
             const Spacer(),
             if (canVerify)
               Padding(

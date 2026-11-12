@@ -23,7 +23,9 @@ import '../../../../core/utils/friendly_error.dart';
 import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class CreatePostScreen extends StatefulWidget {
-  const CreatePostScreen({super.key});
+  /// Share into this community (optional).
+  final String? communityId;
+  const CreatePostScreen({super.key, this.communityId});
 
   @override
   State<CreatePostScreen> createState() => _CreatePostScreenState();
@@ -42,6 +44,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   List<EcoActivity> activities = fallbackActivities;
   String query = "";
   final List<FriendModel> tagged = [];
+  bool everyone = true;
 
   @override
   void initState() {
@@ -238,6 +241,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         if (tagged.isNotEmpty) "taggedUsers": jsonEncode([for (final t in tagged) t.id]),
         "cause": lane,
         "look": look,
+        "visibility": everyone ? "public" : "friends",
+        "community": ?widget.communityId,
         "musicUrl": ?musicUrl,
         if (musicUrl != null) "musicTitle": musicTitle,
         "muteOriginal": isVideo && muteOriginal ? "true" : "false",
@@ -479,6 +484,19 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   const Icon(Icons.chevron_right_rounded, color: AppColors.subtitle),
                 ]),
               ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Material(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(18),
+            child: SwitchListTile(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              secondary: Icon(everyone ? Icons.public_rounded : Icons.people_alt_rounded, color: AppColors.joy),
+              title: Text(everyone ? tr("Everyone can see this") : tr("Friends only"), style: const TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: Text(everyone ? tr("Shown in For you and Reels") : tr("Only your friends see it")),
+              value: everyone,
+              onChanged: (v) => setState(() => everyone = v),
             ),
           ),
           const SizedBox(height: 8),

@@ -15,6 +15,7 @@ import '../../../feed/presentation/screens/feed_screen.dart';
 import '../../../friends/presentation/screens/friends_screen.dart';
 import '../../../issues/presentation/issues_hub_screen.dart';
 import '../../../events/events_screen.dart';
+import '../../../market/market_screens.dart';
 import '../../../pickup/pickup_screen.dart';
 import '../../../rewards/rewards_screen.dart';
 import '../../application/providers/notification_provider.dart';
@@ -33,6 +34,8 @@ import 'package:greenifyx/core/i18n/app_locale.dart';
       "reward" => (icon: Icons.redeem_rounded, color: AppColors.joy),
       "pickup" => (icon: Icons.local_shipping_rounded, color: AppColors.eco),
       "event" => (icon: Icons.event_rounded, color: const Color(0xFF0083B0)),
+      "listing" => (icon: Icons.autorenew_rounded, color: const Color(0xFFFF8008)),
+      "tag" => (icon: Icons.alternate_email_rounded, color: AppColors.joy),
       _ when type.startsWith("challenge") => (icon: Icons.emoji_events_rounded, color: const Color(0xFFB07A00)),
       _ => (icon: Icons.notifications_rounded, color: AppColors.subtitle),
     };
@@ -70,6 +73,10 @@ void openNotification(BuildContext context, AppNotification n) {
       page = const PickupScreen();
     case "event":
       page = const EventsScreen();
+    case "listing":
+      page = const MarketScreen();
+    case "tag":
+      page = const FeedScreen();
     case "campaign":
       page = const VerifierHomeScreen();
     case "verification":

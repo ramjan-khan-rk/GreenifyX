@@ -22,6 +22,8 @@ import '../../../notifications/application/providers/notification_provider.dart'
 import '../../../profile/presentation/screens/account_screen.dart';
 import '../../../../core/i18n/app_locale.dart';
 import '../../../../core/services/push_service.dart';
+import '../../../../core/services/session_user.dart';
+import '../../../auth/application/providers/auth_provider.dart';
 
 class BottomNavScreen extends ConsumerStatefulWidget {
   const BottomNavScreen({super.key});
@@ -118,6 +120,8 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final me = ref.watch(authProvider).user;
+    if (me != null) SessionUser.update(id: me.id, name: me.name, profileImage: me.profileImage);
     final unreadNotes = ref.watch(unreadNotificationCountProvider);
     final pendingFriends = ref.watch(requestsProvider).maybeWhen(
           data: (list) => list.length,

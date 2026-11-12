@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/services/session_user.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/chat_launcher.dart';
 import '../../../../core/utils/friendly_error.dart';
 import '../../../../core/widgets/app_status.dart';
 import '../../../../core/widgets/count_badge.dart';
 import '../../../../core/widgets/user_avatar.dart';
-import '../../../assistant/assistant_screen.dart';
 import '../../../assistant/snap_sort_screen.dart';
 import '../../../campaign/presentation/screens/campaigns_screen.dart';
 import '../../../campaign/presentation/screens/points_history_screen.dart';
 import '../../../campaign/presentation/widgets/featured_campaign.dart';
-import '../../../challenge/presentation/screens/challenge_screen.dart';
 import '../../../chat/application/providers/chats_provider.dart';
 import '../../../chat/presentation/screens/chats_screen.dart';
 import '../../../friends/application/providers/friend_provider.dart';
@@ -30,6 +29,14 @@ import '../../../settings/settings_screen.dart';
 import '../../../rewards/rewards_screen.dart';
 import '../../../events/events_screen.dart';
 import '../../../pickup/pickup_screen.dart';
+import '../../../battles/battles_screen.dart';
+import '../../../carbon/carbon_screen.dart';
+import '../../../checkin/scan_screen.dart';
+import '../../../communities/community_screens.dart';
+import '../../../companion/companion_screen.dart';
+import '../../../impact/impact_screen.dart';
+import '../../../market/market_screens.dart';
+import '../../../social/reels_screen.dart';
 import '../widgets/home_actions.dart';
 import '../widgets/impact_hero.dart';
 import '../widgets/quote_card.dart';
@@ -66,20 +73,25 @@ class HomeScreen extends ConsumerWidget {
           loading: () => const AppLoading(),
           error: (e, _) => AppErrorState(message: friendlyError(e), onRetry: () => ref.invalidate(myProfileProvider)),
           data: (user) {
+            SessionUser.update(id: user.id, name: user.name, profileImage: user.profileImage);
             final first = user.name.trim().split(" ").first;
             final actions = [
               HomeAction(Icons.add_a_photo_rounded, tr("Post"), const [Color(0xFFE36A4A), Color(0xFFF2B544)], () => _go(context, const CreatePostScreen())),
+              HomeAction(Icons.slow_motion_video_rounded, tr("Reels"), const [Color(0xFFE8384F), Color(0xFFFF7EB3)], () => _go(context, ReelsScreen(meId: user.id))),
               HomeAction(Icons.campaign_rounded, tr("Campaigns"), const [Color(0xFF1F8A70), Color(0xFF4CC9A0)], () => _go(context, const CampaignsScreen())),
+              HomeAction(Icons.sports_kabaddi_rounded, tr("Battles"), const [Color(0xFF7F53AC), Color(0xFFE36A4A)], () => _go(context, const BattlesScreen())),
+              HomeAction(Icons.groups_rounded, tr("Communities"), const [Color(0xFF2B2440), Color(0xFF5B4E7A)], () => _go(context, const CommunitiesScreen())),
+              HomeAction(Icons.autorenew_rounded, tr("Swap & Share"), const [Color(0xFFFF8008), Color(0xFFFFC837)], () => _go(context, const MarketScreen())),
+              HomeAction(Icons.qr_code_scanner_rounded, tr("Scan QR"), const [Color(0xFF00B4DB), Color(0xFF0083B0)], () => _go(context, const ScanScreen())),
+              HomeAction(Icons.co2_rounded, tr("Carbon"), const [Color(0xFF11998E), Color(0xFF38EF7D)], () => _go(context, const CarbonScreen())),
               HomeAction(Icons.report_gmailerrorred_rounded, tr("Report"), const [Color(0xFFC2413B), Color(0xFFE36A4A)], () => _go(context, const IssuesHubScreen())),
               HomeAction(Icons.document_scanner_rounded, tr("Snap & Sort"), const [Color(0xFF3A7BD5), Color(0xFF00D2FF)], () => _go(context, const SnapSortScreen())),
-              HomeAction(Icons.auto_awesome_rounded, tr("Ask AI"), const [Color(0xFF7F53AC), Color(0xFF647DEE)], () => _go(context, const AssistantScreen())),
-              HomeAction(Icons.map_rounded, tr("Eco Map"), const [Color(0xFF11998E), Color(0xFF38EF7D)], () => _go(context, const EcoMapScreen())),
-              HomeAction(Icons.groups_rounded, tr("Teams"), const [Color(0xFF2B2440), Color(0xFF5B4E7A)], () => _go(context, const TeamsScreen())),
-              HomeAction(Icons.emoji_events_rounded, tr("Challenges"), const [Color(0xFFF7971E), Color(0xFFFFD200)], () => _go(context, const ChallengeScreen())),
+              HomeAction(Icons.map_rounded, tr("Eco Map"), const [Color(0xFF56AB2F), Color(0xFFA8E063)], () => _go(context, const EcoMapScreen())),
+              HomeAction(Icons.event_rounded, tr("Events"), const [Color(0xFF0083B0), Color(0xFF00B4DB)], () => _go(context, const EventsScreen())),
               HomeAction(Icons.redeem_rounded, tr("Rewards"), const [Color(0xFFE36A4A), Color(0xFFFF5E9C)], () => _go(context, const RewardsScreen())),
-              HomeAction(Icons.event_rounded, tr("Events"), const [Color(0xFF00B4DB), Color(0xFF0083B0)], () => _go(context, const EventsScreen())),
-              HomeAction(Icons.local_shipping_rounded, tr("Pickup"), const [Color(0xFF56AB2F), Color(0xFFA8E063)], () => _go(context, const PickupScreen())),
-              HomeAction(Icons.people_alt_rounded, tr("Friends"), const [Color(0xFFFF8008), Color(0xFFFFC837)], () => _go(context, const FriendsScreen())),
+              HomeAction(Icons.local_shipping_rounded, tr("Pickup"), const [Color(0xFF1F8A70), Color(0xFF56AB2F)], () => _go(context, const PickupScreen())),
+              HomeAction(Icons.workspace_premium_rounded, tr("My impact"), const [Color(0xFFD9B45A), Color(0xFFF2B544)], () => _go(context, const ImpactScreen())),
+              HomeAction(Icons.business_center_rounded, tr("Teams"), const [Color(0xFF3A3256), Color(0xFF7F53AC)], () => _go(context, const TeamsScreen())),
             ];
             return RefreshIndicator(
               color: AppColors.primary,
@@ -139,6 +151,7 @@ class HomeScreen extends ConsumerWidget {
                     onHistory: () => _go(context, const PointsHistoryScreen()),
                     onRewards: () => _go(context, const RewardsScreen()),
                   ),
+                  const CompanionCard(),
                   const SizedBox(height: 16),
                   HomeActionGrid(actions: actions),
                   if (friends.isNotEmpty) ...[

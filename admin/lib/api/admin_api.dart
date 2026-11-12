@@ -299,4 +299,14 @@ class AdminApi {
   Future<List<Json>> enquiries() async => _maps((await _send(() => _dio.get('/admin/enquiries')))['enquiries']);
 
   Future<void> updateEnquiry(String id, Json body) async => _send(() => _dio.patch('/admin/enquiries/$id', data: body));
+
+  // ---- QR check-in points ----
+  Future<List<Json>> checkpoints() async => _maps((await _send(() => _dio.get('/admin/checkpoints')))['checkpoints']);
+
+  Future<void> createCheckpoint(Json body) async => _send(() => _dio.post('/admin/checkpoints', data: body));
+
+  Future<void> updateCheckpoint(String id, Json body) async => _send(() => _dio.patch('/admin/checkpoints/$id', data: body));
+
+  // ---- Public certificate check ----
+  Future<Json> certificate(String code) async => Json.from((await _send(() => _dio.get('/public/certificates/$code')))['certificate'] as Map);
 }

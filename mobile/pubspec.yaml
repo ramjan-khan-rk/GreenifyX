@@ -57,6 +57,9 @@ dependencies:
   http_parser: ^4.1.2
   geolocator: ^14.0.0
   url_launcher: ^6.3.1
+  share_plus: ^11.0.0
+  mobile_scanner: ^7.0.1
+  qr_flutter: ^4.1.0
   flutter_map: ^8.0.0
   latlong2: ^0.9.1
   record: ^6.1.1

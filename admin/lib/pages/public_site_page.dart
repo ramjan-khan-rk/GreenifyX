@@ -563,3 +563,109 @@ class PaymentResultPage extends StatelessWidget {
     );
   }
 }
+
+/// Public check for an impact certificate (the QR on the certificate opens this).
+class VerifyCertificatePage extends StatefulWidget {
+  const VerifyCertificatePage({super.key, required this.code});
+  final String code;
+
+  @override
+  State<VerifyCertificatePage> createState() => _VerifyCertificatePageState();
+}
+
+class _VerifyCertificatePageState extends State<VerifyCertificatePage> {
+  Json? _c;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    Session.instance.api.certificate(widget.code).then((c) {
+      if (mounted) setState(() => _c = c);
+    }).catchError((e) {
+      if (mounted) setState(() => _error = e is ApiError ? e.message : 'Certificate not found');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = _c;
+    final s = Map<String, dynamic>.from((c?['stats'] ?? {}) as Map);
+    String d(String? iso) {
+      final t = DateTime.tryParse(iso ?? '')?.toLocal();
+      return t == null ? '' : '${t.day}/${t.month}/${t.year}';
+    }
+
+    return Scaffold(
+      backgroundColor: Brand.cream,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFCF6),
+                borderRadius: BorderRadius.circular(26),
+                border: Border.all(color: const Color(0xFFD9B45A), width: 2),
+              ),
+              child: _error != null
+                  ? Column(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.gpp_bad_rounded, color: Brand.danger, size: 60),
+                      const SizedBox(height: 12),
+                      const Text('Not a valid certificate', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 6),
+                      Text('Code ${widget.code} was not issued by GreenifyX.', style: const TextStyle(color: Brand.muted)),
+                    ])
+                  : c == null
+                      ? const Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator())
+                      : Column(mainAxisSize: MainAxisSize.min, children: [
+                          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                            ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.asset('assets/brand/app_icon_rounded.png', width: 36, height: 36)),
+                            const SizedBox(width: 10),
+                            const Text('GreenifyX', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20)),
+                          ]),
+                          const SizedBox(height: 18),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(color: Brand.eco.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
+                            child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                              Icon(Icons.verified_rounded, color: Brand.eco, size: 18),
+                              SizedBox(width: 6),
+                              Text('Verified certificate', style: TextStyle(color: Brand.eco, fontWeight: FontWeight.w800)),
+                            ]),
+                          ),
+                          const SizedBox(height: 14),
+                          const Text('CERTIFICATE OF VERIFIED IMPACT', style: TextStyle(letterSpacing: 1.6, fontWeight: FontWeight.w800, color: Color(0xFF9A7B2F))),
+                          const SizedBox(height: 10),
+                          Text(c['name']?.toString() ?? '', textAlign: TextAlign.center, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900, color: Brand.ink)),
+                          const SizedBox(height: 6),
+                          Text('Member since ${d(c['periodFrom']?.toString())} · issued ${d(c['issuedAt']?.toString())}', style: const TextStyle(color: Brand.muted)),
+                          const SizedBox(height: 22),
+                          Wrap(alignment: WrapAlignment.center, spacing: 26, runSpacing: 16, children: [
+                            for (final x in [
+                              ('${s['verifiedActions'] ?? 0}', 'verified actions'),
+                              ('${s['volunteerHours'] ?? 0} h', 'volunteering'),
+                              ('${s['treesPlanted'] ?? 0}', 'trees'),
+                              ('${s['wasteKg'] ?? 0} kg', 'waste'),
+                              ('${s['co2Kg'] ?? 0} kg', 'CO₂ saved'),
+                            ])
+                              Column(children: [
+                                Text(x.$1, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Brand.eco)),
+                                Text(x.$2, style: const TextStyle(color: Brand.muted)),
+                              ]),
+                          ]),
+                          const SizedBox(height: 22),
+                          SelectableText('Certificate ${c['code']}', style: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1)),
+                          const SizedBox(height: 6),
+                          const Text('Figures come from actions confirmed by GreenifyX field verifiers, friends and partners.',
+                              textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5, color: Brand.muted)),
+                        ]),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
