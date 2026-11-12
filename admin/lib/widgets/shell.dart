@@ -19,6 +19,7 @@ const navItems = [
   NavItem('/issues', 'Report & Restore', Icons.report_gmailerrorred_rounded),
   NavItem('/places', 'Eco places', Icons.place_rounded),
   NavItem('/impact', 'Impact', Icons.eco_rounded),
+  NavItem('/insights', 'AI insights', Icons.auto_awesome_rounded),
   NavItem('/points', 'Eco Points', Icons.account_balance_wallet_rounded),
   NavItem('/users', 'Users', Icons.people_alt_rounded),
   NavItem('/moderation', 'Moderation', Icons.shield_rounded),

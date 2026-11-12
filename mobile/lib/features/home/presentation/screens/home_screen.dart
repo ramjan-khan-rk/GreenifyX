@@ -23,6 +23,7 @@ import 'leaderboard_screen.dart';
 import '../../../../core/utils/friendly_error.dart';
 import '../../../campaign/presentation/widgets/featured_campaign.dart';
 import '../../../issues/presentation/report_restore_card.dart';
+import '../../../assistant/ai_tiles.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -182,6 +183,7 @@ class HomeScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  const AiTiles(),
                   const FeaturedCampaign(),
                   const ReportRestoreCard(),
                   const SizedBox(height: 22),

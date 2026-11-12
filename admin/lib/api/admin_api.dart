@@ -212,6 +212,17 @@ class AdminApi {
   Future<Json> updatePlace(String id, Json body) async =>
       Json.from((await _send(() => _dio.patch('/admin/places/$id', data: body)))['place'] as Map);
 
+  // ---- AI copilot ----
+
+  Future<({String text, String mode})> insights(String kind, {int days = 30}) async {
+    final data = await _send(() => _dio.post(
+          '/admin/ai/insights',
+          data: {'kind': kind, 'days': days},
+          options: Options(receiveTimeout: const Duration(seconds: 90)),
+        ));
+    return (text: data['text']?.toString() ?? '', mode: data['mode']?.toString() ?? 'template');
+  }
+
   Future<Paged> challenges({String status = '', int page = 1, int limit = 20}) async {
     final data = await _send(() => _dio.get('/admin/challenges', queryParameters: {
           if (status.isNotEmpty) 'status': status,

@@ -25,6 +25,7 @@ import {
 } from "../controllers/adminCampaignController.js";
 import { adminListEnvReports, adminUpdateEnvReport } from "../controllers/envReportController.js";
 import { adminListPlaces, adminCreatePlace, adminUpdatePlace } from "../controllers/mapController.js";
+import { insights } from "../controllers/aiInsightsController.js";
 
 const router = express.Router();
 
@@ -54,5 +55,6 @@ router.patch("/env-reports/:id/status", adminUpdateEnvReport);
 router.get("/places", adminListPlaces);
 router.post("/places", adminCreatePlace);
 router.patch("/places/:id", adminUpdatePlace);
+router.post("/ai/insights", insights);
 
 export default router;
