@@ -218,12 +218,14 @@ flutter run -d chrome --dart-define=API_BASE=http://localhost:5000/api
 
 Build it as a website with `flutter build web --dart-define=API_BASE=https://your-api/api`, then host the `admin/build/web` folder on any static host and add that address to `CORS_ORIGIN`.
 
-To give an existing account admin access:
+Create your admin account (you'll be asked for a password; it's stored only as a hash):
 
 ```bash
 cd backend
-npm run make-admin -- you@example.com
+npm run create-admin -- --email you@company.com --name "Your Name"
 ```
+
+Run it again with the same email to reset that admin's password.
 
 ### Demo data
 
@@ -233,7 +235,7 @@ npm run seed:demo             # 24 members across all 7 emirates, 96 posts, chal
 npm run seed:demo -- --clear  # removes only what the seeder created
 ```
 
-The seeder prints the admin and demo-user logins. Every seeded record is flagged `isDemo`, so clearing never touches real accounts.
+The seeder prints the demo resident and field-verifier logins. It never creates an admin account. Every seeded record is flagged `isDemo`, so clearing never touches real accounts.
 
 Create a `.env` file inside the backend directory with:
 

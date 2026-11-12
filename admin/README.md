@@ -18,7 +18,8 @@ flutter run -d chrome                                                   # uses t
 flutter run -d chrome --dart-define=API_BASE=http://localhost:5000/api  # local API
 ```
 
-Sign in with an account that has the admin role (`npm run make-admin -- you@example.com` in `backend/`, or use the seeded `admin@greenifyx.demo`).
+Sign in with an account that has the admin role. Create one from `backend/` with
+`npm run create-admin -- --email you@company.com --name "Your Name"` (you'll be asked for a password).
 
 ## Deploy as a website
 

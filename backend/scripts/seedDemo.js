@@ -23,8 +23,6 @@ dotenv.config();
 
 const DAY = 24 * 60 * 60 * 1000;
 const DEMO_PASSWORD = process.env.SEED_DEMO_PASSWORD || "Demo@12345";
-const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || "Admin@12345";
-const ADMIN_EMAIL = "admin@greenifyx.demo";
 
 // Deterministic pseudo-random so every seed looks the same in a demo.
 let seed = 42;
@@ -465,15 +463,12 @@ const create = async () => {
   }
 
   const userHash = await bcrypt.hash(DEMO_PASSWORD, 10);
-  const adminHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
   const now = Date.now();
 
+  // Attribution for demo reviews and approvals. It has no password, so nobody
+  // can sign in as it. Create your real admin with: npm run create-admin
   const admin = await User.create({
-    name: "GreenifyX Admin",
-    email: ADMIN_EMAIL,
-    emailVerified: true,
-    password: adminHash,
-    role: "admin",
+    name: "GreenifyX Operations",
     emirate: "Dubai",
     isProfileCompleted: true,
     isDemo: true,
@@ -616,7 +611,7 @@ const create = async () => {
   console.log(`  ${campaignSummary}`);
   console.log(`  ${issueSummary}`);
   console.log(`  ${places.length} eco places on the Smart Eco Map`);
-  console.log(`  Admin dashboard login: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
+  console.log("  Admin access: create your own account with  npm run create-admin -- --email you@company.com");
   console.log(`  Field verifier login: verifier@greenifyx.demo / ${DEMO_PASSWORD}`);
   console.log(`  Any demo user, e.g. ${users[0].email} / ${DEMO_PASSWORD}`);
   console.log(`  Admin id: ${admin._id}`);
