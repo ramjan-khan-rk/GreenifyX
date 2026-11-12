@@ -15,6 +15,7 @@ import '../pages/points_page.dart';
 import '../pages/users_page.dart';
 import '../pages/verification_page.dart';
 import '../pages/rewards_page.dart';
+import '../pages/activities_page.dart';
 import '../pages/pickups_page.dart';
 import '../pages/events_page.dart';
 import '../widgets/shell.dart';
@@ -45,6 +46,7 @@ final GoRouter adminRouter = GoRouter(
         GoRoute(path: '/points', pageBuilder: (context, state) => _page(state, const PointsPage())),
         GoRoute(path: '/issues', pageBuilder: (context, state) => _page(state, const IssuesPage())),
         GoRoute(path: '/places', pageBuilder: (context, state) => _page(state, const PlacesPage())),
+        GoRoute(path: '/activities', pageBuilder: (context, state) => _page(state, const ActivitiesPage())),
         GoRoute(path: '/rewards', pageBuilder: (context, state) => _page(state, const RewardsPage())),
         GoRoute(path: '/pickups', pageBuilder: (context, state) => _page(state, const PickupsPage())),
         GoRoute(path: '/events', pageBuilder: (context, state) => _page(state, const EventsPage())),

@@ -281,4 +281,11 @@ class AdminApi {
   Future<void> createEvent(Json body) async => _send(() => _dio.post('/admin/events', data: body));
 
   Future<void> updateEvent(String id, Json body) async => _send(() => _dio.patch('/admin/events/$id', data: body));
+
+  // ---- Eco activities ----
+  Future<List<Json>> activities() async => _maps((await _send(() => _dio.get('/admin/activities')))['activities']);
+
+  Future<void> createActivity(Json body) async => _send(() => _dio.post('/admin/activities', data: body));
+
+  Future<void> updateActivity(String id, Json body) async => _send(() => _dio.patch('/admin/activities/$id', data: body));
 }

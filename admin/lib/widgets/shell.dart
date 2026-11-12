@@ -20,6 +20,7 @@ const navItems = [
   NavItem('/places', 'Eco places', Icons.place_rounded),
   NavItem('/impact', 'Impact', Icons.eco_rounded),
   NavItem('/insights', 'AI insights', Icons.auto_awesome_rounded),
+  NavItem('/activities', 'Eco activities', Icons.eco_rounded),
   NavItem('/points', 'Eco Points', Icons.account_balance_wallet_rounded),
   NavItem('/rewards', 'Rewards', Icons.redeem_rounded),
   NavItem('/pickups', 'Recycling pickups', Icons.local_shipping_rounded),
