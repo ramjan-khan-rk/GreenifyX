@@ -1,6 +1,6 @@
 import Message from "../models/Message.js";
 import User from "../models/User.js";
-import { emitToUser } from "../socket/socket.js";
+import { emitToUser, isUserOnline } from "../socket/socket.js";
 import Notification from "../models/Notification.js";
 import { assertCanMessage } from "../utils/friendOps.js";
 import { sendServerError } from "../utils/httpError.js";
@@ -139,6 +139,8 @@ export const markAsRead = async (req, res) => {
       }
     );
 
+    emitToUser(userId, "messagesRead", { by: req.user._id.toString() });
+
     res.status(200).json({
       success: true,
       message: "Messages marked as read.",
@@ -195,6 +197,20 @@ export const getChatList = async (req, res) => {
       chats: finalChats.filter((chat) => !chat.blocked),
     });
   } catch (e) {
+    return sendServerError(res, "Request failed");
+  }
+};
+
+// GET /api/messages/presence/:userId — friend's online state and last seen.
+export const getPresence = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const me = await User.findById(req.user._id).select("friends");
+    const isFriend = me?.friends?.some((id) => id.toString() === String(userId));
+    if (!isFriend) return res.status(403).json({ success: false, message: "You can only see friends' status." });
+    const other = await User.findById(userId).select("lastSeenAt");
+    res.json({ success: true, online: isUserOnline(userId), lastSeenAt: other?.lastSeenAt || null });
+  } catch (error) {
     return sendServerError(res, "Request failed");
   }
 };

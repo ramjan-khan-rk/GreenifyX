@@ -20,6 +20,22 @@ class MessageRepository {
     await api.sendMessage(receiverId: receiverId, audio: url, durationSec: durationSec);
   }
 
+  /// Uploads a photo, then sends it as an image message with an optional caption.
+  Future<void> sendPhoto({required String receiverId, required File file, String caption = ""}) async {
+    final url = await api.uploadImage(file);
+    await api.sendMessage(receiverId: receiverId, image: url, text: caption);
+  }
+
+  /// Friend's online state: (online, lastSeenAt).
+  Future<(bool, DateTime?)> presence(String userId) async {
+    try {
+      final r = await api.presence(userId);
+      return (r["online"] == true, DateTime.tryParse(r["lastSeenAt"]?.toString() ?? "")?.toLocal());
+    } catch (_) {
+      return (false, null);
+    }
+  }
+
   Future<void> markRead(String userId) async {
     try {
       await api.markRead(userId);

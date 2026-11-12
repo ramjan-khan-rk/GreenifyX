@@ -16,11 +16,12 @@ class MessageApi {
     return response.data["chats"];
   }
 
-  Future<void> sendMessage({required String receiverId, String text = "", String? audio, int durationSec = 0}) async {
+  Future<void> sendMessage({required String receiverId, String text = "", String? audio, String? image, int durationSec = 0}) async {
     await ApiService.dio.post("/messages", data: {
       "receiverId": receiverId,
       "text": text,
       "audio": ?audio,
+      "image": ?image,
       if (audio != null) "durationSec": durationSec,
     });
   }
@@ -35,6 +36,23 @@ class MessageApi {
       options: Options(sendTimeout: const Duration(minutes: 1), receiveTimeout: const Duration(minutes: 1)),
     );
     return res.data["audioUrl"].toString();
+  }
+
+  Future<String> uploadImage(File file) async {
+    final form = FormData.fromMap({
+      "image": await MultipartFile.fromFile(file.path, filename: file.path.split(RegExp(r"[/\\]")).last),
+    });
+    final res = await ApiService.dio.post(
+      "/upload/image",
+      data: form,
+      options: Options(sendTimeout: const Duration(minutes: 1), receiveTimeout: const Duration(minutes: 1)),
+    );
+    return res.data["imageUrl"].toString();
+  }
+
+  Future<Map<String, dynamic>> presence(String userId) async {
+    final res = await ApiService.dio.get("/messages/presence/$userId");
+    return Map<String, dynamic>.from(res.data as Map);
   }
 
   Future<void> markRead(String userId) => ApiService.dio.put("/messages/read/$userId");

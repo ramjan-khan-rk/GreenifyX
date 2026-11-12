@@ -64,6 +64,20 @@ export const initializeSocket = (server) => {
     const userId = socket.userId;
     socket.join(roomFor(userId));
     onlineUsers.set(userId, socket.id);
+    broadcastPresence(userId, true);
+
+    // Typing indicator, relayed to friends only.
+    socket.on("typing", async (payload) => {
+      try {
+        const to = String(payload?.to || "");
+        if (!to || to === userId) return;
+        const me = await User.findById(userId).select("friends");
+        if (!me?.friends?.some((id) => id.toString() === to)) return;
+        emitToUser(to, "typing", { from: userId, typing: payload?.typing === true });
+      } catch {
+        /* ignore */
+      }
+    });
 
     socket.on("join", () => {
       socket.join(roomFor(socket.userId));
@@ -144,6 +158,7 @@ export const initializeSocket = (server) => {
     socket.on("disconnect", () => {
       if (onlineUsers.get(userId) === socket.id) {
         onlineUsers.delete(userId);
+        broadcastPresence(userId, false);
       }
       for (const key of liveCalls) {
         if (key.split(":").includes(userId)) {
@@ -155,6 +170,23 @@ export const initializeSocket = (server) => {
 
   return io;
 };
+
+// Tell a user's friends that they came online or went offline.
+const broadcastPresence = async (userId, online) => {
+  try {
+    const lastSeenAt = new Date();
+    const user = online
+      ? await User.findById(userId).select("friends")
+      : await User.findByIdAndUpdate(userId, { lastSeenAt }, { new: true }).select("friends");
+    for (const f of user?.friends || []) {
+      emitToUser(f, "presence", { userId, online, lastSeenAt: online ? null : lastSeenAt });
+    }
+  } catch {
+    /* best-effort */
+  }
+};
+
+export const isUserOnline = (userId) => onlineUsers.has(String(userId));
 
 export const getIo = () => io;
 

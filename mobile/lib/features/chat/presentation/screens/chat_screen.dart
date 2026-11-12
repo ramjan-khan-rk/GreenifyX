@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/services/socket_service.dart';
@@ -39,15 +41,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   bool _recording = false;
   bool _hasText = false;
 
+  // Presence and typing.
+  bool _online = false;
+  DateTime? _lastSeen;
+  bool _peerTyping = false;
+  bool _iAmTyping = false;
+  Timer? _peerTypingTimeout;
+  Timer? _myTypingStop;
+
   @override
   void initState() {
     super.initState();
     _input.addListener(() {
       final has = _input.text.trim().isNotEmpty;
       if (has != _hasText) setState(() => _hasText = has);
+      if (has) _typingPing();
     });
     ChatScreen.activeUserId = widget.userId;
     SocketService.instance.on("receiveMessage", _onIncoming);
+    SocketService.instance.on("typing", _onTyping);
+    SocketService.instance.on("presence", _onPresence);
+    SocketService.instance.on("messagesRead", _onRead);
+    _loadPresence();
     ref.read(messageRepositoryProvider).markRead(widget.userId);
   }
 
@@ -55,6 +70,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void dispose() {
     if (ChatScreen.activeUserId == widget.userId) ChatScreen.activeUserId = null;
     SocketService.instance.off("receiveMessage", _onIncoming);
+    SocketService.instance.off("typing", _onTyping);
+    SocketService.instance.off("presence", _onPresence);
+    SocketService.instance.off("messagesRead", _onRead);
+    if (_iAmTyping) SocketService.instance.emit("typing", {"to": widget.userId, "typing": false});
+    _peerTypingTimeout?.cancel();
+    _myTypingStop?.cancel();
     _recTick?.cancel();
     _recorder.dispose();
     _input.dispose();
@@ -72,6 +93,165 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
+  Future<void> _loadPresence() async {
+    final (online, seen) = await ref.read(messageRepositoryProvider).presence(widget.userId);
+    if (!mounted) return;
+    setState(() {
+      _online = online;
+      _lastSeen = seen;
+    });
+  }
+
+  void _onTyping(dynamic raw) {
+    if (!mounted || raw is! Map || raw["from"]?.toString() != widget.userId) return;
+    final typing = raw["typing"] == true;
+    _peerTypingTimeout?.cancel();
+    // Clear the indicator even if the "stopped" event never arrives.
+    if (typing) {
+      _peerTypingTimeout = Timer(const Duration(seconds: 6), () {
+        if (mounted) setState(() => _peerTyping = false);
+      });
+    }
+    setState(() {
+      _peerTyping = typing;
+      if (typing) _online = true;
+    });
+  }
+
+  void _onPresence(dynamic raw) {
+    if (!mounted || raw is! Map || raw["userId"]?.toString() != widget.userId) return;
+    setState(() {
+      _online = raw["online"] == true;
+      if (!_online) {
+        _peerTyping = false;
+        _lastSeen = DateTime.tryParse(raw["lastSeenAt"]?.toString() ?? "")?.toLocal() ?? DateTime.now();
+      }
+    });
+  }
+
+  void _onRead(dynamic raw) {
+    if (!mounted || raw is! Map || raw["by"]?.toString() != widget.userId) return;
+    ref.invalidate(chatProvider(widget.userId));
+  }
+
+  void _typingPing() {
+    if (!_iAmTyping) {
+      _iAmTyping = true;
+      SocketService.instance.emit("typing", {"to": widget.userId, "typing": true});
+    }
+    _myTypingStop?.cancel();
+    _myTypingStop = Timer(const Duration(milliseconds: 2500), _typingDone);
+  }
+
+  void _typingDone() {
+    _myTypingStop?.cancel();
+    if (!_iAmTyping) return;
+    _iAmTyping = false;
+    SocketService.instance.emit("typing", {"to": widget.userId, "typing": false});
+  }
+
+  String get _status {
+    if (_peerTyping) return "typing…";
+    if (_online) return "Online";
+    final s = _lastSeen;
+    if (s == null) return "Tap the call buttons to talk";
+    final now = DateTime.now();
+    final diff = now.difference(s);
+    if (diff.inMinutes < 1) return "Last seen just now";
+    if (diff.inMinutes < 60) return "Last seen ${diff.inMinutes} min ago";
+    if (_sameDay(s, now)) return "Last seen today at ${DateFormat("h:mm a").format(s)}";
+    if (_sameDay(s, now.subtract(const Duration(days: 1)))) return "Last seen yesterday at ${DateFormat("h:mm a").format(s)}";
+    return "Last seen ${DateFormat("d MMM").format(s)}";
+  }
+
+  Future<void> _pickPhoto(ImageSource source) async {
+    final shot = await ImagePicker().pickImage(source: source, imageQuality: 80, maxWidth: 1600);
+    if (shot == null || !mounted) return;
+    final file = File(shot.path);
+    final caption = TextEditingController();
+    final send = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.black,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(onPressed: () => Navigator.pop(ctx, false), icon: const Icon(Icons.close_rounded, color: Colors.white)),
+            ),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.6),
+              child: Image.file(file, fit: BoxFit.contain),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(children: [
+                Expanded(
+                  child: TextField(
+                    controller: caption,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Add a caption…",
+                      hintStyle: const TextStyle(color: Colors.white60),
+                      filled: true,
+                      fillColor: Colors.white12,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                FloatingActionButton(
+                  heroTag: "send-photo",
+                  backgroundColor: AppColors.joy,
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Icon(Icons.send_rounded, color: Colors.white),
+                ),
+              ]),
+            ),
+          ]),
+        ),
+      ),
+    );
+    if (send != true || !mounted) return;
+    setState(() => _sending = true);
+    try {
+      await ref.read(messageRepositoryProvider).sendPhoto(receiverId: widget.userId, file: file, caption: caption.text.trim());
+      ref.invalidate(chatProvider(widget.userId));
+      ref.invalidate(chatsProvider);
+      _toBottom();
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyError(e, fallback: "Photo failed to send."))));
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  void _attachSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+          child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+            _AttachOption(icon: Icons.photo_camera_rounded, label: "Camera", color: AppColors.joy, onTap: () {
+              Navigator.pop(ctx);
+              _pickPhoto(ImageSource.camera);
+            }),
+            _AttachOption(icon: Icons.photo_library_rounded, label: "Gallery", color: const Color(0xFF7F53AC), onTap: () {
+              Navigator.pop(ctx);
+              _pickPhoto(ImageSource.gallery);
+            }),
+          ]),
+        ),
+      ),
+    );
+  }
+
   void _toBottom({bool animate = true}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scroll.hasClients) return;
@@ -83,6 +263,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> _sendText() async {
     final text = _input.text.trim();
     if (text.isEmpty || _sending) return;
+    _typingDone();
     setState(() => _sending = true);
     try {
       await ref.read(messageRepositoryProvider).sendMessage(receiverId: widget.userId, text: text);
@@ -154,13 +335,40 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         shadowColor: Colors.black12,
         titleSpacing: 0,
         title: Row(children: [
-          UserAvatar(imageUrl: widget.profileImage, name: widget.userName, radius: 19),
+          Stack(children: [
+            UserAvatar(imageUrl: widget.profileImage, name: widget.userName, radius: 19),
+            if (_online)
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2ECC71),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                ),
+              ),
+          ]),
           const SizedBox(width: 10),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(widget.userName,
                   maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16.5, color: AppColors.ink)),
-              const Text("GreenifyX friend", style: TextStyle(fontSize: 12, color: AppColors.subtitle)),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Text(
+                  _status,
+                  key: ValueKey(_status),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: _peerTyping || _online ? FontWeight.w700 : FontWeight.w500,
+                    color: _peerTyping || _online ? AppColors.eco : AppColors.subtitle,
+                  ),
+                ),
+              ),
             ]),
           ),
         ]),
@@ -214,6 +422,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           recording: _recording,
           elapsed: _recorder.elapsed,
           onSend: _sendText,
+          onAttach: _attachSheet,
           onMic: _startRecording,
           onCancelRecording: _cancelRecording,
           onFinishRecording: _finishRecording,
@@ -284,10 +493,36 @@ class _Bubble extends StatelessWidget {
     if (message.type == "audio" && message.audio.isNotEmpty) {
       content = VoiceNotePlayer(url: message.audio, durationSec: message.durationSec, mine: mine);
     } else if (message.type == "image" && message.image.isNotEmpty) {
-      content = ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.network(resolveMediaUrl(message.image) ?? message.image, width: 220, fit: BoxFit.cover),
-      );
+      final url = resolveMediaUrl(message.image) ?? message.image;
+      content = Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+        GestureDetector(
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _PhotoViewer(url: url))),
+          child: Hero(
+            tag: "${message.id}-$url",
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                url,
+                width: 230,
+                height: 260,
+                fit: BoxFit.cover,
+                loadingBuilder: (c, child, p) => p == null
+                    ? child
+                    : Container(width: 230, height: 260, color: Colors.black12, child: const Center(child: CircularProgressIndicator(strokeWidth: 2))),
+                errorBuilder: (_, _, _) => Container(width: 230, height: 120, color: Colors.black12, child: const Icon(Icons.broken_image_outlined)),
+              ),
+            ),
+          ),
+        ),
+        if (message.text.trim().isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 230),
+              child: Text(message.text, style: TextStyle(color: fg, fontSize: 15, height: 1.35)),
+            ),
+          ),
+      ]);
     } else {
       content = Text(message.text, style: TextStyle(color: fg, fontSize: 15.5, height: 1.35));
     }
@@ -356,6 +591,7 @@ class _Composer extends StatelessWidget {
   final bool recording;
   final Duration elapsed;
   final VoidCallback onSend;
+  final VoidCallback onAttach;
   final VoidCallback onMic;
   final VoidCallback onCancelRecording;
   final VoidCallback onFinishRecording;
@@ -367,6 +603,7 @@ class _Composer extends StatelessWidget {
     required this.recording,
     required this.elapsed,
     required this.onSend,
+    required this.onAttach,
     required this.onMic,
     required this.onCancelRecording,
     required this.onFinishRecording,
@@ -383,7 +620,7 @@ class _Composer extends StatelessWidget {
           Expanded(
             child: Container(
               constraints: const BoxConstraints(minHeight: 50),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.only(left: recording ? 16 : 4, right: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(26),
@@ -398,7 +635,13 @@ class _Composer extends StatelessWidget {
                       const Expanded(child: Text("Recording…", style: TextStyle(color: AppColors.subtitle))),
                       TextButton(onPressed: onCancelRecording, child: const Text("Cancel")),
                     ])
-                  : TextField(
+                  : Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                      IconButton(
+                        tooltip: "Send a photo",
+                        onPressed: sending ? null : onAttach,
+                        icon: const Icon(Icons.add_photo_alternate_outlined, color: AppColors.subtitle),
+                      ),
+                      Expanded(child: TextField(
                       controller: controller,
                       minLines: 1,
                       maxLines: 5,
@@ -411,7 +654,8 @@ class _Composer extends StatelessWidget {
                         filled: false,
                         contentPadding: EdgeInsets.symmetric(vertical: 14),
                       ),
-                    ),
+                    )),
+                    ]),
             ),
           ),
           const SizedBox(width: 8),
@@ -469,4 +713,44 @@ class _RecDotState extends State<_RecDot> with SingleTickerProviderStateMixin {
         opacity: Tween(begin: 0.3, end: 1.0).animate(_c),
         child: Container(width: 12, height: 12, decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle)),
       );
+}
+
+class _AttachOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  const _AttachOption({required this.icon, required this.label, required this.color, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          CircleAvatar(radius: 30, backgroundColor: color, child: Icon(icon, color: Colors.white, size: 28)),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+        ]),
+      ),
+    );
+  }
+}
+
+class _PhotoViewer extends StatelessWidget {
+  final String url;
+  const _PhotoViewer({required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(backgroundColor: Colors.black, foregroundColor: Colors.white, elevation: 0),
+      body: Center(
+        child: InteractiveViewer(minScale: 1, maxScale: 4, child: Image.network(url, fit: BoxFit.contain)),
+      ),
+    );
+  }
 }
