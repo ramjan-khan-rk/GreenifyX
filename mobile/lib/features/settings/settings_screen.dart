@@ -14,6 +14,7 @@ import '../profile/application/providers/profile_provider.dart';
 import '../profile/presentation/screens/edit_profile_screen.dart';
 import 'legal_screen.dart';
 import 'settings_api.dart';
+import '../../core/i18n/app_locale.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -51,7 +52,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         for (final k in _prefs.keys.toList()) {
           _prefs[k] = p[k] != false;
         }
-        _language = s["language"]?.toString() ?? "en";
+        _language = AppLocale.current.value.languageCode;
         _loaded = true;
       });
     } catch (_) {
@@ -78,6 +79,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     setState(() => _language = lang);
     try {
       await _api.save(language: lang);
+      await AppLocale.set(lang);
       _snack(lang == "ar" ? "تم حفظ اللغة العربية" : "Language saved");
     } catch (e) {
       if (mounted) {
@@ -164,7 +166,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final profile = ref.watch(myProfileProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text("Settings")),
+      appBar: AppBar(title: Text(tr("Settings"))),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
         children: [
@@ -173,8 +175,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ListTile(
                 contentPadding: const EdgeInsets.fromLTRB(16, 10, 12, 10),
                 leading: UserAvatar(imageUrl: u.profileImage, name: u.name, radius: 28),
-                title: Text(u.name.isEmpty ? "Add your name" : u.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
-                subtitle: Text(u.bio.isEmpty ? "Add a bio so friends know you" : u.bio, maxLines: 2, overflow: TextOverflow.ellipsis),
+                title: Text(u.name.isEmpty ? tr("Add your name") : u.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
+                subtitle: Text(u.bio.isEmpty ? tr("Add a bio so friends know you") : u.bio, maxLines: 2, overflow: TextOverflow.ellipsis),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen())),
               ),
@@ -191,7 +193,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             for (final e in _prefLabels.entries)
               SwitchListTile(
                 secondary: Icon(e.value.$2, color: AppColors.ink),
-                title: Text(e.value.$1, style: const TextStyle(fontWeight: FontWeight.w600)),
+                title: Text(tr(e.value.$1), style: const TextStyle(fontWeight: FontWeight.w600)),
                 value: _prefs[e.key] ?? true,
                 onChanged: _loaded ? (v) => _togglePref(e.key, v) : null,
               ),
@@ -210,7 +212,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _Card(children: [
             _Row(icon: Icons.privacy_tip_outlined, title: "Privacy policy", onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => LegalScreen.privacy))),
             _Row(icon: Icons.description_outlined, title: "Terms of use", onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => LegalScreen.terms))),
-            const ListTile(leading: Icon(Icons.info_outline_rounded), title: Text("Version"), trailing: Text("1.0.0")),
+            ListTile(leading: const Icon(Icons.info_outline_rounded), title: Text(tr("Version")), trailing: const Text("1.0.0")),
           ]),
           const SizedBox(height: 20),
           _Card(children: [
@@ -229,7 +231,7 @@ class _Label extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.fromLTRB(8, 22, 8, 8),
-        child: Text(text.toUpperCase(), style: const TextStyle(fontSize: 12, letterSpacing: 0.8, fontWeight: FontWeight.w800, color: AppColors.subtitle)),
+        child: Text(tr(text).toUpperCase(), style: const TextStyle(fontSize: 12, letterSpacing: 0.8, fontWeight: FontWeight.w800, color: AppColors.subtitle)),
       );
 }
 
@@ -259,7 +261,7 @@ class _Row extends StatelessWidget {
     final c = danger ? AppColors.error : AppColors.ink;
     return ListTile(
       leading: Icon(icon, color: c),
-      title: Text(title, style: TextStyle(color: c, fontWeight: FontWeight.w600)),
+      title: Text(tr(title), style: TextStyle(color: c, fontWeight: FontWeight.w600)),
       trailing: danger ? null : const Icon(Icons.chevron_right_rounded),
       onTap: onTap,
     );

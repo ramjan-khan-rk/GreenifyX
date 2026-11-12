@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../core/services/api_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/friendly_error.dart';
+import '../../core/i18n/app_locale.dart';
 
 typedef Json = Map<String, dynamic>;
 
@@ -71,11 +72,11 @@ class _PickupScreenState extends State<PickupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Recycling pickup")),
+      appBar: AppBar(title: Text(tr("Recycling pickup"))),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _new,
         icon: const Icon(Icons.local_shipping_rounded),
-        label: const Text("Book a pickup"),
+        label: Text(tr("Book a pickup")),
       ),
       body: RefreshIndicator(
         onRefresh: _load,
@@ -235,7 +236,7 @@ class _NewPickupScreenState extends State<_NewPickupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Book a pickup")),
+      appBar: AppBar(title: Text(tr("Book a pickup"))),
       body: ListView(padding: const EdgeInsets.fromLTRB(18, 8, 18, 30), children: [
         const Text("What are you recycling?", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
         const SizedBox(height: 10),

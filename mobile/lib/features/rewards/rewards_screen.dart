@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../core/services/api_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/friendly_error.dart';
+import '../../core/i18n/app_locale.dart';
 
 typedef Json = Map<String, dynamic>;
 
@@ -145,7 +146,7 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
             expandedHeight: 210,
             backgroundColor: AppColors.ink,
             foregroundColor: Colors.white,
-            title: const Text("Rewards"),
+            title: Text(tr("Rewards")),
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: const BoxDecoration(
@@ -154,7 +155,7 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
                 padding: const EdgeInsets.fromLTRB(20, 96, 20, 56),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
                   Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-                    Text("Available to spend", style: TextStyle(color: Colors.white.withValues(alpha: 0.75))),
+                    Text(tr("Available to spend"), style: TextStyle(color: Colors.white.withValues(alpha: 0.75))),
                     Text("$_balance", style: const TextStyle(color: Colors.white, fontSize: 38, fontWeight: FontWeight.w800, height: 1.1)),
                   ]),
                   const Spacer(),
@@ -167,7 +168,7 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
               labelColor: Colors.white,
               unselectedLabelColor: Colors.white60,
               indicatorColor: AppColors.sun,
-              tabs: [const Tab(text: "Catalogue"), Tab(text: "My codes (${_mine.where((m) => m["status"] == "issued").length})")],
+              tabs: [Tab(text: tr("Catalogue")), Tab(text: "${tr("My codes")} (${_mine.where((m) => m["status"] == "issued").length})")],
             ),
           ),
         ],
@@ -191,7 +192,7 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
                                 padding: const EdgeInsets.only(right: 8),
                                 child: ChoiceChip(
                                   avatar: Icon(c.value.$2, size: 17),
-                                  label: Text(c.value.$1),
+                                  label: Text(tr(c.value.$1)),
                                   selected: _category == c.key,
                                   onSelected: (_) => setState(() => _category = c.key),
                                 ),
@@ -292,7 +293,7 @@ class _RewardCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 affordable
-                    ? FilledButton(onPressed: onTap, child: const Text("Redeem"))
+                    ? FilledButton(onPressed: onTap, child: Text(tr("Redeem")))
                     : Text("${cost - balance} to go", style: const TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w700)),
               ]),
             ),

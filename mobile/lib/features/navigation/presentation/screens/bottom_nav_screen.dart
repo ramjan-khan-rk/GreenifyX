@@ -20,6 +20,7 @@ import '../../../friends/application/providers/friend_provider.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../notifications/application/providers/notification_provider.dart';
 import '../../../profile/presentation/screens/account_screen.dart';
+import '../../../../core/i18n/app_locale.dart';
 
 class BottomNavScreen extends ConsumerStatefulWidget {
   const BottomNavScreen({super.key});
@@ -144,27 +145,27 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
             NavigationDestination(
               icon: CountBadge(count: unreadNotes, child: const Icon(Icons.home_outlined)),
               selectedIcon: CountBadge(count: unreadNotes, child: const Icon(Icons.home_rounded)),
-              label: "Home",
+              label: tr("Home"),
             ),
-            const NavigationDestination(
-              icon: Icon(Icons.forest_outlined),
-              selectedIcon: Icon(Icons.forest_rounded),
-              label: "Campaigns",
+            NavigationDestination(
+              icon: const Icon(Icons.forest_outlined),
+              selectedIcon: const Icon(Icons.forest_rounded),
+              label: tr("Campaigns"),
             ),
-            const NavigationDestination(
-              icon: Icon(Icons.auto_awesome_outlined),
-              selectedIcon: Icon(Icons.auto_awesome_rounded),
-              label: "Moments",
+            NavigationDestination(
+              icon: const Icon(Icons.auto_awesome_outlined),
+              selectedIcon: const Icon(Icons.auto_awesome_rounded),
+              label: tr("Moments"),
             ),
             NavigationDestination(
               icon: CountBadge(count: unreadChats, child: const Icon(Icons.chat_bubble_outline_rounded)),
               selectedIcon: CountBadge(count: unreadChats, child: const Icon(Icons.chat_bubble_rounded)),
-              label: "Chat",
+              label: tr("Chat"),
             ),
             NavigationDestination(
               icon: CountBadge(count: pendingFriends, child: const Icon(Icons.person_outline_rounded)),
               selectedIcon: CountBadge(count: pendingFriends, child: const Icon(Icons.person_rounded)),
-              label: "Profile",
+              label: tr("Profile"),
             ),
           ],
         ),

@@ -7,6 +7,7 @@ import '../../core/services/api_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/friendly_error.dart';
 import '../campaign/presentation/screens/campaigns_screen.dart';
+import '../../core/i18n/app_locale.dart';
 
 typedef Json = Map<String, dynamic>;
 
@@ -84,21 +85,21 @@ class _EventsScreenState extends State<EventsScreen> {
     for (final e in list) {
       final s = _start(e);
       final key = _same(s, today)
-          ? "Today"
+          ? tr("Today")
           : _same(s, today.add(const Duration(days: 1)))
-              ? "Tomorrow"
+              ? tr("Tomorrow")
               : s.isBefore(today)
-                  ? "Happening now"
+                  ? tr("Happening now")
                   : DateFormat("EEEE, d MMMM").format(s);
       groups.putIfAbsent(key, () => []).add(e);
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Green events"),
+        title: Text(tr("Green events")),
         actions: [
           FilterChip(
-            label: const Text("Going"),
+            label: Text(tr("Going")),
             selected: _goingOnly,
             onSelected: (v) => setState(() => _goingOnly = v),
           ),

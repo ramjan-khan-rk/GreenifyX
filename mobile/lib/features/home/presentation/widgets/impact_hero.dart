@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/i18n/app_locale.dart';
 
 /// Premium points card: balance, level progress and streak.
 class ImpactHero extends StatelessWidget {
@@ -49,7 +50,7 @@ class ImpactHero extends StatelessWidget {
           Row(children: [
             const Icon(Icons.stars_rounded, color: AppColors.sun, size: 20),
             const SizedBox(width: 6),
-            Text("Eco Points", style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontWeight: FontWeight.w700)),
+            Text(tr("Eco Points"), style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontWeight: FontWeight.w700)),
             const Spacer(),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -57,7 +58,7 @@ class ImpactHero extends StatelessWidget {
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 const Icon(Icons.local_fire_department_rounded, color: Color(0xFFFF9F43), size: 16),
                 const SizedBox(width: 4),
-                Text("$streak-day streak", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12)),
+                Text("$streak ${tr("day streak")}", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12)),
               ]),
             ),
           ]),
@@ -65,9 +66,9 @@ class ImpactHero extends StatelessWidget {
           Text("$points", style: const TextStyle(color: Colors.white, fontSize: 42, fontWeight: FontWeight.w800, height: 1, letterSpacing: -1)),
           const SizedBox(height: 16),
           Row(children: [
-            Text("Level $level", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+            Text("${tr("Level")} $level", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
             const Spacer(),
-            Text("${100 - into} to level ${level + 1}", style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12.5)),
+            Text("${100 - into} ${tr("to level")} ${level + 1}", style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12.5)),
           ]),
           const SizedBox(height: 8),
           ClipRRect(
@@ -82,11 +83,11 @@ class ImpactHero extends StatelessWidget {
           const SizedBox(height: 16),
           Row(children: [
             Expanded(
-              child: _HeroButton(icon: Icons.redeem_rounded, label: "Rewards", filled: true, onTap: onRewards),
+              child: _HeroButton(icon: Icons.redeem_rounded, label: tr("Rewards"), filled: true, onTap: onRewards),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: _HeroButton(icon: Icons.receipt_long_rounded, label: "History", onTap: onHistory),
+              child: _HeroButton(icon: Icons.receipt_long_rounded, label: tr("History"), onTap: onHistory),
             ),
           ]),
         ]),

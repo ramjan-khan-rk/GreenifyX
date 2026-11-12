@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/i18n/app_locale.dart';
 import '../../../../core/services/socket_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/chat_launcher.dart';
@@ -151,8 +152,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   String get _status {
-    if (_peerTyping) return "typing…";
-    if (_online) return "Online";
+    if (_peerTyping) return tr("typing…");
+    if (_online) return tr("Online");
     final s = _lastSeen;
     if (s == null) return "Tap the call buttons to talk";
     final now = DateTime.now();
