@@ -271,7 +271,7 @@ class _StoryViewerState extends State<StoryViewer> with SingleTickerProviderStat
       final viewers = maps(r["viewers"]);
       await showModalBottomSheet<void>(
         context: context,
-        builder: (_) => SafeArea(
+        builder: (sheetCtx) => SafeArea(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             ListTile(
               leading: const Icon(Icons.visibility_rounded),
@@ -289,8 +289,8 @@ class _StoryViewerState extends State<StoryViewer> with SingleTickerProviderStat
               title: Text(tr("Delete story"), style: const TextStyle(color: AppColors.error)),
               onTap: () async {
                 await SocialApi.deleteStory(_story["_id"].toString());
-                if (context.mounted) Navigator.pop(context);
-                if (mounted) Navigator.pop(this.context);
+                if (sheetCtx.mounted) Navigator.pop(sheetCtx);
+                if (mounted) Navigator.pop(context);
               },
             ),
           ]),

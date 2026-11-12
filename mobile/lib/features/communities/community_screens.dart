@@ -7,7 +7,7 @@ import '../../core/services/session_user.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/friendly_error.dart';
 import '../../core/widgets/user_avatar.dart';
-import '../events/events_screen.dart';
+import '../events/events_screen.dart' show EventDetailScreen;
 import '../feed/domain/models/feed_model.dart';
 import '../feed/presentation/widgets/post_card.dart';
 import '../post/domain/eco_activity.dart';
@@ -520,7 +520,7 @@ class _ChallengeCard extends StatelessWidget {
         if ((ch["description"] ?? "").toString().isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text(ch["description"].toString())),
         const SizedBox(height: 8),
         Text(
-          "${target}× ${(ch["activity"] ?? "").toString().isEmpty ? tr("any eco action") : ch["activity"]} · ${ch["participants"]} ${tr("joined")} · ${ended ? tr("Ended") : left!.inDays > 0 ? "${left.inDays}d ${tr("left")}" : "${left.inHours}h ${tr("left")}"}",
+          "$target× ${(ch["activity"] ?? "").toString().isEmpty ? tr("any eco action") : ch["activity"]} · ${ch["participants"]} ${tr("joined")} · ${ended ? tr("Ended") : left!.inDays > 0 ? "${left.inDays}d ${tr("left")}" : "${left.inHours}h ${tr("left")}"}",
           style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5),
         ),
         if (ch["joined"] == true) ...[

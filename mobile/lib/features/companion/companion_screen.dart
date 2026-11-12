@@ -6,7 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/friendly_error.dart';
 import '../assistant/assistant_screen.dart';
 import '../battles/battles_screen.dart';
-import '../events/events_screen.dart';
+import '../events/events_screen.dart' show EventsScreen;
 import '../post/domain/eco_activity.dart';
 import '../post/presentation/screens/create_post_screen.dart';
 import '../social/social_api.dart';
