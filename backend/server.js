@@ -32,6 +32,7 @@ import pickupRoutes from "./routes/pickupRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
 import activityRoutes from "./routes/activityRoutes.js";
 import publicRoutes from "./routes/publicRoutes.js";
+import socialRoutes from "./routes/socialRoutes.js";
 import mongoose from "mongoose";
 import { syncActivities } from "./utils/ecoActivities.js";
 
@@ -75,6 +76,7 @@ app.use("/api/pickups", pickupRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/public", publicRoutes);
+app.use("/api", socialRoutes);
 
 app.get("/", (req, res) => {
   res.send("GreenifyX API Running...");

@@ -163,6 +163,16 @@ const userSchema = new mongoose.Schema(
     },
 
     // Push notification device tokens (Firebase Cloud Messaging).
+    // Weekly goal accepted from the AI companion.
+    weeklyGoal: {
+      points: { type: Number, default: 0 },
+      actions: { type: Number, default: 0 },
+      setAt: { type: Date },
+    },
+
+    // Topics picked by the member (boost the For you feed).
+    interests: [{ type: String, trim: true, maxlength: 40 }],
+
     pushTokens: [
       {
         token: { type: String },

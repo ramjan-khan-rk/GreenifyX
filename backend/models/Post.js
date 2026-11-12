@@ -80,6 +80,15 @@ const postSchema = new mongoose.Schema(
     // Friends tagged by the author ("with Sara and Omar").
     taggedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
+    // Who can see it: everyone (For you, Reels, profile) or friends only.
+    visibility: { type: String, enum: ["public", "friends"], default: "public" },
+
+    // Optional community the post was shared in.
+    community: { type: mongoose.Schema.Types.ObjectId, ref: "Community" },
+
+    // Reel / post opens (rough reach for creator analytics).
+    views: { type: Number, default: 0 },
+
     // Members who bookmarked the post.
     savedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 

@@ -88,6 +88,13 @@ export const createPost = async (req, res) => {
       cause,
       mediaType,
       taggedUsers,
+      visibility: req.body.visibility === "friends" ? "friends" : "public",
+      community: await (async () => {
+        const id = String(req.body.community || "");
+        if (!/^[a-f\d]{24}$/i.test(id)) return undefined;
+        const { default: Community } = await import("../models/Community.js");
+        return (await Community.exists({ _id: id, members: req.user._id })) ? id : undefined;
+      })(),
       // Videos keep the look as a client-side filter; photos get it baked in by the CDN.
       look,
       musicUrl,

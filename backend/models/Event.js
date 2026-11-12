@@ -15,6 +15,8 @@ const eventSchema = new mongoose.Schema(
     coverImage: { type: String, default: "" },
     organizer: { type: String, default: "GreenifyX", trim: true, maxlength: 100 },
     organization: { type: mongoose.Schema.Types.ObjectId, ref: "Organization" },
+    community: { type: mongoose.Schema.Types.ObjectId, ref: "Community" },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     capacity: { type: Number, min: 0, default: 0 }, // 0 = no limit
     attendees: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     isPublished: { type: Boolean, default: true },
