@@ -10,6 +10,8 @@ import '../../core/widgets/user_avatar.dart';
 import 'org_api.dart';
 import 'org_widgets.dart';
 import 'package:greenifyx/core/i18n/app_locale.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../core/services/api_service.dart';
 
 class OrgDashboardScreen extends ConsumerWidget {
   final String orgId;
@@ -42,7 +44,24 @@ class OrgDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text(tr("Team impact"), style: AppTextStyles.title)),
+      appBar: AppBar(
+        title: Text(tr("Team impact"), style: AppTextStyles.title),
+        actions: [
+          IconButton(
+            tooltip: tr("ESG report"),
+            icon: const Icon(Icons.assessment_rounded),
+            onPressed: () async {
+              try {
+                final r = await ApiService.dio.get("/orgs/$orgId/esg");
+                final url = r.data["shareUrl"].toString();
+                await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+              } catch (e) {
+                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+              }
+            },
+          ),
+        ],
+      ),
       body: ref.watch(orgDashboardProvider(orgId)).when(
             loading: () => const AppLoading(),
             error: (e, _) => AppErrorState(message: friendlyError(e), onRetry: () => ref.invalidate(orgDashboardProvider(orgId))),

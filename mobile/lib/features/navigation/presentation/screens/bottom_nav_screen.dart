@@ -24,6 +24,8 @@ import '../../../../core/i18n/app_locale.dart';
 import '../../../../core/services/push_service.dart';
 import '../../../../core/services/session_user.dart';
 import '../../../auth/application/providers/auth_provider.dart';
+import '../../../voice/greeny.dart';
+import '../../../growth/growth_screens.dart';
 
 class BottomNavScreen extends ConsumerStatefulWidget {
   const BottomNavScreen({super.key});
@@ -92,6 +94,10 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
     calls.bind();
     calls.addListener(_onIncomingCall);
     PushService.instance.register();
+    Greeny.instance.loadPrefs();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) OnboardingScreen.maybeShow(context);
+    });
   }
 
   void _onIncomingCall() {
@@ -134,6 +140,7 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
         );
 
     return Scaffold(
+      floatingActionButton: currentIndex == 3 || currentIndex == 4 ? null : const GreenyButton(),
       // Keeps each tab's scroll position and state when switching.
       body: IndexedStack(index: currentIndex, children: pages),
       bottomNavigationBar: DecoratedBox(

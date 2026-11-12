@@ -37,6 +37,11 @@ import '../../../companion/companion_screen.dart';
 import '../../../impact/impact_screen.dart';
 import '../../../market/market_screens.dart';
 import '../../../social/reels_screen.dart';
+import '../../../growth/growth_screens.dart';
+import '../../../live/live_screens.dart';
+import '../../../social/trending_screens.dart';
+import '../../../sponsored/sponsored.dart';
+import '../../../voice/greeny.dart';
 import '../widgets/home_actions.dart';
 import '../widgets/impact_hero.dart';
 import '../widgets/quote_card.dart';
@@ -92,6 +97,10 @@ class HomeScreen extends ConsumerWidget {
               HomeAction(Icons.local_shipping_rounded, tr("Pickup"), const [Color(0xFF1F8A70), Color(0xFF56AB2F)], () => _go(context, const PickupScreen())),
               HomeAction(Icons.workspace_premium_rounded, tr("My impact"), const [Color(0xFFD9B45A), Color(0xFFF2B544)], () => _go(context, const ImpactScreen())),
               HomeAction(Icons.business_center_rounded, tr("Teams"), const [Color(0xFF3A3256), Color(0xFF7F53AC)], () => _go(context, const TeamsScreen())),
+              HomeAction(Icons.sensors_rounded, tr("Live"), const [Color(0xFFE8384F), Color(0xFFFF8A65)], () => _go(context, const LiveListScreen())),
+              HomeAction(Icons.tag_rounded, tr("Trending"), const [Color(0xFF1D6FD1), Color(0xFF6DD5FA)], () => _go(context, TrendingScreen(meId: user.id))),
+              HomeAction(Icons.card_giftcard_rounded, tr("Invite"), const [Color(0xFFF2B544), Color(0xFFE36A4A)], () => _go(context, const InviteScreen())),
+              HomeAction(Icons.mic_rounded, "Greeny", const [Color(0xFF38EF7D), Color(0xFF11998E)], () => Greeny.instance.open(context)),
             ];
             return RefreshIndicator(
               color: AppColors.primary,
@@ -151,7 +160,9 @@ class HomeScreen extends ConsumerWidget {
                     onHistory: () => _go(context, const PointsHistoryScreen()),
                     onRewards: () => _go(context, const RewardsScreen()),
                   ),
+                  const StreakCard(),
                   const CompanionCard(),
+                  const SponsoredStrip(),
                   const SizedBox(height: 16),
                   HomeActionGrid(actions: actions),
                   if (friends.isNotEmpty) ...[

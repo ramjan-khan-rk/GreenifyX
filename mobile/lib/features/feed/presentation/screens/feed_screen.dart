@@ -15,6 +15,9 @@ import '../../../post/presentation/screens/create_post_screen.dart';
 import '../../../social/foryou_feed.dart';
 import '../../../social/reels_screen.dart';
 import '../../../social/stories.dart';
+import '../../../social/trending_screens.dart';
+import '../../../live/live_screens.dart';
+import '../../../sponsored/sponsored.dart';
 import '../../application/providers/feed_provider.dart';
 import '../widgets/post_card.dart';
 
@@ -40,9 +43,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       ref.read(feedProvider.notifier).refresh();
     }
 
-    Widget stories(GlobalKey<StoriesBarState> key) => Padding(
+    Widget stories(GlobalKey<StoriesBarState> key, {bool sponsored = false}) => Padding(
           padding: const EdgeInsets.only(bottom: 8),
-          child: StoriesBar(key: key, meId: meId, myName: SessionUser.name, myImage: SessionUser.profileImage),
+          child: Column(children: [
+            StoriesBar(key: key, meId: meId, myName: SessionUser.name, myImage: SessionUser.profileImage),
+            if (sponsored) const Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: SponsoredStrip()),
+          ]),
         );
 
     return DefaultTabController(
@@ -59,6 +65,16 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               tooltip: tr("Reels"),
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ReelsScreen(meId: meId))),
               icon: const Icon(Icons.slow_motion_video_rounded, size: 27),
+            ),
+            IconButton(
+              tooltip: tr("Live"),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LiveListScreen())),
+              icon: const Icon(Icons.sensors_rounded, size: 26),
+            ),
+            IconButton(
+              tooltip: tr("Trending"),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => TrendingScreen(meId: meId))),
+              icon: const Icon(Icons.tag_rounded, size: 26),
             ),
             IconButton(tooltip: tr("New post"), onPressed: create, icon: const Icon(Icons.add_box_outlined, size: 27)),
             IconButton(
@@ -78,7 +94,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           ),
         ),
         body: TabBarView(children: [
-          ForYouFeed(meId: meId, header: stories(_storiesA)),
+          ForYouFeed(meId: meId, header: stories(_storiesA, sponsored: true)),
           _FriendsFeed(meId: meId, header: stories(_storiesB), onCreate: create),
         ]),
       ),

@@ -24,6 +24,8 @@ const navItems = [
   NavItem('/activities', 'Eco activities', Icons.eco_rounded),
   NavItem('/points', 'Eco Points', Icons.account_balance_wallet_rounded),
   NavItem('/rewards', 'Rewards', Icons.redeem_rounded),
+  NavItem('/sponsored', 'Sponsored challenges', Icons.campaign_rounded),
+  NavItem('/badges', 'Verified badges', Icons.verified_rounded),
   NavItem('/pickups', 'Recycling pickups', Icons.local_shipping_rounded),
   NavItem('/events', 'Events', Icons.event_rounded),
   NavItem('/orgs', 'Organisations', Icons.business_rounded),

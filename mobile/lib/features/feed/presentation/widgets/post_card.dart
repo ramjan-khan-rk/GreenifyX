@@ -11,6 +11,9 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/utils/media_url.dart';
 import '../../../social/creator_profile_screen.dart';
+import '../../../social/trending_screens.dart';
+import '../../../../core/widgets/rich_caption.dart';
+import '../../../../core/widgets/verified_tick.dart';
 import '../../../post/domain/eco_activity.dart';
 import '../../../profile/application/providers/my_profile_provider.dart';
 import '../../application/providers/feed_provider.dart';
@@ -180,10 +183,7 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
                     child: Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5, color: AppColors.ink)),
                   ),
-                  if (_verified) ...[
-                    const SizedBox(width: 4),
-                    const Icon(Icons.verified_rounded, size: 16, color: AppColors.eco),
-                  ],
+                  VerifiedTick(p.userBadge),
                 ]),
                 Text.rich(
                   TextSpan(children: [
@@ -328,14 +328,12 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
               const SizedBox(height: 4),
               GestureDetector(
                 onTap: () => setState(() => _expanded = !_expanded),
-                child: Text.rich(
-                  TextSpan(children: [
-                    TextSpan(text: "${p.name.split(" ").first}  ", style: const TextStyle(fontWeight: FontWeight.w800)),
-                    TextSpan(text: p.description),
-                  ]),
+                child: RichCaption(
+                  p.description,
+                  lead: p.name.split(" ").first,
                   maxLines: _expanded ? null : 2,
-                  overflow: _expanded ? null : TextOverflow.ellipsis,
                   style: const TextStyle(color: AppColors.ink, fontSize: 14.5, height: 1.4),
+                  onHashtag: (tag) => Navigator.push(context, MaterialPageRoute(builder: (_) => HashtagScreen(tag: tag, meId: widget.meId))),
                 ),
               ),
             ],

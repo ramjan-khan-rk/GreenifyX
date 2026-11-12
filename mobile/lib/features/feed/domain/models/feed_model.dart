@@ -30,6 +30,8 @@ class FeedModel {
   final List<TaggedUser> tagged;
   final String activityIcon;
   final DateTime? createdAt;
+  final String userBadge;
+  final List<String> hashtags;
 
   FeedModel({
     required this.id,
@@ -56,6 +58,8 @@ class FeedModel {
     this.tagged = const [],
     this.activityIcon = "eco",
     this.createdAt,
+    this.userBadge = "",
+    this.hashtags = const [],
   });
 
   factory FeedModel.fromJson(Map<String, dynamic> json) {
@@ -92,6 +96,8 @@ class FeedModel {
       ],
       activityIcon: json["activityIcon"]?.toString() ?? "eco",
       createdAt: DateTime.tryParse(json["createdAt"]?.toString() ?? "")?.toLocal(),
+      userBadge: (user is Map ? user["verifiedBadge"] : null)?.toString() ?? "",
+      hashtags: (json["hashtags"] as List? ?? const []).map((e) => e.toString()).toList(),
     );
   }
 }

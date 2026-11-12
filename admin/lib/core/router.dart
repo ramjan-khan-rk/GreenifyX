@@ -21,6 +21,7 @@ import '../pages/events_page.dart';
 import '../pages/public_site_page.dart';
 import '../pages/enquiries_page.dart';
 import '../pages/checkpoints_page.dart';
+import '../pages/growth_pages.dart';
 import '../widgets/shell.dart';
 import 'session.dart';
 
@@ -36,7 +37,7 @@ final GoRouter adminRouter = GoRouter(
     final session = Session.instance;
     if (session.restoring) return null;
     // Public pages: open to everyone, signed in or not.
-    if (publicPaths.contains(state.matchedLocation) || state.matchedLocation.startsWith('/verify/')) return null;
+    if (publicPaths.contains(state.matchedLocation) || state.matchedLocation.startsWith('/verify/') || state.matchedLocation.startsWith('/esg/') || state.matchedLocation.startsWith('/join/')) return null;
     final atLogin = state.matchedLocation == '/login';
     if (!session.signedIn) return atLogin ? null : '/login';
     if (atLogin) return '/';
@@ -45,7 +46,9 @@ final GoRouter adminRouter = GoRouter(
   routes: [
     GoRoute(path: '/login', pageBuilder: (context, state) => _page(state, const LoginPage())),
     GoRoute(path: '/for-organisations', pageBuilder: (context, state) => _page(state, const PublicSitePage())),
+    GoRoute(path: '/esg/:token', pageBuilder: (context, state) => _page(state, EsgReportPage(token: state.pathParameters['token'] ?? ''))),
     GoRoute(path: '/verify/:code', pageBuilder: (context, state) => _page(state, VerifyCertificatePage(code: state.pathParameters['code'] ?? ''))),
+    GoRoute(path: '/join/:code', pageBuilder: (context, state) => _page(state, JoinInvitePage(code: state.pathParameters['code'] ?? ''))),
     GoRoute(path: '/pay/success', pageBuilder: (context, state) => _page(state, const PaymentResultPage(success: true))),
     GoRoute(path: '/pay/cancelled', pageBuilder: (context, state) => _page(state, const PaymentResultPage(success: false))),
     ShellRoute(
@@ -59,6 +62,8 @@ final GoRouter adminRouter = GoRouter(
         GoRoute(path: '/checkpoints', pageBuilder: (context, state) => _page(state, const CheckpointsPage())),
         GoRoute(path: '/places', pageBuilder: (context, state) => _page(state, const PlacesPage())),
         GoRoute(path: '/activities', pageBuilder: (context, state) => _page(state, const ActivitiesPage())),
+        GoRoute(path: '/sponsored', pageBuilder: (context, state) => _page(state, const SponsoredPage())),
+        GoRoute(path: '/badges', pageBuilder: (context, state) => _page(state, const BadgesPage())),
         GoRoute(path: '/rewards', pageBuilder: (context, state) => _page(state, const RewardsPage())),
         GoRoute(path: '/pickups', pageBuilder: (context, state) => _page(state, const PickupsPage())),
         GoRoute(path: '/events', pageBuilder: (context, state) => _page(state, const EventsPage())),

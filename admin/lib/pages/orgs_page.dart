@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 
 import '../api/admin_api.dart';
@@ -190,6 +191,23 @@ class _OrgCard extends StatelessWidget {
           ),
         ]),
         if ((o['statusNote'] as String?)?.isNotEmpty == true) _Line('Note', o['statusNote'] as String),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () async {
+              try {
+                final r = await Session.instance.api.orgEsg(o['_id'] as String);
+                final url = r['shareUrl'] as String? ?? '';
+                final token = url.split('/esg/').last;
+                if (context.mounted) context.go('/esg/$token');
+              } catch (e) {
+                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+              }
+            },
+            icon: const Icon(Icons.assessment_rounded),
+            label: const Text('ESG report'),
+          ),
+        ),
         if (impact != null) ...[
           const SizedBox(height: 10),
           Wrap(spacing: 8, runSpacing: 8, children: [

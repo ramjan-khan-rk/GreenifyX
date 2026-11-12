@@ -16,6 +16,8 @@ import 'legal_screen.dart';
 import 'settings_api.dart';
 import '../../core/i18n/app_locale.dart';
 import '../../core/services/push_service.dart';
+import '../voice/greeny.dart';
+import '../growth/growth_screens.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -189,6 +191,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _Card(children: [
             _Row(icon: Icons.person_outline_rounded, title: tr("Edit profile"), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen()))),
             _Row(icon: Icons.lock_outline_rounded, title: tr("Change password"), onTap: _changePassword),
+          ]),
+          const _Label("Greeny voice assistant"),
+          _Card(children: [
+            ValueListenableBuilder<bool>(
+              valueListenable: Greeny.instance.handsFree,
+              builder: (_, on, _) => SwitchListTile(
+                secondary: const Icon(Icons.mic_rounded, color: AppColors.eco),
+                title: Text(tr("Hands-free \"Hey Greeny\""), style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(tr("Listens for \"Hey Greeny\" while the app is open")),
+                value: on,
+                onChanged: (v) => Greeny.instance.setHandsFree(v),
+              ),
+            ),
+            _Row(icon: Icons.record_voice_over_rounded, title: "Try Greeny now", onTap: () => Greeny.instance.open(context)),
+          ]),
+          const _Label("Grow"),
+          _Card(children: [
+            _Row(icon: Icons.card_giftcard_rounded, title: "Invite friends", onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const InviteScreen()))),
+            _Row(icon: Icons.verified_rounded, title: "Get verified", onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BadgeRequestScreen()))),
           ]),
           const _Label("Notifications"),
           _Card(children: [

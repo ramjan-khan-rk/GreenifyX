@@ -309,4 +309,22 @@ class AdminApi {
 
   // ---- Public certificate check ----
   Future<Json> certificate(String code) async => Json.from((await _send(() => _dio.get('/public/certificates/$code')))['certificate'] as Map);
+
+  // ---- Verified badges ----
+  Future<List<Json>> badgeUsers() async => _maps((await _send(() => _dio.get('/admin/badges')))['users']);
+
+  Future<void> decideBadge(String userId, String action, {String? type}) async =>
+      _send(() => _dio.patch('/admin/badges/$userId', data: {'action': action, 'type': ?type}));
+
+  // ---- Sponsored challenges ----
+  Future<List<Json>> sponsored() async => _maps((await _send(() => _dio.get('/admin/sponsored')))['challenges']);
+
+  Future<void> createSponsored(Json body) async => _send(() => _dio.post('/admin/sponsored', data: body));
+
+  Future<void> updateSponsored(String id, Json body) async => _send(() => _dio.patch('/admin/sponsored/$id', data: body));
+
+  // ---- ESG ----
+  Future<Json> orgEsg(String orgId) async => await _send(() => _dio.get('/admin/orgs/$orgId/esg'));
+
+  Future<Json> publicEsg(String token) async => Json.from((await _send(() => _dio.get('/public/esg/$token')))['report'] as Map);
 }

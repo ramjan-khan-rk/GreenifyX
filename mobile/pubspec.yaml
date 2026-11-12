@@ -60,6 +60,9 @@ dependencies:
   share_plus: ^11.0.0
   mobile_scanner: ^7.0.1
   qr_flutter: ^4.1.0
+  speech_to_text: ^7.0.0
+  flutter_tts: ^4.2.0
+  livekit_client: ">=2.3.0 <3.0.0"
   flutter_map: ^8.0.0
   latlong2: ^0.9.1
   record: ^6.1.1
