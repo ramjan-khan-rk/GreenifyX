@@ -24,9 +24,9 @@ export const ensureUserIndexes = async () => {
     return;
   }
 
-  if (phoneIndex.unique && !phoneIndex.sparse) {
+  if (phoneIndex.unique && !phoneIndex.sparse && !phoneIndex.partialFilterExpression) {
     console.warn(
-      "User.phone unique index is not sparse. Not dropping it. Recreate locally as unique+sparse named phone_1_sparse when you can."
+      "User.phone unique index blocks users without a phone. Run `npm run create-admin` or `npm run seed:demo` once to repair it."
     );
   }
 };

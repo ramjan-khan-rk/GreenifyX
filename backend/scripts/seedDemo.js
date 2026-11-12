@@ -18,6 +18,7 @@ import EnvironmentalReport from "../models/EnvironmentalReport.js";
 import EcoPlace from "../models/EcoPlace.js";
 import { evaluateEvidence } from "../utils/geo.js";
 import { creditPoints } from "../utils/ledger.js";
+import { repairUserIndexes } from "../utils/repairUserIndexes.js";
 
 dotenv.config();
 
@@ -623,7 +624,9 @@ if (!process.env.MONGO_URI) {
 }
 
 await mongoose.connect(process.env.MONGO_URI);
+console.log(`Connected to database "${mongoose.connection.name}".`);
 try {
+  for (const change of await repairUserIndexes()) console.log(`  Fixed: ${change}`);
   if (process.argv.includes("--clear")) await clear();
   else await create();
 } finally {

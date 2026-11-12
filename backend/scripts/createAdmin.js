@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import readline from "readline";
 import User from "../models/User.js";
+import { repairUserIndexes } from "../utils/repairUserIndexes.js";
 
 dotenv.config();
 
@@ -63,7 +64,9 @@ if (!strongEnough(password)) {
 }
 
 await mongoose.connect(process.env.MONGO_URI);
+console.log(`Connected to database "${mongoose.connection.name}".`);
 try {
+  for (const change of await repairUserIndexes()) console.log(`  Fixed: ${change}`);
   const hash = await bcrypt.hash(password, 12);
   const existing = await User.findOne({ email });
   if (existing) {
