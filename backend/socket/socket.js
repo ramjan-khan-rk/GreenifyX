@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Notification from "../models/Notification.js";
 import { getJwtSecret } from "../utils/jwtConfig.js";
 import { corsOriginDelegate } from "../utils/corsConfig.js";
 
@@ -73,7 +74,7 @@ export const initializeSocket = (server) => {
       try {
         const to = String(payload?.to || "");
         const type = String(payload?.type || "");
-        const allowed = new Set(["offer", "answer", "ice", "reject", "end"]);
+        const allowed = new Set(["offer", "answer", "ice", "reject", "end", "busy"]);
         if (!to || to === userId || !allowed.has(type)) return;
 
         const key = pairKey(userId, to);
@@ -83,13 +84,32 @@ export const initializeSocket = (server) => {
           const me = await User.findById(userId).select("friends name");
           const isFriend = me?.friends?.some((id) => id.toString() === to);
           if (!isFriend) return;
-          liveCalls.add(key);
           fromName = me?.name || "Friend";
+
+          // Friend not connected: tell the caller right away and leave a missed-call notice.
+          if (!onlineUsers.has(to)) {
+            emitToUser(userId, "call:signal", { from: to, type: "unavailable" });
+            try {
+              const n = await Notification.create({
+                receiver: to,
+                sender: userId,
+                type: "call",
+                title: "Missed call",
+                message: `${fromName} tried to ${payload?.video === true ? "video " : ""}call you.`,
+                referenceId: userId,
+              });
+              emitToUser(to, "newNotification", n);
+            } catch {
+              /* best-effort */
+            }
+            return;
+          }
+          liveCalls.add(key);
         } else if (!liveCalls.has(key)) {
           return;
         }
 
-        if (type === "end" || type === "reject") {
+        if (type === "end" || type === "reject" || type === "busy") {
           liveCalls.delete(key);
         }
 

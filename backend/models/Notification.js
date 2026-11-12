@@ -29,6 +29,7 @@ const notificationSchema = new mongoose.Schema(
         "verification",
         "campaign",
         "points",
+        "call",
       ],
       required: true,
     },
