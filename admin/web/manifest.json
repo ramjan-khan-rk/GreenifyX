@@ -1,0 +1,15 @@
+{
+  "name": "GreenifyX Admin",
+  "short_name": "GreenifyX Admin",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#FFF6EF",
+  "theme_color": "#2B2440",
+  "description": "Community, impact and moderation dashboard for GreenifyX.",
+  "orientation": "any",
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "icons/Icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/Icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

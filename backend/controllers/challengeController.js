@@ -2,7 +2,7 @@ import Challenge from "../models/Challenge.js";
 import User from "../models/User.js";
 import { emitToUser } from "../socket/socket.js";
 import Notification from "../models/Notification.js";
-import { applyEcoAward } from "../utils/verifiedProgress.js";
+import { creditPoints } from "../utils/ledger.js";
 import { sendServerError } from "../utils/httpError.js";
 // ======================================================
 // CREATE CHALLENGE
@@ -385,11 +385,13 @@ export const updateProgress = async (req, res) => {try {
 
     // Rewards
     if (challenge.winner) {
-      const winner = await User.findById(challenge.winner);
-      if (winner) {
-        applyEcoAward(winner, challenge.ecoReward);
-        await winner.save();
-      }
+      await creditPoints({
+        userId: challenge.winner,
+        amount: challenge.ecoReward,
+        type: "challenge_won",
+        reason: `Won "${challenge.title}"`,
+        createdBy: req.user._id,
+      });
     }
 
     // Create notifications

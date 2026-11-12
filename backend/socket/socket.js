@@ -1,12 +1,16 @@
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Notification from "../models/Notification.js";
 import { getJwtSecret } from "../utils/jwtConfig.js";
 import { corsOriginDelegate } from "../utils/corsConfig.js";
 
 let io;
 
 const onlineUsers = new Map();
+const liveCalls = new Set();
+
+const pairKey = (a, b) => [String(a), String(b)].sort().join(":");
 
 const readHandshakeToken = (socket) => {
   const authToken = socket.handshake.auth?.token;
@@ -66,9 +70,85 @@ export const initializeSocket = (server) => {
       onlineUsers.set(socket.userId, socket.id);
     });
 
+    socket.on("call:signal", async (payload) => {
+      try {
+        const to = String(payload?.to || "");
+        const type = String(payload?.type || "");
+        const allowed = new Set(["offer", "answer", "ice", "reject", "end", "busy"]);
+        if (!to || to === userId || !allowed.has(type)) return;
+
+        const key = pairKey(userId, to);
+        let fromName;
+
+        if (type === "offer") {
+          const me = await User.findById(userId).select("friends name");
+          const isFriend = me?.friends?.some((id) => id.toString() === to);
+          if (!isFriend) return;
+          fromName = me?.name || "Friend";
+
+          // Friend not connected: tell the caller right away and leave a missed-call notice.
+          if (!onlineUsers.has(to)) {
+            emitToUser(userId, "call:signal", { from: to, type: "unavailable" });
+            try {
+              const n = await Notification.create({
+                receiver: to,
+                sender: userId,
+                type: "call",
+                title: "Missed call",
+                message: `${fromName} tried to ${payload?.video === true ? "video " : ""}call you.`,
+                referenceId: userId,
+              });
+              emitToUser(to, "newNotification", n);
+            } catch {
+              /* best-effort */
+            }
+            return;
+          }
+          liveCalls.add(key);
+        } else if (!liveCalls.has(key)) {
+          return;
+        }
+
+        if (type === "end" || type === "reject" || type === "busy") {
+          liveCalls.delete(key);
+        }
+
+        const sdp = payload?.sdp;
+        const candidate = payload?.candidate;
+        emitToUser(to, "call:signal", {
+          from: userId,
+          fromName,
+          type,
+          video: payload?.video === true,
+          sdp:
+            sdp && typeof sdp === "object"
+              ? {
+                  type: String(sdp.type || ""),
+                  sdp: String(sdp.sdp || "").slice(0, 120000),
+                }
+              : undefined,
+          candidate:
+            candidate && typeof candidate === "object"
+              ? {
+                  candidate: String(candidate.candidate || "").slice(0, 4000),
+                  sdpMid: candidate.sdpMid ?? null,
+                  sdpMLineIndex: candidate.sdpMLineIndex ?? null,
+                }
+              : undefined,
+        });
+      } catch (error) {
+        console.error("Call signal failed");
+      }
+    });
+
     socket.on("disconnect", () => {
       if (onlineUsers.get(userId) === socket.id) {
         onlineUsers.delete(userId);
+      }
+      for (const key of liveCalls) {
+        if (key.split(":").includes(userId)) {
+          liveCalls.delete(key);
+        }
       }
     });
   });

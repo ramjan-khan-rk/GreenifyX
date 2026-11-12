@@ -14,11 +14,16 @@ import '../../../notifications/application/providers/notification_provider.dart'
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../../post/presentation/screens/create_post_screen.dart';
 import '../../../profile/application/providers/my_profile_provider.dart';
-import '../../../profile/presentation/screens/complete_profile_screen.dart';
+import '../../../profile/presentation/screens/edit_profile_screen.dart';
 import '../widgets/eco_points_card.dart';
 import '../widgets/quote_card.dart';
+import '../widgets/spark_card.dart';
 import '../../../challenge/presentation/screens/challenge_screen.dart';
 import 'leaderboard_screen.dart';
+import '../../../../core/utils/friendly_error.dart';
+import '../../../campaign/presentation/widgets/featured_campaign.dart';
+import '../../../issues/presentation/report_restore_card.dart';
+import '../../../assistant/ai_tiles.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -34,7 +39,7 @@ class HomeScreen extends ConsumerWidget {
         child: profile.when(
           loading: () => const AppLoading(),
           error: (e, _) => AppErrorState(
-            message: e.toString(),
+            message: friendlyError(e),
             onRetry: () => ref.invalidate(myProfileProvider),
           ),
           data: (user) {
@@ -56,7 +61,10 @@ class HomeScreen extends ConsumerWidget {
                               BrandCopy.name,
                               style: AppTextStyles.title.copyWith(fontSize: 22),
                             ),
-                            Text(BrandCopy.tagline, style: AppTextStyles.tagline),
+                            Text(
+                              "Good, out loud",
+                              style: AppTextStyles.tagline,
+                            ),
                           ],
                         ),
                       ),
@@ -108,6 +116,17 @@ class HomeScreen extends ConsumerWidget {
                     ecoPoints: user.ecoPoints,
                     level: user.level,
                     streak: user.streak,
+                  ),
+                  const SizedBox(height: 16),
+                  SparkCard(
+                    onShare: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CreatePostScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 20),
                   Text("Your journey", style: AppTextStyles.title.copyWith(fontSize: 18)),
@@ -164,6 +183,9 @@ class HomeScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  const AiTiles(),
+                  const FeaturedCampaign(),
+                  const ReportRestoreCard(),
                   const SizedBox(height: 22),
                   Text("Quick actions", style: AppTextStyles.title.copyWith(fontSize: 18)),
                   const SizedBox(height: 12),
@@ -228,7 +250,7 @@ class HomeScreen extends ConsumerWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const CompleteProfileScreen(),
+                              builder: (_) => const EditProfileScreen(),
                             ),
                           );
                         },

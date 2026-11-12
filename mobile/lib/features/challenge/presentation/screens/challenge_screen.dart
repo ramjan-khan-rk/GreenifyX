@@ -6,6 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../application/providers/challenge_provider.dart';
 import '../widgets/challenge_card.dart';
 import 'create_challenge_screen.dart';
+import '../../../../core/utils/friendly_error.dart';
 
 class ChallengeScreen extends ConsumerWidget {
   const ChallengeScreen({super.key});
@@ -76,7 +77,7 @@ class ChallengeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                error.toString(),
+                friendlyError(error),
                 textAlign: TextAlign.center,
                 style: AppTextStyles.subtitle,
               ),

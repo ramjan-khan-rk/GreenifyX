@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/emirates.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/brand_icons.dart';
@@ -20,6 +21,7 @@ class _CompleteProfileScreenState
     extends ConsumerState<CompleteProfileScreen> {
   final nameController = TextEditingController();
   final bioController = TextEditingController();
+  String _emirate = "";
 
   @override
   void dispose() {
@@ -35,7 +37,7 @@ class _CompleteProfileScreenState
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text("Settings", style: AppTextStyles.title),
+        title: Text("Set up your profile", style: AppTextStyles.title),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -44,7 +46,7 @@ class _CompleteProfileScreenState
             const Icon(BrandGlyph.settings, color: AppColors.navy, size: 28),
             const SizedBox(height: 8),
             Text(
-              "Name, photo, and bio",
+              "Add your name, a photo and where you live",
               style: AppTextStyles.subtitle,
             ),
             const SizedBox(height: 20),
@@ -71,6 +73,31 @@ class _CompleteProfileScreenState
                 hintText: "Tell something about yourself",
               ),
             ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Your emirate",
+                style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final e in kEmirates)
+                  ChoiceChip(
+                    label: Text(e),
+                    selected: _emirate == e,
+                    selectedColor: AppColors.primary.withValues(alpha: 0.16),
+                    side: BorderSide(
+                      color: _emirate == e ? AppColors.primary : AppColors.border,
+                    ),
+                    onSelected: (_) => setState(() => _emirate = e),
+                  ),
+              ],
+            ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -91,6 +118,7 @@ class _CompleteProfileScreenState
                             .saveProfile(
                               name: nameController.text.trim(),
                               bio: bioController.text.trim(),
+                              emirate: _emirate.isEmpty ? null : _emirate,
                             );
 
                         if (success && context.mounted) {

@@ -3,7 +3,8 @@ import { isProduction } from "./jwtConfig.js";
 export const corsOriginList = () =>
   String(process.env.CORS_ORIGIN || "")
     .split(",")
-    .map((origin) => origin.trim())
+    // Browsers send origins without a trailing slash; tolerate one in the setting.
+    .map((origin) => origin.trim().replace(/\/+$/, "").toLowerCase())
     .filter(Boolean);
 
 export const corsOriginDelegate = (origin, callback) => {
@@ -13,7 +14,14 @@ export const corsOriginDelegate = (origin, callback) => {
   }
 
   const allowed = corsOriginList();
-  if (allowed.includes(origin)) {
+
+  // Local development: allow any localhost port (Flutter web picks a random one).
+  if (!isProduction() && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    callback(null, true);
+    return;
+  }
+
+  if (allowed.includes(String(origin).toLowerCase())) {
     callback(null, true);
     return;
   }

@@ -21,4 +21,8 @@ class FeedRepository {
   Future<void> verifyPost(String postId) async {
     await _api.verifyPost(postId);
   }
+
+  Future<void> reportPost(String postId, String reason) async {
+    await _api.reportPost(postId, reason);
+  }
 }

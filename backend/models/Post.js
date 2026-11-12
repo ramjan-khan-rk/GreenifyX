@@ -24,6 +24,22 @@ const postSchema = new mongoose.Schema(
       required: true,
     },
 
+    cause: {
+      type: String,
+      default: "Planet",
+    },
+
+    mediaType: {
+      type: String,
+      enum: ["image", "video"],
+      default: "image",
+    },
+
+    look: {
+      type: String,
+      default: "natural",
+    },
+
     ecoPoints: {
       type: Number,
       default: 10,
@@ -42,6 +58,33 @@ const postSchema = new mongoose.Schema(
     },
 
     pointsAwarded: {
+      type: Boolean,
+      default: false,
+    },
+
+    reports: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        reason: { type: String, default: "", maxlength: 200 },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+
+    isHidden: {
+      type: Boolean,
+      default: false,
+    },
+
+    moderatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    moderatedAt: {
+      type: Date,
+    },
+
+    isDemo: {
       type: Boolean,
       default: false,
     },

@@ -1,14 +1,13 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/utils/media_url.dart';
 import '../../../../core/widgets/app_status.dart';
 import '../../../../core/widgets/brand_icons.dart';
 import '../../../../core/widgets/count_badge.dart';
 import '../../../../core/widgets/points_status_chip.dart';
+import '../../../../core/utils/friendly_error.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../auth/application/providers/auth_provider.dart';
 import '../../../comment/presentation/widgets/comment_bottom_sheet.dart';
@@ -16,6 +15,8 @@ import '../../../notifications/application/providers/notification_provider.dart'
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../../profile/application/providers/my_profile_provider.dart';
 import '../../application/providers/feed_provider.dart';
+import '../widgets/moment_media.dart';
+import '../widgets/report_post_sheet.dart';
 
 class FeedScreen extends ConsumerWidget {
   const FeedScreen({super.key});
@@ -29,7 +30,7 @@ class FeedScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text("Posts", style: AppTextStyles.title),
+        title: Text("Moments", style: AppTextStyles.title),
         actions: [
           IconButton(
             tooltip: "Updates",
@@ -56,7 +57,7 @@ class FeedScreen extends ConsumerWidget {
               icon: BrandGlyph.post,
               title: "No posts yet",
               message:
-                  "Share a green action from Post on Home. Eco Points land after a friend verifies it.",
+                  "Share a moment from Home. Points land after a friend verifies it.",
             );
           }
 
@@ -97,44 +98,55 @@ class FeedScreen extends ConsumerWidget {
                           semanticLabel: "${post.name} photo",
                         ),
                         title: Text(post.name, style: AppTextStyles.body),
-                        subtitle: Container(
-                          margin: const EdgeInsets.only(top: 6),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            post.activity,
-                            style: AppTextStyles.subtitle.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w700,
-                            ),
+                        subtitle: Text(
+                          "${post.cause} · ${post.activity}",
+                          style: AppTextStyles.subtitle.copyWith(
+                            color: AppColors.joy,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
+                        trailing: post.userId.isNotEmpty && post.userId != meId
+                            ? PopupMenuButton<String>(
+                                tooltip: "More",
+                                icon: const Icon(Icons.more_vert_rounded),
+                                onSelected: (_) async {
+                                  final reason = await showReportPostSheet(context);
+                                  if (reason == null) return;
+                                  try {
+                                    await ref
+                                        .read(feedRepositoryProvider)
+                                        .reportPost(post.id, reason);
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text("Thanks. Our team will review this post."),
+                                        ),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(friendlyError(e))),
+                                      );
+                                    }
+                                  }
+                                },
+                                itemBuilder: (_) => const [
+                                  PopupMenuItem(
+                                    value: "report",
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.flag_outlined, size: 20),
+                                        SizedBox(width: 12),
+                                        Text("Report post"),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : null,
                       ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: CachedNetworkImage(
-                          imageUrl: resolveMediaUrl(post.image) ?? "",
-                          width: double.infinity,
-                          height: 280,
-                          fit: BoxFit.cover,
-                          placeholder: (_, _) => Container(
-                            height: 280,
-                            color: AppColors.border,
-                          ),
-                          errorWidget: (_, _, _) => Container(
-                            height: 280,
-                            alignment: Alignment.center,
-                            color: AppColors.border,
-                            child: const Icon(Icons.broken_image_outlined),
-                          ),
-                        ),
-                      ),
+                      MomentMedia(url: post.image, mediaType: post.mediaType),
                       if (post.description.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.all(12),
@@ -161,7 +173,7 @@ class FeedScreen extends ConsumerWidget {
                               } catch (e) {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(e.toString())),
+                                    SnackBar(content: Text(friendlyError(e))),
                                   );
                                 }
                               }
@@ -210,7 +222,7 @@ class FeedScreen extends ConsumerWidget {
                                 } catch (e) {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(e.toString())),
+                                      SnackBar(content: Text(friendlyError(e))),
                                     );
                                   }
                                 }
@@ -229,7 +241,7 @@ class FeedScreen extends ConsumerWidget {
         },
         loading: () => const AppLoading(),
         error: (e, _) => AppErrorState(
-          message: e.toString(),
+          message: friendlyError(e, fallback: "Could not load moments."),
           onRetry: () => ref.invalidate(feedProvider),
         ),
       ),

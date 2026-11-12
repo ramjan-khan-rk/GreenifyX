@@ -19,6 +19,7 @@ class ProfileRepository {
     required String name,
     required String bio,
     required String profileImage,
+    String? emirate,
 
   }){
 
@@ -27,6 +28,7 @@ class ProfileRepository {
       name:name,
       bio:bio,
       profileImage:profileImage,
+      emirate: emirate,
 
     );
 

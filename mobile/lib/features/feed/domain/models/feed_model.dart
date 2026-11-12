@@ -12,6 +12,9 @@ class FeedModel {
   final bool isLiked;
   final bool isVerified;
   final String pointsStatus;
+  final String mediaType;
+  final String cause;
+  final String look;
 
   FeedModel({
     required this.id,
@@ -26,7 +29,10 @@ class FeedModel {
     required this.comments,
     required this.isLiked,
     required this.isVerified,
-    this.pointsStatus = "unverified_self_reported",
+    required this.pointsStatus,
+    this.mediaType = "image",
+    this.cause = "Planet",
+    this.look = "natural",
   });
 
   factory FeedModel.fromJson(Map<String, dynamic> json) {
@@ -49,6 +55,9 @@ class FeedModel {
           ((json["isVerified"] == true)
               ? "verified"
               : "unverified_self_reported"),
+      mediaType: json["mediaType"]?.toString() ?? "image",
+      cause: json["cause"]?.toString() ?? "Planet",
+      look: json["look"]?.toString() ?? "natural",
     );
   }
 }

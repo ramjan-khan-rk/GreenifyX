@@ -3,11 +3,12 @@ import { resolveEcoPoints } from "../utils/ecoPoints.js";
 import { escapeRegex } from "../utils/escapeRegex.js";
 import { parsePagination } from "../utils/pagination.js";
 import { sendServerError } from "../utils/httpError.js";
+import { normalizeEmirate } from "../utils/emirates.js";
 
 // COMPLETE / UPDATE PROFILE
 export const updateProfile = async (req, res) => {
   try {
-    const { name, bio, profileImage } = req.body;
+    const { name, bio, profileImage, emirate } = req.body;
 
     const user = await User.findById(req.user._id);
 
@@ -21,6 +22,13 @@ export const updateProfile = async (req, res) => {
     if (name !== undefined) user.name = name;
     if (bio !== undefined) user.bio = bio;
     if (profileImage !== undefined) user.profileImage = profileImage;
+    if (emirate !== undefined) {
+      const value = normalizeEmirate(emirate);
+      if (emirate && !value) {
+        return res.status(400).json({ success: false, message: "Choose a valid emirate" });
+      }
+      user.emirate = value || undefined;
+    }
 
     user.isProfileCompleted = true;
 
@@ -88,6 +96,7 @@ export const getUserById = async (req, res) => {
         name: user.name,
         bio: user.bio,
         profileImage: user.profileImage,
+        emirate: user.emirate || "",
         ecoPoints: resolveEcoPoints(user),
         level: user.level,
         streak: user.streak,
@@ -102,7 +111,7 @@ export const getUserById = async (req, res) => {
 // LEADERBOARD
 export const getLeaderboard = async (req, res) => {
   try {
-    const users = await User.find()
+    const users = await User.find({ isSuspended: { $ne: true } })
       .select("name profileImage ecoPoints level streak")
       .sort({ ecoPoints: -1 })
       .limit(10);

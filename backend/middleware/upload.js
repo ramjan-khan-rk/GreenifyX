@@ -5,12 +5,15 @@ const allowedTypes = new Set([
   "image/png",
   "image/webp",
   "image/gif",
+  "video/mp4",
+  "video/quicktime",
+  "video/webm",
 ]);
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 5 * 1024 * 1024,
+    fileSize: 40 * 1024 * 1024,
     files: 1,
   },
   fileFilter: (req, file, cb) => {
@@ -18,7 +21,7 @@ const upload = multer({
       cb(null, true);
       return;
     }
-    cb(new Error("Only image uploads are allowed"));
+    cb(new Error("Use a photo or a short mp4, mov, or webm video"));
   },
 });
 

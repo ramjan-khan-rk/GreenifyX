@@ -6,6 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../auth/application/providers/auth_provider.dart';
 import '../../application/providers/challenge_provider.dart';
 import '../../domain/models/challenge_model.dart';
+import '../../../../core/utils/friendly_error.dart';
 
 class ChallengeCard extends ConsumerWidget {
   final ChallengeModel challenge;
@@ -307,7 +308,7 @@ class _ActionRow extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          SnackBar(content: Text(friendlyError(e))),
         );
       }
     }

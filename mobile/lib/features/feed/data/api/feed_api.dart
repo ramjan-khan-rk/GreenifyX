@@ -17,5 +17,9 @@ Future<Response> toggleLike(String postId) async {
     return ApiService.dio.put("/posts/$postId/verify");
   }
 
+  Future<Response> reportPost(String postId, String reason) {
+    return ApiService.dio.post("/posts/$postId/report", data: {"reason": reason});
+  }
+
 
 }
