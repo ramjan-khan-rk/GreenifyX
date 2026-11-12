@@ -6,6 +6,9 @@ import Comment from "../models/Comment.js";
 import Campaign from "../models/Campaign.js";
 import VerificationReport from "../models/VerificationReport.js";
 import EnvironmentalReport from "../models/EnvironmentalReport.js";
+import Redemption from "../models/Redemption.js";
+import PickupRequest from "../models/PickupRequest.js";
+import Event from "../models/Event.js";
 import { resolveEcoPoints } from "../utils/ecoPoints.js";
 import { escapeRegex } from "../utils/escapeRegex.js";
 import { parsePagination } from "../utils/pagination.js";
@@ -170,6 +173,14 @@ export const getStats = async (req, res) => {
     const challenges = Object.fromEntries(challengeStatus.map((c) => [c._id, c.count]));
     const emirateCounts = new Map(usersByEmirate.map((e) => [e._id || null, e.count]));
 
+    const [redemptionsIssued, pickupAgg, upcomingEvents, rsvpAgg] = await Promise.all([
+      Redemption.countDocuments({ status: { $ne: "cancelled" } }),
+      PickupRequest.aggregate([{ $group: { _id: "$status", n: { $sum: 1 }, kg: { $sum: { $ifNull: ["$collectedKg", 0] } } } }]),
+      Event.countDocuments({ isPublished: true, startsAt: { $gte: new Date() } }),
+      Event.aggregate([{ $match: { isPublished: true, startsAt: { $gte: new Date() } } }, { $group: { _id: null, n: { $sum: { $size: "$attendees" } } } }]),
+    ]);
+    const pickupsBy = Object.fromEntries(pickupAgg.map((p) => [p._id, p]));
+
     res.json({
       success: true,
       generatedAt: new Date().toISOString(),
@@ -207,6 +218,11 @@ export const getStats = async (req, res) => {
         survivalPlanted,
         survivalSurviving,
         survivalRate: survivalPlanted ? Math.round((survivalSurviving / survivalPlanted) * 100) : null,
+        rewardsRedeemed: redemptionsIssued,
+        pickupsOpen: (pickupsBy.requested?.n || 0) + (pickupsBy.scheduled?.n || 0),
+        pickupKgCollected: pickupsBy.collected?.kg || 0,
+        eventsUpcoming: upcomingEvents,
+        eventRsvps: rsvpAgg[0]?.n || 0,
       },
       series: {
         signups: fillDays(signupsDaily, days),
