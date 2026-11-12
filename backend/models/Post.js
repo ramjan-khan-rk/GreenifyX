@@ -77,6 +77,12 @@ const postSchema = new mongoose.Schema(
       },
     ],
 
+    // Friends tagged by the author ("with Sara and Omar").
+    taggedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+
+    // Members who bookmarked the post.
+    savedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+
     isVerified: {
       type: Boolean,
       default: false,

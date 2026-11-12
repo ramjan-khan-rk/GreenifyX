@@ -13,6 +13,7 @@ const PREF_FOR_TYPE = {
   friend_accept: "social",
   like: "social",
   comment: "social",
+  tag: "social",
   challenge: "social",
   challenge_accept: "social",
   challenge_reject: "social",

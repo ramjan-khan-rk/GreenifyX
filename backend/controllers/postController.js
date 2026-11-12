@@ -9,6 +9,7 @@ import { parsePagination } from "../utils/pagination.js";
 import { applyVerifyAward, pointsStatusFor } from "../utils/postPoints.js";
 import { creditPoints } from "../utils/ledger.js";
 import { CAUSES, LOOKS, presentMediaUrl } from "../utils/mediaLook.js";
+import { findActivity } from "../utils/ecoActivities.js";
 
 const ecoPointsMap = {
   "Tree Plantation": 50,
@@ -64,15 +65,29 @@ export const createPost = async (req, res) => {
       "GreenifyX/posts",
       "auto"
     );
-    const ecoPoints = ecoPointsMap[activity] || 10;
+    const known = findActivity(activity);
+    const ecoPoints = known ? known.points : ecoPointsMap[activity] || 10;
+
+    // Tagged friends: accepts a JSON array or comma list; only real friends, max 20.
+    let tagIds = [];
+    try {
+      const raw = req.body.taggedUsers;
+      tagIds = Array.isArray(raw) ? raw : String(raw || "").trim().startsWith("[") ? JSON.parse(raw) : String(raw || "").split(",");
+    } catch {
+      tagIds = [];
+    }
+    const me = await User.findById(req.user._id).select("friends");
+    const friendSet = new Set((me?.friends || []).map((f) => f.toString()));
+    const taggedUsers = [...new Set(tagIds.map((t) => String(t).trim()))].filter((t) => friendSet.has(t)).slice(0, 20);
 
     const post = await Post.create({
       user: req.user._id,
       image: imageUrl,
       description,
-      activity,
+      activity: known ? known.name : activity,
       cause,
       mediaType,
+      taggedUsers,
       // Videos keep the look as a client-side filter; photos get it baked in by the CDN.
       look,
       musicUrl,
@@ -90,7 +105,20 @@ export const createPost = async (req, res) => {
         _id: { $in: currentUser.friends },
       });
 
+      for (const friendId of taggedUsers) {
+        const n = await Notification.create({
+          receiver: friendId,
+          sender: req.user._id,
+          type: "tag",
+          title: "You were tagged",
+          message: `${req.user.name} tagged you in a moment: ${known ? known.name : activity}.`,
+          referenceId: post._id,
+        });
+        emitToUser(friendId, "newNotification", n);
+      }
+
       for (const friend of friends) {
+        if (taggedUsers.includes(friend._id.toString())) continue;
         const notification = await Notification.create({
           receiver: friend._id,
           sender: req.user._id,
@@ -135,6 +163,7 @@ export const getPosts = async (req, res) => {
     const [posts, total] = await Promise.all([
       Post.find(filter)
         .populate("user", "name profileImage ecoPoints level")
+        .populate("taggedUsers", "name profileImage")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),
@@ -157,6 +186,9 @@ export const getPosts = async (req, res) => {
         likes: post.likes,
         likesCount: post.likes.length,
         isLiked: post.likes.some((id) => id.toString() === currentUserId),
+        isSaved: (post.savedBy || []).some((id) => id.toString() === currentUserId),
+        taggedUsers: (post.taggedUsers || []).map((u) => ({ _id: u._id, name: u.name, profileImage: u.profileImage || "" })),
+        activityIcon: findActivity(post.activity)?.icon || "eco",
         musicUrl: post.musicUrl || "",
         musicTitle: post.musicTitle || "",
         musicStartSec: post.musicStartSec || 0,
@@ -333,5 +365,19 @@ export const verifyPost = async (req, res) => {
     });
   } catch (error) {
     return sendServerError(res, "Unable to verify post");
+  }
+};
+
+// PUT /api/posts/:id/save — bookmark toggle.
+export const toggleSave = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id).select("savedBy isHidden");
+    if (!post || post.isHidden) return res.status(404).json({ success: false, message: "Post not found" });
+    const me = req.user._id.toString();
+    const saved = (post.savedBy || []).some((id) => id.toString() === me);
+    await Post.updateOne({ _id: post._id }, saved ? { $pull: { savedBy: req.user._id } } : { $addToSet: { savedBy: req.user._id } });
+    res.json({ success: true, saved: !saved });
+  } catch (error) {
+    return sendServerError(res, "Unable to save post");
   }
 };

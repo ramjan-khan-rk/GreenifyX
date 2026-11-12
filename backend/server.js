@@ -30,10 +30,16 @@ import orgRoutes from "./routes/orgRoutes.js";
 import rewardRoutes from "./routes/rewardRoutes.js";
 import pickupRoutes from "./routes/pickupRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
+import activityRoutes from "./routes/activityRoutes.js";
+import mongoose from "mongoose";
+import { syncActivities } from "./utils/ecoActivities.js";
 
 dotenv.config();
 assertJwtSecret();
 connectDB();
+mongoose.connection.once("open", () => {
+  syncActivities().catch((e) => console.error("Activity sync failed:", e.message));
+});
 
 const app = express();
 const server = http.createServer(app);
@@ -66,6 +72,7 @@ app.use("/api/orgs", orgRoutes);
 app.use("/api/rewards", rewardRoutes);
 app.use("/api/pickups", pickupRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/activities", activityRoutes);
 
 app.get("/", (req, res) => {
   res.send("GreenifyX API Running...");
