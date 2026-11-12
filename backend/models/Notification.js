@@ -64,6 +64,14 @@ const notificationSchema = new mongoose.Schema(
   }
 );
 
+// Every new in-app notification is also pushed to the receiver's phone (when FCM is configured).
+notificationSchema.post("save", function (doc) {
+  if (!doc.$locals?.pushed) {
+    doc.$locals.pushed = true;
+    import("../utils/push.js").then(({ pushNotification }) => pushNotification(doc)).catch(() => {});
+  }
+});
+
 export default mongoose.model(
   "Notification",
   notificationSchema
