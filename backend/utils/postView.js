@@ -34,6 +34,7 @@ export const presentPosts = async (posts, meId) => {
     hashtags: post.hashtags || [],
     community: post.community || null,
     isVerified: post.isVerified,
+    verifiedBy: post.verifiedBy || (post.isVerified ? "friend" : ""),
     pointsStatus: pointsStatusFor(post),
     createdAt: post.createdAt,
   }));

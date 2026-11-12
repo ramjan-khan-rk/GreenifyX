@@ -41,6 +41,7 @@ import { adminListEnquiries, adminUpdateEnquiry } from "../controllers/publicCon
 import { adminListCheckpoints, adminCreateCheckpoint, adminUpdateCheckpoint } from "../controllers/checkinController.js";
 import { adminBadgeRequests, adminDecideBadge, adminListSponsored, adminCreateSponsored, adminUpdateSponsored } from "../controllers/growthController.js";
 import { orgEsg } from "../controllers/esgController.js";
+import { analytics } from "../controllers/analyticsController.js";
 
 const router = express.Router();
 
@@ -54,6 +55,7 @@ router.get("/redemptions", adminListRedemptions);
 router.patch("/redemptions/:id", adminUpdateRedemption);
 router.get("/pickups", adminListPickups);
 router.patch("/pickups/:id", adminUpdatePickup);
+router.get("/analytics", analytics);
 router.get("/badges", adminBadgeRequests);
 router.patch("/badges/:userId", adminDecideBadge);
 router.get("/sponsored", adminListSponsored);

@@ -12,7 +12,7 @@ import { CAUSES, LOOKS, presentMediaUrl } from "../utils/mediaLook.js";
 import { findActivity } from "../utils/ecoActivities.js";
 import crypto from "crypto";
 import { extractHashtags, extractMentionTokens, resolveMentions } from "../utils/textTags.js";
-import { reviewPost, REASON_TEXT } from "../utils/moderation.js";
+import { reviewPost, REASON_TEXT, AUTO_VERIFY_CONFIDENCE } from "../utils/moderation.js";
 import { knownPeople } from "./commentController.js";
 
 const ecoPointsMap = {
@@ -172,12 +172,34 @@ export const createPost = async (req, res) => {
     setImmediate(async () => {
       try {
         const review = await reviewPost({ ...file, activity: post.activity, description, duplicate: Boolean(duplicate) });
-        const update = { aiReview: { status: review.status, reasons: review.reasons, checkedAt: new Date() } };
+        const update = { aiReview: { status: review.status, reasons: review.reasons, confidence: review.confidence, checkedAt: new Date() } };
         if (review.reasons.length) {
           update.$push = { reports: { $each: review.reasons.map((r) => ({ reason: REASON_TEXT[r] || r })) } };
           if (review.reasons.includes("unsafe_content")) update.isHidden = true;
         }
         await Post.updateOne({ _id: post._id }, update);
+
+        // AI verification: a confident, clear photo earns its points straight away.
+        if (review.status === "clear" && review.confidence >= AUTO_VERIFY_CONFIDENCE) {
+          const fresh = await Post.findById(post._id);
+          const result = applyVerifyAward(fresh);
+          if (result.ok) {
+            fresh.verifiedBy = "ai";
+            await fresh.save();
+            if (result.award) {
+              await creditPoints({ userId: fresh.user, amount: result.points, type: "post_verified", reason: `${fresh.activity} verified by AI`, post: fresh._id });
+            }
+            const n = await Notification.create({
+              receiver: fresh.user,
+              sender: fresh.user,
+              type: "verification",
+              title: "✨ Verified instantly by AI",
+              message: `Your ${fresh.activity} post was verified.${result.award ? ` +${result.points} Eco Points.` : ""}`,
+              referenceId: fresh._id,
+            });
+            emitToUser(fresh.user, "newNotification", n);
+          }
+        }
       } catch (e) {
         console.error("Post review failed:", e.message);
       }
@@ -242,6 +264,7 @@ export const getPosts = async (req, res) => {
         taggedUsers: (post.taggedUsers || []).map((u) => ({ _id: u._id, name: u.name, profileImage: u.profileImage || "" })),
         activityIcon: findActivity(post.activity)?.icon || "eco",
         hashtags: post.hashtags || [],
+        verifiedBy: post.verifiedBy || (post.isVerified ? "friend" : ""),
         musicUrl: post.musicUrl || "",
         musicTitle: post.musicTitle || "",
         musicStartSec: post.musicStartSec || 0,
@@ -380,6 +403,7 @@ export const verifyPost = async (req, res) => {
     }
 
     const result = applyVerifyAward(post);
+    if (result.ok) post.verifiedBy = "friend";
     if (!result.ok) {
       return res.status(400).json({
         success: false,

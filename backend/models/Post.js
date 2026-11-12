@@ -96,8 +96,10 @@ const postSchema = new mongoose.Schema(
     // Anti-cheat: content hash of the uploaded file and the automatic review.
     mediaHash: { type: String, index: true },
     duplicateOf: { type: mongoose.Schema.Types.ObjectId, ref: "Post" },
+    verifiedBy: { type: String, enum: ["", "friend", "ai", "admin"], default: "" },
     aiReview: {
       status: { type: String, enum: ["pending", "clear", "flagged", "skipped"], default: "pending" },
+      confidence: { type: Number },
       reasons: [{ type: String }],
       checkedAt: Date,
     },
