@@ -16,7 +16,14 @@ class MessageRepository {
 
   /// Uploads the recording, then sends it as a voice-note message.
   Future<void> sendVoiceNote({required String receiverId, required File file, required int durationSec}) async {
-    final url = await api.uploadAudio(file);
+    // One automatic retry: uploads on mobile data often fail once.
+    String url;
+    try {
+      url = await api.uploadAudio(file);
+    } catch (_) {
+      await Future.delayed(const Duration(seconds: 2));
+      url = await api.uploadAudio(file);
+    }
     await api.sendMessage(receiverId: receiverId, audio: url, durationSec: durationSec);
   }
 

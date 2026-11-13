@@ -10,7 +10,8 @@ export const uploadAudio = async (req, res) => {
     const audioUrl = await uploadBufferToCloudinary(req.file.buffer, "GreenifyX/audio", "video");
     return res.status(200).json({ success: true, audioUrl });
   } catch (e) {
-    res.status(500).json({ success: false, message: "Audio upload failed" });
+    console.error("Audio upload failed:", e?.message || e);
+    res.status(500).json({ success: false, message: "Voice note couldn't be saved. Please try again." });
   }
 };
 

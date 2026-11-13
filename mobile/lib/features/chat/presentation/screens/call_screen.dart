@@ -38,9 +38,12 @@ class _CallScreenState extends State<CallScreen> {
   void _onCall() {
     if (!mounted) return;
     if (call.phase == "idle") {
+      // pop() (not maybePop) so the "can't go back during a call" guard
+      // never traps the screen after the call has ended.
       if (!_popped) {
         _popped = true;
-        Navigator.of(context).maybePop();
+        final nav = Navigator.of(context);
+        if (nav.canPop()) nav.pop();
       }
       return;
     }
@@ -71,6 +74,10 @@ class _CallScreenState extends State<CallScreen> {
 
     return PopScope(
       canPop: call.phase == "idle" || ended,
+      // Back during a call = hang up, never a stuck screen.
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) call.hangUp();
+      },
       child: Scaffold(
         backgroundColor: AppColors.inkFixed,
         body: Stack(fit: StackFit.expand, children: [
@@ -80,7 +87,7 @@ class _CallScreenState extends State<CallScreen> {
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.ink, Color(0xFF1F5A4B)],
+                  colors: [AppColors.inkFixed, Color(0xFF1F5A4B)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),

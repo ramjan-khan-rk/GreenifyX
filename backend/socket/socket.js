@@ -126,7 +126,11 @@ export const initializeSocket = (server) => {
         if (type === "offer") {
           const me = await User.findById(userId).select("friends name");
           const isFriend = me?.friends?.some((id) => id.toString() === to);
-          if (!isFriend) return;
+          if (!isFriend) {
+            // Tell the caller instead of leaving them on "Ringing…".
+            emitToUser(userId, "call:signal", { from: to, type: "not_friends" });
+            return;
+          }
           fromName = me?.name || "Friend";
 
           // Friend not connected: tell the caller right away and leave a missed-call notice.
@@ -185,15 +189,23 @@ export const initializeSocket = (server) => {
     });
 
     socket.on("disconnect", () => {
-      if (onlineUsers.get(userId) === socket.id) {
-        onlineUsers.delete(userId);
-        broadcastPresence(userId, false);
-      }
-      for (const key of liveCalls) {
-        if (key.split(":").includes(userId)) {
+      // Phones reconnect often (permission pop-ups, switching Wi-Fi to data).
+      // Only an old socket going away after a newer one connected is harmless,
+      // so calls are only ended when the user's *current* socket drops.
+      if (onlineUsers.get(userId) !== socket.id) return;
+      onlineUsers.delete(userId);
+      broadcastPresence(userId, false);
+      // Give them a few seconds to reconnect before hanging up their calls.
+      setTimeout(() => {
+        if (onlineUsers.has(userId)) return;
+        for (const key of [...liveCalls]) {
+          const ids = key.split(":");
+          if (!ids.includes(userId)) continue;
           liveCalls.delete(key);
+          const other = ids.find((id) => id !== userId);
+          if (other) emitToUser(other, "call:signal", { from: userId, type: "end" });
         }
-      }
+      }, 8000);
     });
   });
 

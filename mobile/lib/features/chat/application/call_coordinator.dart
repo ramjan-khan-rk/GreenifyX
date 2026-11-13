@@ -42,6 +42,7 @@ class CallCoordinator extends ChangeNotifier {
   List<dynamic>? _iceServers;
   Timer? _ringTimer;
   Timer? _closeTimer;
+  Timer? _connectTimer;
   bool _ready = false;
   bool _bound = false;
   bool _remoteReady = false;
@@ -97,12 +98,25 @@ class CallCoordinator extends ChangeNotifier {
     });
   }
 
+  /// If the two phones can't reach each other (usually mobile data without a
+  /// relay server), say so instead of showing "Connecting…" forever.
+  void _watchConnect() {
+    _connectTimer?.cancel();
+    _connectTimer = Timer(const Duration(seconds: 25), () {
+      if (phase == "connecting") {
+        _endWith("Couldn't connect. Try on Wi-Fi, or ask the admin to set up call relay.", notifyPeer: true);
+      }
+    });
+  }
+
   Future<void> accept() async {
     if (_pendingOffer == null || phase != "incoming") return;
+    _ringTimer?.cancel();
     outgoing = false;
     phase = "connecting";
     detail = "Connecting…";
     notifyListeners();
+    _watchConnect();
     await _ensureMedia();
     if (_local == null) {
       _endWith("Microphone permission is needed", notifyPeer: true);
@@ -123,10 +137,13 @@ class CallCoordinator extends ChangeNotifier {
   Future<void> hangUp({bool notifyPeer = true}) async {
     _ringTimer?.cancel();
     _closeTimer?.cancel();
-    if (notifyPeer && peerId.isNotEmpty && phase != "ended") _send("end");
-    await _teardown();
+    _connectTimer?.cancel();
+    if (notifyPeer && peerId.isNotEmpty && phase != "ended" && phase != "idle") _send("end");
+    // Close the screen first so ending always feels instant, then release
+    // the camera and microphone (a stuck device must never trap the call).
     phase = "idle";
     notifyListeners();
+    await _teardown().timeout(const Duration(seconds: 4), onTimeout: () {});
   }
 
   void toggleMute() {
@@ -173,6 +190,7 @@ class CallCoordinator extends ChangeNotifier {
   void _live() {
     if (phase == "live") return;
     _ringTimer?.cancel();
+    _connectTimer?.cancel();
     phase = "live";
     detail = "Connected";
     connectedAt = DateTime.now();
@@ -185,7 +203,9 @@ class CallCoordinator extends ChangeNotifier {
 
   /// Shows why the call ended, then closes the call screen.
   void _endWith(String reason, {bool notifyPeer = false}) {
+    if (phase == "idle") return;
     _ringTimer?.cancel();
+    _connectTimer?.cancel();
     if (notifyPeer && peerId.isNotEmpty) _send("end");
     unawaited(_teardown());
     phase = "ended";
@@ -281,6 +301,17 @@ class CallCoordinator extends ChangeNotifier {
         _live();
       } else if (state == RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
         _endWith("Connection lost. The network may be blocking calls.", notifyPeer: true);
+      } else if (state == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected && phase == "live") {
+        detail = "Reconnecting…";
+        notifyListeners();
+      }
+    };
+    _pc!.onIceConnectionState = (state) {
+      if (state == RTCIceConnectionState.RTCIceConnectionStateConnected ||
+          state == RTCIceConnectionState.RTCIceConnectionStateCompleted) {
+        _live();
+      } else if (state == RTCIceConnectionState.RTCIceConnectionStateFailed) {
+        _endWith("Couldn't connect. Try on Wi-Fi, or ask the admin to set up call relay.", notifyPeer: true);
       }
     };
   }
@@ -318,9 +349,11 @@ class CallCoordinator extends ChangeNotifier {
     switch (type) {
       case "answer":
         if (data["sdp"] is Map) {
+          _ringTimer?.cancel();
           phase = "connecting";
           detail = "Connecting…";
           notifyListeners();
+          _watchConnect();
           await _applyRemote(Map<String, dynamic>.from(data["sdp"] as Map));
         }
       case "ice":
@@ -341,6 +374,8 @@ class CallCoordinator extends ChangeNotifier {
         _endWith("$peerName declined");
       case "busy":
         _endWith("$peerName is on another call");
+      case "not_friends":
+        _endWith("You can only call friends. Add $peerName as a friend first.");
       case "unavailable":
         _endWith("$peerName isn't online. We let them know you called.");
       case "end":

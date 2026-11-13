@@ -156,24 +156,53 @@ class VoiceRecorder {
   DateTime? _startedAt;
   String? _path;
 
+  /// Why the last start() failed, for a clear message.
+  String lastError = "";
+
   Future<bool> start() async {
-    if (!await _rec.hasPermission()) return false;
-    final dir = await getTemporaryDirectory();
-    _path = "${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a";
-    await _rec.start(const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 64000, sampleRate: 44100), path: _path!);
-    _startedAt = DateTime.now();
-    return true;
+    lastError = "";
+    if (!await _rec.hasPermission()) {
+      lastError = "Allow the microphone to record voice notes";
+      return false;
+    }
+    try {
+      // A previous recording or a call may still hold the microphone.
+      if (await _rec.isRecording()) await _rec.stop();
+      final dir = await getTemporaryDirectory();
+      _path = "${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a";
+      // Mono 44.1 kHz AAC works on every Android and iPhone.
+      await _rec.start(const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 64000, sampleRate: 44100, numChannels: 1), path: _path!);
+      _startedAt = DateTime.now();
+      return true;
+    } catch (_) {
+      lastError = "The microphone is busy. Close any call and try again.";
+      return false;
+    }
   }
 
   Duration get elapsed => _startedAt == null ? Duration.zero : DateTime.now().difference(_startedAt!);
 
   /// Returns the file and its length, or null if it was too short to keep.
   Future<({File file, int seconds})?> stop() async {
-    final path = await _rec.stop();
+    String? path;
+    try {
+      path = await _rec.stop();
+    } catch (_) {
+      path = _path;
+    }
     final secs = elapsed.inMilliseconds / 1000;
     _startedAt = null;
+    path ??= _path;
     if (path == null || secs < 0.8) return null;
-    return (file: File(path), seconds: secs.ceil());
+    // Some phones hand back a "file://" URI instead of a plain path.
+    if (path.startsWith("file://")) path = Uri.parse(path).toFilePath();
+    final f = File(path);
+    // Give the encoder a moment to finish writing the file.
+    for (var i = 0; i < 10 && (!f.existsSync() || f.lengthSync() == 0); i++) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+    if (!f.existsSync() || f.lengthSync() == 0) return null;
+    return (file: f, seconds: secs.ceil());
   }
 
   Future<void> cancel() async {

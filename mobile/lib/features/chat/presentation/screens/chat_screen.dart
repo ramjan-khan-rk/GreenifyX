@@ -282,7 +282,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> _startRecording() async {
     final ok = await _recorder.start();
     if (!ok) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("Allow the microphone to record voice notes"))));
+      if (mounted) {
+        final why = _recorder.lastError.isEmpty ? "Allow the microphone to record voice notes" : _recorder.lastError;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr(why))));
+      }
       return;
     }
     setState(() => _recording = true);
