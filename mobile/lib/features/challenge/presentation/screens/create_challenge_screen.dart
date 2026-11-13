@@ -6,6 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../friends/application/providers/friend_provider.dart';
 import 'choose_friend_screen.dart';
 import '../../../../core/utils/friendly_error.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class CreateChallengeScreen extends ConsumerStatefulWidget {
   const CreateChallengeScreen({super.key});
@@ -84,11 +85,11 @@ class _CreateChallengeScreenState
       fillColor: Colors.white,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: AppColors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: AppColors.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
@@ -107,7 +108,7 @@ class _CreateChallengeScreenState
         backgroundColor: AppColors.background,
         elevation: 0,
         title: Text(
-          "New challenge",
+          tr("New challenge"),
           style: AppTextStyles.title.copyWith(fontSize: 20),
         ),
       ),
@@ -135,12 +136,12 @@ class _CreateChallengeScreenState
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    "Add a friend first",
+                    tr("Add a friend first"),
                     style: AppTextStyles.title.copyWith(fontSize: 20),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Challenges are head-to-head. Connect with at least one friend, then come back to create one.",
+                    tr("Challenges are head-to-head. Connect with at least one friend, then come back to create one."),
                     textAlign: TextAlign.center,
                     style: AppTextStyles.subtitle.copyWith(height: 1.45),
                   ),
@@ -155,7 +156,7 @@ class _CreateChallengeScreenState
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
               children: [
                 Text(
-                  "Define the goal",
+                  tr("Define the goal"),
                   style: AppTextStyles.subtitle.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppColors.text,
@@ -212,7 +213,7 @@ class _CreateChallengeScreenState
                 ),
                 const SizedBox(height: 22),
                 Text(
-                  "Difficulty",
+                  tr("Difficulty"),
                   style: AppTextStyles.subtitle.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppColors.text,
@@ -220,10 +221,10 @@ class _CreateChallengeScreenState
                 ),
                 const SizedBox(height: 10),
                 SegmentedButton<String>(
-                  segments: const [
-                    ButtonSegment(value: "Easy", label: Text("Easy")),
-                    ButtonSegment(value: "Medium", label: Text("Medium")),
-                    ButtonSegment(value: "Hard", label: Text("Hard")),
+                  segments: [
+                    ButtonSegment(value: "Easy", label: Text(tr("Easy"))),
+                    ButtonSegment(value: "Medium", label: Text(tr("Medium"))),
+                    ButtonSegment(value: "Hard", label: Text(tr("Hard"))),
                   ],
                   selected: {difficulty},
                   onSelectionChanged: (value) {
@@ -240,7 +241,7 @@ class _CreateChallengeScreenState
                 ),
                 const SizedBox(height: 22),
                 Text(
-                  "Target count",
+                  tr("Target count"),
                   style: AppTextStyles.subtitle.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppColors.text,
@@ -253,7 +254,7 @@ class _CreateChallengeScreenState
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: AppColors.border),
                   ),
@@ -283,24 +284,24 @@ class _CreateChallengeScreenState
                 ),
                 const SizedBox(height: 18),
                 Material(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(14),
                   child: ListTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
-                      side: const BorderSide(color: AppColors.border),
+                      side: BorderSide(color: AppColors.border),
                     ),
                     leading: const Icon(
                       Icons.calendar_month_outlined,
                       color: AppColors.primary,
                     ),
-                    title: const Text("Deadline"),
+                    title: Text(tr("Deadline")),
                     subtitle: Text(
                       "${deadline.day}/${deadline.month}/${deadline.year}",
                     ),
                     trailing: TextButton(
                       onPressed: pickDeadline,
-                      child: const Text("Change"),
+                      child: Text(tr("Change")),
                     ),
                   ),
                 ),
@@ -329,7 +330,7 @@ class _CreateChallengeScreenState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Winner reward",
+                              tr("Winner reward"),
                               style: AppTextStyles.subtitle.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.text,
@@ -379,7 +380,7 @@ class _CreateChallengeScreenState
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    child: const Text("Choose opponent"),
+                    child: Text(tr("Choose opponent")),
                   ),
                 ),
               ],

@@ -29,6 +29,8 @@ const campaignSchema = new mongoose.Schema(
     description: { type: String, default: "", trim: true, maxlength: 2000 },
     category: { type: String, enum: CAMPAIGN_CATEGORIES, required: true },
     organiserName: { type: String, required: true, trim: true, maxlength: 120 },
+    // Optional verified organisation that runs or sponsors the campaign.
+    organization: { type: mongoose.Schema.Types.ObjectId, ref: "Organization", default: null },
 
     emirate: { type: String, required: true },
     locationName: { type: String, required: true, trim: true, maxlength: 160 },

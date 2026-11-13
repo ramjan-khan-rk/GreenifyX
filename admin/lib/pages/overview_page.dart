@@ -168,6 +168,31 @@ class _Overview extends StatelessWidget {
           KpiCard(label: 'Challenges completed', value: Fmt.number(k['challengesCompleted'] as num?), icon: Icons.emoji_events_rounded, color: Brand.eco),
           KpiCard(label: 'Comments', value: Fmt.compact(k['totalComments'] as num?), icon: Icons.forum_rounded, color: Brand.coral),
         ]),
+        const SizedBox(height: 16),
+        ResponsiveGrid(children: [
+          InkWell(
+            onTap: () => context.go('/rewards'),
+            child: KpiCard(label: 'Rewards redeemed', value: Fmt.number(k['rewardsRedeemed'] as num?), icon: Icons.redeem_rounded, color: Brand.coral),
+          ),
+          InkWell(
+            onTap: () => context.go('/pickups'),
+            child: KpiCard(label: 'Open recycling pickups', value: Fmt.number(k['pickupsOpen'] as num?), icon: Icons.local_shipping_rounded, color: Brand.sun),
+          ),
+          InkWell(
+            onTap: () => context.go('/pickups'),
+            child: KpiCard(label: 'Kg collected at doorstep', value: Fmt.compact(k['pickupKgCollected'] as num?), icon: Icons.recycling_rounded, color: Brand.eco),
+          ),
+          InkWell(
+            onTap: () => context.go('/events'),
+            child: KpiCard(
+              label: 'Upcoming events',
+              value: Fmt.number(k['eventsUpcoming'] as num?),
+              icon: Icons.event_rounded,
+              color: Brand.sky,
+              caption: '${Fmt.number(k['eventRsvps'] as num?)} RSVPs',
+            ),
+          ),
+        ]),
       ],
     );
   }

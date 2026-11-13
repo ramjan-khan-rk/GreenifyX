@@ -7,6 +7,7 @@ import '../../../auth/application/providers/auth_provider.dart';
 import '../../application/providers/challenge_provider.dart';
 import '../../domain/models/challenge_model.dart';
 import '../../../../core/utils/friendly_error.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class ChallengeCard extends ConsumerWidget {
   final ChallengeModel challenge;
@@ -105,9 +106,9 @@ class ChallengeCard extends ConsumerWidget {
                 label: "+${challenge.ecoReward} Eco Points",
                 emphasize: true,
               ),
-              const _MetaChip(
+              _MetaChip(
                 icon: Icons.info_outline,
-                label: "Self-reported (no evidence yet)",
+                label: tr("Self-reported (no evidence yet)"),
               ),
             ],
           ),
@@ -320,7 +321,7 @@ class _ActionRow extends ConsumerWidget {
 
     if (challenge.status == "pending") {
       if (currentUserId != null && currentUserId != challenge.friendId) {
-        return const Text("Waiting for your friend to respond");
+        return Text(tr("Waiting for your friend to respond"));
       }
 
       return Row(
@@ -343,7 +344,7 @@ class _ActionRow extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: const Text("Decline"),
+              child: Text(tr("Decline")),
             ),
           ),
           const SizedBox(width: 10),
@@ -366,7 +367,7 @@ class _ActionRow extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: const Text("Accept"),
+              child: Text(tr("Accept")),
             ),
           ),
         ],
@@ -395,7 +396,7 @@ class _ActionRow extends ConsumerWidget {
             ),
           ),
           icon: const Icon(Icons.add_rounded),
-          label: const Text("Log progress (self-reported)"),
+          label: Text(tr("Log progress (self-reported)")),
         ),
       );
     }

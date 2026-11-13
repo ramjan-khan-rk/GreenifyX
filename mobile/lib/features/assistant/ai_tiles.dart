@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import 'assistant_screen.dart';
 import 'snap_sort_screen.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 /// Home-screen entry to the AI features.
 class AiTiles extends StatelessWidget {
@@ -40,7 +41,7 @@ class AiTiles extends StatelessWidget {
       child: Row(children: [
         tile(
           icon: Icons.auto_awesome_rounded,
-          title: "Ask GreenifyX",
+          title: tr("Ask GreenifyX"),
           text: "Find campaigns, drop-offs and answers",
           colors: const [AppColors.eco, Color(0xFF2A9D8F)],
           page: const AssistantScreen(),
@@ -48,7 +49,7 @@ class AiTiles extends StatelessWidget {
         const SizedBox(width: 12),
         tile(
           icon: Icons.camera_alt_rounded,
-          title: "Snap & Sort",
+          title: tr("Snap & Sort"),
           text: "Photo an item, see which bin",
           colors: const [Color(0xFFE36A4A), Color(0xFFC2513A)],
           page: const SnapSortScreen(),

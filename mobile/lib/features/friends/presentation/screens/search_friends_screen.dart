@@ -8,6 +8,7 @@ import '../../../../core/widgets/user_avatar.dart';
 import '../../application/providers/friend_provider.dart';
 import '../../application/providers/search_user_provider.dart';
 import '../../../../core/utils/friendly_error.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class SearchFriendsScreen extends ConsumerStatefulWidget {
   const SearchFriendsScreen({super.key});
@@ -34,7 +35,7 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text("Find friends", style: AppTextStyles.title),
+        title: Text(tr("Find friends"), style: AppTextStyles.title),
       ),
       body: Column(
         children: [
@@ -42,8 +43,8 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
             padding: const EdgeInsets.all(16),
             child: TextField(
               controller: controller,
-              decoration: const InputDecoration(
-                hintText: "Search by name",
+              decoration: InputDecoration(
+                hintText: tr("Search by name"),
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: (value) {
@@ -62,17 +63,17 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
               ),
               data: (list) {
                 if (keyword.trim().isEmpty) {
-                  return const AppEmptyState(
+                  return AppEmptyState(
                     icon: Icons.person_search_outlined,
-                    title: "Search the community",
-                    message: "Find people by name, then send a friend request.",
+                    title: tr("Search the community"),
+                    message: tr("Find people by name, then send a friend request."),
                   );
                 }
                 if (list.isEmpty) {
-                  return const AppEmptyState(
+                  return AppEmptyState(
                     icon: Icons.person_off_outlined,
-                    title: "No matches",
-                    message: "Try another name.",
+                    title: tr("No matches"),
+                    message: tr("Try another name."),
                   );
                 }
 
@@ -83,14 +84,14 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
                     late final Widget button;
 
                     if (user.isFriend) {
-                      button = const OutlinedButton(
+                      button = OutlinedButton(
                         onPressed: null,
-                        child: Text("Friends"),
+                        child: Text(tr("Friends")),
                       );
                     } else if (user.requestSent) {
-                      button = const OutlinedButton(
+                      button = OutlinedButton(
                         onPressed: null,
-                        child: Text("Pending"),
+                        child: Text(tr("Pending")),
                       );
                     } else if (user.requestReceived) {
                       button = ElevatedButton(
@@ -100,7 +101,7 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
                               .acceptRequest(user.id);
                           ref.invalidate(searchUsersProvider(keyword));
                         },
-                        child: const Text("Accept"),
+                        child: Text(tr("Accept")),
                       );
                     } else {
                       button = ElevatedButton(
@@ -110,7 +111,7 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
                               .sendRequest(user.id);
                           ref.invalidate(searchUsersProvider(keyword));
                         },
-                        child: const Text("Add"),
+                        child: Text(tr("Add")),
                       );
                     }
 

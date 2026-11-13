@@ -10,6 +10,7 @@ import '../../../profile/application/providers/my_profile_provider.dart';
 import '../../application/campaign_providers.dart';
 import '../../domain/campaign_model.dart';
 import '../widgets/campaign_visuals.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class CampaignDetailScreen extends ConsumerStatefulWidget {
   final String campaignId;
@@ -28,11 +29,11 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
       final ok = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text("Leave this campaign?"),
-          content: const Text("Your spot will be given to someone else."),
+          title: Text(tr("Leave this campaign?")),
+          content: Text(tr("Your spot will be given to someone else.")),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Stay")),
-            TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Leave")),
+            TextButton(onPressed: () => Navigator.pop(context, false), child: Text(tr("Stay"))),
+            TextButton(onPressed: () => Navigator.pop(context, true), child: Text(tr("Leave"))),
           ],
         ),
       );
@@ -43,7 +44,7 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
       final api = ref.read(campaignApiProvider);
       if (c.joined) {
         await api.leave(c.id);
-        messenger.showSnackBar(const SnackBar(content: Text("You left the campaign")));
+        messenger.showSnackBar(SnackBar(content: Text(tr("You left the campaign"))));
       } else {
         await api.join(c.id);
         messenger.showSnackBar(SnackBar(
@@ -64,7 +65,7 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
     final uri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}");
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Could not open maps")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("Could not open maps"))));
     }
   }
 
@@ -112,7 +113,16 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
                       Text(c.title,
                           style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800, height: 1.15)),
                       const SizedBox(height: 4),
-                      Text("by ${c.organiserName}", style: TextStyle(color: Colors.white.withValues(alpha: 0.85))),
+                      Row(children: [
+                        Flexible(
+                          child: Text("by ${c.organizationName.isNotEmpty ? c.organizationName : c.organiserName}",
+                              style: TextStyle(color: Colors.white.withValues(alpha: 0.85))),
+                        ),
+                        if (c.organizationVerified) ...[
+                          const SizedBox(width: 6),
+                          const Icon(Icons.verified_rounded, size: 16, color: Colors.white),
+                        ],
+                      ]),
                     ],
                   ),
                 ),
@@ -125,16 +135,16 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
           sliver: SliverList.list(children: [
             if (c.myStatus != null) _StatusBanner(status: c.myStatus!, points: c.pointsPerParticipant),
             Row(children: [
-              _Stat(value: "+${c.pointsPerParticipant}", label: "Eco Points", color: const Color(0xFF8A5A00)),
+              _Stat(value: "+${c.pointsPerParticipant}", label: tr("Eco Points"), color: const Color(0xFF8A5A00)),
               const SizedBox(width: 10),
-              _Stat(value: "${c.spotsLeft}", label: "Spots left", color: AppColors.primary),
+              _Stat(value: "${c.spotsLeft}", label: tr("Spots left"), color: AppColors.primary),
               const SizedBox(width: 10),
               _Stat(value: "${c.verifiedOutput}", label: "Verified ${c.outputUnit}", color: AppColors.eco),
             ]),
             const SizedBox(height: 16),
             _Section(children: [
               ProgressMeter(
-                label: "Volunteers",
+                label: tr("Volunteers"),
                 value: "${c.participantCount} / ${c.targetParticipants}",
                 progress: c.participantProgress,
                 color: AppColors.primary,
@@ -154,7 +164,7 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
               _Section(children: [
                 Text(
                   "${c.verifiedOutput} trees verified as planted. Survival is checked on site so we only count trees that live.",
-                  style: const TextStyle(color: AppColors.subtitle, height: 1.4, fontSize: 13),
+                  style: TextStyle(color: AppColors.subtitle, height: 1.4, fontSize: 13),
                 ),
                 const SizedBox(height: 12),
                 for (final s in c.survivalChecks) ...[
@@ -170,7 +180,7 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
             ],
             if (c.description.isNotEmpty) ...[
               const _Heading("About"),
-              Text(c.description, style: const TextStyle(fontSize: 15, height: 1.55, color: AppColors.ink)),
+              Text(c.description, style: TextStyle(fontSize: 15, height: 1.55, color: AppColors.ink)),
             ],
             const _Heading("When & where"),
             _Section(children: [
@@ -183,7 +193,7 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
                 child: OutlinedButton.icon(
                   onPressed: () => _directions(c),
                   icon: const Icon(Icons.directions_rounded),
-                  label: const Text("Get directions"),
+                  label: Text(tr("Get directions")),
                 ),
               ),
             ]),
@@ -209,9 +219,9 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
                 color: AppColors.eco,
               ),
               const Divider(height: 22),
-              const _InfoRow(
+              _InfoRow(
                 icon: Icons.gps_fixed_rounded,
-                title: "GPS and photo evidence",
+                title: tr("GPS and photo evidence"),
                 subtitle: "Points are credited only after the on-site report is approved",
               ),
             ]),
@@ -248,7 +258,7 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
           child: Container(
             padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + MediaQuery.paddingOf(context).bottom),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 16, offset: const Offset(0, -4))],
             ),
             child: SizedBox(
@@ -313,14 +323,14 @@ class _Stat extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.border),
         ),
         child: Column(children: [
           Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: color)),
           const SizedBox(height: 2),
-          Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11.5, color: AppColors.subtitle)),
+          Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 11.5, color: AppColors.subtitle)),
         ]),
       ),
     );
@@ -334,7 +344,7 @@ class _Heading extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.fromLTRB(4, 22, 4, 10),
-        child: Text(text, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.ink)),
+        child: Text(text, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.ink)),
       );
 }
 
@@ -346,7 +356,7 @@ class _Section extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: AppColors.border),
         ),
@@ -373,9 +383,9 @@ class _InfoRow extends StatelessWidget {
       const SizedBox(width: 12),
       Expanded(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
+          Text(title, style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
           const SizedBox(height: 2),
-          Text(subtitle, style: const TextStyle(color: AppColors.subtitle, fontSize: 13, height: 1.35)),
+          Text(subtitle, style: TextStyle(color: AppColors.subtitle, fontSize: 13, height: 1.35)),
         ]),
       ),
     ]);

@@ -13,6 +13,7 @@ import '../../core/widgets/app_status.dart';
 import '../campaign/presentation/screens/campaign_detail_screen.dart';
 import '../campaign/presentation/widgets/campaign_visuals.dart';
 import '../issues/presentation/issue_widgets.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 /// One pin on the map, normalised across campaigns, reports and places.
 class MapPin {
@@ -150,7 +151,7 @@ class _EcoMapScreenState extends ConsumerState<EcoMapScreen> {
       _map.move(me, 12);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Could not find your location")));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("Could not find your location"))));
       }
     }
   }
@@ -166,8 +167,8 @@ class _EcoMapScreenState extends ConsumerState<EcoMapScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text("Smart Eco Map", style: AppTextStyles.title),
-          Text("Campaigns, recycling and refill points across the UAE", style: AppTextStyles.tagline),
+          Text(tr("Smart Eco Map"), style: AppTextStyles.title),
+          Text(tr("Campaigns, recycling and refill points across the UAE"), style: AppTextStyles.tagline),
         ]),
       ),
       body: pins.when(
@@ -346,7 +347,7 @@ class _PinCard extends StatelessWidget {
       elevation: 8,
       shadowColor: Colors.black26,
       borderRadius: BorderRadius.circular(20),
-      color: Colors.white,
+      color: AppColors.surface,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -360,9 +361,9 @@ class _PinCard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(pin.title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.ink)),
+                Text(pin.title, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.ink)),
                 const SizedBox(height: 2),
-                Text(pin.subtitle, style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
+                Text(pin.subtitle, style: TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
               ]),
             ),
             IconButton(onPressed: onClose, icon: const Icon(Icons.close_rounded), visualDensity: VisualDensity.compact),
@@ -379,13 +380,13 @@ class _PinCard extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: onDirections,
                 icon: const Icon(Icons.directions_rounded, size: 18),
-                label: const Text("Directions"),
+                label: Text(tr("Directions")),
               ),
             ),
             if (onOpen != null) ...[
               const SizedBox(width: 10),
               Expanded(
-                child: ElevatedButton(onPressed: onOpen, child: const Text("View campaign")),
+                child: ElevatedButton(onPressed: onOpen, child: Text(tr("View campaign"))),
               ),
             ],
           ]),

@@ -30,6 +30,14 @@ const notificationSchema = new mongoose.Schema(
         "campaign",
         "points",
         "call",
+        "reward",
+        "tag",
+        "listing",
+        "live",
+        "badge",
+        "sponsored",
+        "pickup",
+        "event",
       ],
       required: true,
     },
@@ -60,6 +68,14 @@ const notificationSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Every new in-app notification is also pushed to the receiver's phone (when FCM is configured).
+notificationSchema.post("save", function (doc) {
+  if (!doc.$locals?.pushed) {
+    doc.$locals.pushed = true;
+    import("../utils/push.js").then(({ pushNotification }) => pushNotification(doc)).catch(() => {});
+  }
+});
 
 export default mongoose.model(
   "Notification",

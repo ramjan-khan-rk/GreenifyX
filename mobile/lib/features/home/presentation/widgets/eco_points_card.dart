@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/brand_icons.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class EcoPointsCard extends StatelessWidget {
   final int ecoPoints;
@@ -36,13 +37,13 @@ class EcoPointsCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Text("Your Eco Points", style: AppTextStyles.title),
+                child: Text(tr("Your Eco Points"), style: AppTextStyles.title),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
-            "From friend-verified posts and challenge wins",
+            tr("From friend-verified posts and challenge wins"),
             style: AppTextStyles.subtitle,
           ),
           const SizedBox(height: 20),
@@ -52,19 +53,19 @@ class EcoPointsCard extends StatelessWidget {
               _Item(
                 icon: Icons.star_rounded,
                 value: "$level",
-                title: "Level",
+                title: tr("Level"),
                 color: AppColors.navy,
               ),
               _Item(
                 icon: BrandGlyph.ecoPoints,
                 value: "$ecoPoints",
-                title: "Eco Points",
+                title: tr("Eco Points"),
                 color: AppColors.accent,
               ),
               _Item(
                 icon: Icons.local_fire_department_rounded,
                 value: "$streak",
-                title: "Streak",
+                title: tr("Streak"),
                 color: AppColors.primary,
               ),
             ],

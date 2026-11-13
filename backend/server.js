@@ -26,10 +26,26 @@ import envReportRoutes from "./routes/envReportRoutes.js";
 import mapRoutes from "./routes/mapRoutes.js";
 import assistantRoutes from "./routes/assistantRoutes.js";
 import callRoutes from "./routes/callRoutes.js";
+import orgRoutes from "./routes/orgRoutes.js";
+import rewardRoutes from "./routes/rewardRoutes.js";
+import pickupRoutes from "./routes/pickupRoutes.js";
+import eventRoutes from "./routes/eventRoutes.js";
+import activityRoutes from "./routes/activityRoutes.js";
+import publicRoutes from "./routes/publicRoutes.js";
+import socialRoutes from "./routes/socialRoutes.js";
+import lifeRoutes from "./routes/lifeRoutes.js";
+import growthRoutes from "./routes/growthRoutes.js";
+import { startScheduler } from "./utils/scheduler.js";
+import mongoose from "mongoose";
+import { syncActivities } from "./utils/ecoActivities.js";
 
 dotenv.config();
 assertJwtSecret();
 connectDB();
+mongoose.connection.once("open", () => {
+  syncActivities().catch((e) => console.error("Activity sync failed:", e.message));
+  startScheduler();
+});
 
 const app = express();
 const server = http.createServer(app);
@@ -58,6 +74,15 @@ app.use("/api/env-reports", envReportRoutes);
 app.use("/api/map", mapRoutes);
 app.use("/api/assistant", assistantRoutes);
 app.use("/api/calls", callRoutes);
+app.use("/api/orgs", orgRoutes);
+app.use("/api/rewards", rewardRoutes);
+app.use("/api/pickups", pickupRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/activities", activityRoutes);
+app.use("/api/public", publicRoutes);
+app.use("/api", growthRoutes);
+app.use("/api", lifeRoutes);
+app.use("/api", socialRoutes);
 
 app.get("/", (req, res) => {
   res.send("GreenifyX API Running...");

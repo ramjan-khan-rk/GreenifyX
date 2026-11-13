@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class ChallengeCard extends StatelessWidget {
   final VoidCallback? onStart;
@@ -16,17 +17,17 @@ class ChallengeCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Today's Challenge",
+            tr("Today's Challenge"),
             style: AppTextStyles.title,
           ),
           const SizedBox(height: 12),
           Text(
-            "Plant a Tree",
+            tr("Plant a Tree"),
             style: AppTextStyles.body,
           ),
           const SizedBox(height: 8),
           Text(
-            "+50 Eco Points",
+            tr("+50 Eco Points"),
             style: AppTextStyles.subtitle,
           ),
           const SizedBox(height: 20),

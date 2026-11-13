@@ -1,3 +1,5 @@
+import { findActivity } from "./ecoActivities.js";
+
 /**
  * Indicative CO2e savings per verified action, in kilograms.
  *
@@ -23,8 +25,11 @@ const KG_PER_ACTION = {
 
 export const DEFAULT_KG_PER_ACTION = 0.2;
 
-export const kgForActivity = (activity) =>
-  KG_PER_ACTION[String(activity || "").trim()] ?? DEFAULT_KG_PER_ACTION;
+export const kgForActivity = (activity) => {
+  const a = findActivity(activity);
+  if (a && Number.isFinite(Number(a.co2Kg))) return Number(a.co2Kg);
+  return KG_PER_ACTION[String(activity || "").trim()] ?? DEFAULT_KG_PER_ACTION;
+};
 
 /** rows: [{ activity, count }] -> total kg rounded to one decimal. */
 export const estimateCo2Kg = (rows = []) => {

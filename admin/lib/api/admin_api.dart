@@ -89,6 +89,9 @@ class AdminApi {
 
   Future<Json> stats() => _send(() => _dio.get('/admin/stats'));
 
+  /// DAU/WAU/MAU, retention cohorts, funnel, emirates and heat-map points.
+  Future<Json> analytics() => _send(() => _dio.get('/admin/analytics'));
+
   Future<Paged> users({String q = '', String status = 'all', String emirate = '', String sort = 'recent', int page = 1, int limit = 20}) async {
     final data = await _send(() => _dio.get('/admin/users', queryParameters: {
           if (q.isNotEmpty) 'q': q,
@@ -223,6 +226,26 @@ class AdminApi {
     return (text: data['text']?.toString() ?? '', mode: data['mode']?.toString() ?? 'template');
   }
 
+  // ---- Organisations ----
+
+  Future<({Paged page, Map<String, int> counts})> orgs({String status = '', int page = 1}) async {
+    final data = await _send(() => _dio.get('/admin/orgs', queryParameters: {
+          if (status.isNotEmpty) 'status': status,
+          'page': page,
+        }));
+    final counts = <String, int>{};
+    (data['counts'] as Map? ?? const {}).forEach((k, v) => counts[k.toString()] = (v as num).toInt());
+    return (page: _paged(data, 'organizations'), counts: counts);
+  }
+
+  Future<Json> setOrgStatus(String id, String status, {String note = ''}) async => Json.from(
+      (await _send(() => _dio.patch('/admin/orgs/$id/status', data: {'status': status, 'note': note})))['organization'] as Map);
+
+  Future<List<Json>> orgOptions() async {
+    final data = await _send(() => _dio.get('/admin/orgs/options'));
+    return List<Json>.from((data['organizations'] as List? ?? const []).map((e) => Json.from(e as Map)));
+  }
+
   Future<Paged> challenges({String status = '', int page = 1, int limit = 20}) async {
     final data = await _send(() => _dio.get('/admin/challenges', queryParameters: {
           if (status.isNotEmpty) 'status': status,
@@ -231,4 +254,80 @@ class AdminApi {
         }));
     return _paged(data, 'challenges');
   }
+
+  // ---- Rewards ----
+  List<Json> _maps(dynamic v) => List<Json>.from((v as List? ?? const []).map((e) => Json.from(e as Map)));
+
+  Future<Json> rewards() async => await _send(() => _dio.get('/admin/rewards'));
+
+  Future<void> createReward(Json body) async => _send(() => _dio.post('/admin/rewards', data: body));
+
+  Future<void> updateReward(String id, Json body) async => _send(() => _dio.patch('/admin/rewards/$id', data: body));
+
+  Future<List<Json>> redemptions({String status = '', String code = ''}) async => _maps((await _send(() => _dio.get(
+        '/admin/redemptions',
+        queryParameters: {if (status.isNotEmpty) 'status': status, if (code.isNotEmpty) 'code': code},
+      )))['redemptions']);
+
+  Future<void> updateRedemption(String id, String status) async =>
+      _send(() => _dio.patch('/admin/redemptions/$id', data: {'status': status}));
+
+  // ---- Recycling pickups ----
+  Future<Json> pickups({String status = ''}) async =>
+      await _send(() => _dio.get('/admin/pickups', queryParameters: {if (status.isNotEmpty) 'status': status}));
+
+  Future<void> updatePickup(String id, Json body) async => _send(() => _dio.patch('/admin/pickups/$id', data: body));
+
+  // ---- Events ----
+  Future<List<Json>> events() async => _maps((await _send(() => _dio.get('/admin/events')))['events']);
+
+  Future<void> createEvent(Json body) async => _send(() => _dio.post('/admin/events', data: body));
+
+  Future<void> updateEvent(String id, Json body) async => _send(() => _dio.patch('/admin/events/$id', data: body));
+
+  // ---- Eco activities ----
+  Future<List<Json>> activities() async => _maps((await _send(() => _dio.get('/admin/activities')))['activities']);
+
+  Future<void> createActivity(Json body) async => _send(() => _dio.post('/admin/activities', data: body));
+
+  Future<void> updateActivity(String id, Json body) async => _send(() => _dio.patch('/admin/activities/$id', data: body));
+
+  // ---- Public website (no login) ----
+  Future<Json> publicStats() async => await _send(() => _dio.get('/public/stats'));
+
+  Future<String> sendEnquiry(Json body) async =>
+      (await _send(() => _dio.post('/public/org-enquiry', data: body)))['message']?.toString() ?? 'Thank you!';
+
+  // ---- Website enquiries (admin) ----
+  Future<List<Json>> enquiries() async => _maps((await _send(() => _dio.get('/admin/enquiries')))['enquiries']);
+
+  Future<void> updateEnquiry(String id, Json body) async => _send(() => _dio.patch('/admin/enquiries/$id', data: body));
+
+  // ---- QR check-in points ----
+  Future<List<Json>> checkpoints() async => _maps((await _send(() => _dio.get('/admin/checkpoints')))['checkpoints']);
+
+  Future<void> createCheckpoint(Json body) async => _send(() => _dio.post('/admin/checkpoints', data: body));
+
+  Future<void> updateCheckpoint(String id, Json body) async => _send(() => _dio.patch('/admin/checkpoints/$id', data: body));
+
+  // ---- Public certificate check ----
+  Future<Json> certificate(String code) async => Json.from((await _send(() => _dio.get('/public/certificates/$code')))['certificate'] as Map);
+
+  // ---- Verified badges ----
+  Future<List<Json>> badgeUsers() async => _maps((await _send(() => _dio.get('/admin/badges')))['users']);
+
+  Future<void> decideBadge(String userId, String action, {String? type}) async =>
+      _send(() => _dio.patch('/admin/badges/$userId', data: {'action': action, 'type': ?type}));
+
+  // ---- Sponsored challenges ----
+  Future<List<Json>> sponsored() async => _maps((await _send(() => _dio.get('/admin/sponsored')))['challenges']);
+
+  Future<void> createSponsored(Json body) async => _send(() => _dio.post('/admin/sponsored', data: body));
+
+  Future<void> updateSponsored(String id, Json body) async => _send(() => _dio.patch('/admin/sponsored/$id', data: body));
+
+  // ---- ESG ----
+  Future<Json> orgEsg(String orgId) async => await _send(() => _dio.get('/admin/orgs/$orgId/esg'));
+
+  Future<Json> publicEsg(String token) async => Json.from((await _send(() => _dio.get('/public/esg/$token')))['report'] as Map);
 }

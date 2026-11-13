@@ -39,3 +39,16 @@ test("applyEcoAward updates points, streak, level, and badges", () => {
   assert.ok(result.badges.includes("streak_3"));
   assert.deepEqual(badgesFor(0, 0), []);
 });
+
+import { applyEcoAward as awardWithFreeze } from "../utils/verifiedProgress.js";
+
+test("a streak freeze saves one missed day", () => {
+  const now = new Date("2026-11-13T09:00:00Z");
+  const user = { ecoPoints: 0, streak: 5, streakFreezes: 1, lastVerifiedAt: new Date("2026-11-11T09:00:00Z"), badges: [] };
+  awardWithFreeze(user, 10, now);
+  assert.equal(user.streak, 6);
+  assert.equal(user.streakFreezes, 0);
+  const user2 = { ecoPoints: 0, streak: 5, streakFreezes: 0, lastVerifiedAt: new Date("2026-11-11T09:00:00Z"), badges: [] };
+  awardWithFreeze(user2, 10, now);
+  assert.equal(user2.streak, 1);
+});

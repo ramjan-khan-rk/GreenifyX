@@ -57,3 +57,6 @@ Thumbs.db
 *.temp
 # User-uploaded/generated files
 backend/uploads/
+# Firebase app config (kept local)
+mobile/android/app/google-services.json
+mobile/ios/Runner/GoogleService-Info.plist

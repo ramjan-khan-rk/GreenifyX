@@ -9,6 +9,11 @@ import { parsePagination } from "../utils/pagination.js";
 import { applyVerifyAward, pointsStatusFor } from "../utils/postPoints.js";
 import { creditPoints } from "../utils/ledger.js";
 import { CAUSES, LOOKS, presentMediaUrl } from "../utils/mediaLook.js";
+import { findActivity } from "../utils/ecoActivities.js";
+import crypto from "crypto";
+import { extractHashtags, extractMentionTokens, resolveMentions } from "../utils/textTags.js";
+import { reviewPost, REASON_TEXT, AUTO_VERIFY_CONFIDENCE } from "../utils/moderation.js";
+import { knownPeople } from "./commentController.js";
 
 const ecoPointsMap = {
   "Tree Plantation": 50,
@@ -36,6 +41,10 @@ export const createPost = async (req, res) => {
     const { description, activity } = req.body;
     const cause = CAUSES.has(req.body.cause) ? req.body.cause : "Planet";
     const look = LOOKS.has(req.body.look) ? req.body.look : "hd";
+    const musicUrl = /^https:\/\/res\.cloudinary\.com\//.test(String(req.body.musicUrl || "")) ? String(req.body.musicUrl) : "";
+    const musicTitle = musicUrl ? String(req.body.musicTitle || "Soundtrack").trim().slice(0, 80) : "";
+    const musicStartSec = musicUrl ? Math.max(0, Math.min(600, Math.round(Number(req.body.musicStartSec) || 0))) : 0;
+    const muteOriginal = String(req.body.muteOriginal) === "true";
 
     if (!req.file) {
       return res.status(400).json({
@@ -55,21 +64,58 @@ export const createPost = async (req, res) => {
       ? "video"
       : "image";
 
+    // Anti-cheat: the same file can't be posted twice.
+    const mediaHash = crypto.createHash("sha256").update(req.file.buffer).digest("hex");
+    const duplicate = await Post.findOne({ mediaHash }).select("_id user");
+    const hashtags = extractHashtags(description);
+    const mentions = resolveMentions(extractMentionTokens(description), await knownPeople(req.user._id)).filter((id) => id !== String(req.user._id));
+
     const imageUrl = await uploadBufferToCloudinary(
       req.file.buffer,
       "GreenifyX/posts",
       "auto"
     );
-    const ecoPoints = ecoPointsMap[activity] || 10;
+    const known = findActivity(activity);
+    const ecoPoints = known ? known.points : ecoPointsMap[activity] || 10;
+
+    // Tagged friends: accepts a JSON array or comma list; only real friends, max 20.
+    let tagIds = [];
+    try {
+      const raw = req.body.taggedUsers;
+      tagIds = Array.isArray(raw) ? raw : String(raw || "").trim().startsWith("[") ? JSON.parse(raw) : String(raw || "").split(",");
+    } catch {
+      tagIds = [];
+    }
+    const me = await User.findById(req.user._id).select("friends");
+    const friendSet = new Set((me?.friends || []).map((f) => f.toString()));
+    const taggedUsers = [...new Set(tagIds.map((t) => String(t).trim()))].filter((t) => friendSet.has(t)).slice(0, 20);
 
     const post = await Post.create({
       user: req.user._id,
       image: imageUrl,
       description,
-      activity,
+      activity: known ? known.name : activity,
       cause,
       mediaType,
-      look: mediaType === "video" ? "natural" : look,
+      taggedUsers,
+      hashtags,
+      mentions,
+      mediaHash,
+      duplicateOf: duplicate?._id,
+      sponsored: /^[a-f\d]{24}$/i.test(String(req.body.sponsored || "")) ? req.body.sponsored : undefined,
+      visibility: req.body.visibility === "friends" ? "friends" : "public",
+      community: await (async () => {
+        const id = String(req.body.community || "");
+        if (!/^[a-f\d]{24}$/i.test(id)) return undefined;
+        const { default: Community } = await import("../models/Community.js");
+        return (await Community.exists({ _id: id, members: req.user._id })) ? id : undefined;
+      })(),
+      // Videos keep the look as a client-side filter; photos get it baked in by the CDN.
+      look,
+      musicUrl,
+      musicTitle,
+      musicStartSec,
+      muteOriginal: mediaType === "video" ? muteOriginal : false,
       ecoPoints,
       isVerified: false,
       pointsAwarded: false,
@@ -81,7 +127,20 @@ export const createPost = async (req, res) => {
         _id: { $in: currentUser.friends },
       });
 
+      for (const friendId of taggedUsers) {
+        const n = await Notification.create({
+          receiver: friendId,
+          sender: req.user._id,
+          type: "tag",
+          title: "You were tagged",
+          message: `${req.user.name} tagged you in a moment: ${known ? known.name : activity}.`,
+          referenceId: post._id,
+        });
+        emitToUser(friendId, "newNotification", n);
+      }
+
       for (const friend of friends) {
+        if (taggedUsers.includes(friend._id.toString())) continue;
         const notification = await Notification.create({
           receiver: friend._id,
           sender: req.user._id,
@@ -97,9 +156,61 @@ export const createPost = async (req, res) => {
       console.error("Post created but notification failed");
     }
 
+    // Mentions in the caption.
+    for (const m of mentions) {
+      if (taggedUsers.includes(m)) continue;
+      try {
+        const n = await Notification.create({ receiver: m, sender: req.user._id, type: "tag", title: "You were mentioned", message: `${req.user.name} mentioned you in a moment.`, referenceId: post._id });
+        emitToUser(m, "newNotification", n);
+      } catch {
+        /* best-effort */
+      }
+    }
+
+    // Automatic review runs after the reply so posting stays fast.
+    const file = { buffer: req.file.buffer, mimetype: req.file.mimetype };
+    setImmediate(async () => {
+      try {
+        const review = await reviewPost({ ...file, activity: post.activity, description, duplicate: Boolean(duplicate) });
+        const update = { aiReview: { status: review.status, reasons: review.reasons, confidence: review.confidence, checkedAt: new Date() } };
+        if (review.reasons.length) {
+          update.$push = { reports: { $each: review.reasons.map((r) => ({ reason: REASON_TEXT[r] || r })) } };
+          if (review.reasons.includes("unsafe_content")) update.isHidden = true;
+        }
+        await Post.updateOne({ _id: post._id }, update);
+
+        // AI verification: a confident, clear photo earns its points straight away.
+        if (review.status === "clear" && review.confidence >= AUTO_VERIFY_CONFIDENCE) {
+          const fresh = await Post.findById(post._id);
+          const result = applyVerifyAward(fresh);
+          if (result.ok) {
+            fresh.verifiedBy = "ai";
+            await fresh.save();
+            if (result.award) {
+              await creditPoints({ userId: fresh.user, amount: result.points, type: "post_verified", reason: `${fresh.activity} verified by AI`, post: fresh._id });
+            }
+            const n = await Notification.create({
+              receiver: fresh.user,
+              sender: fresh.user,
+              type: "verification",
+              title: "✨ Verified instantly by AI",
+              message: `Your ${fresh.activity} post was verified.${result.award ? ` +${result.points} Eco Points.` : ""}`,
+              referenceId: fresh._id,
+            });
+            emitToUser(fresh.user, "newNotification", n);
+          }
+        }
+      } catch (e) {
+        console.error("Post review failed:", e.message);
+      }
+    });
+
     res.status(201).json({
       success: true,
-      message: "Shared. Eco Points land after a friend verifies it.",
+      duplicate: Boolean(duplicate),
+      message: duplicate
+        ? "Shared — but this photo was posted before, so it can't earn points."
+        : "Shared. Eco Points land after a friend verifies it.",
       post,
       pointsStatus: pointsStatusFor(post),
     });
@@ -125,7 +236,8 @@ export const getPosts = async (req, res) => {
 
     const [posts, total] = await Promise.all([
       Post.find(filter)
-        .populate("user", "name profileImage ecoPoints level")
+        .populate("user", "name profileImage ecoPoints level verifiedBadge")
+        .populate("taggedUsers", "name profileImage")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),
@@ -148,6 +260,15 @@ export const getPosts = async (req, res) => {
         likes: post.likes,
         likesCount: post.likes.length,
         isLiked: post.likes.some((id) => id.toString() === currentUserId),
+        isSaved: (post.savedBy || []).some((id) => id.toString() === currentUserId),
+        taggedUsers: (post.taggedUsers || []).map((u) => ({ _id: u._id, name: u.name, profileImage: u.profileImage || "" })),
+        activityIcon: findActivity(post.activity)?.icon || "eco",
+        hashtags: post.hashtags || [],
+        verifiedBy: post.verifiedBy || (post.isVerified ? "friend" : ""),
+        musicUrl: post.musicUrl || "",
+        musicTitle: post.musicTitle || "",
+        musicStartSec: post.musicStartSec || 0,
+        muteOriginal: post.muteOriginal === true,
         commentsCount: await Comment.countDocuments({
           post: post._id,
         }),
@@ -262,6 +383,13 @@ export const verifyPost = async (req, res) => {
       });
     }
 
+    if (post.duplicateOf || post.aiReview?.status === "flagged" || post.isHidden) {
+      return res.status(400).json({
+        success: false,
+        message: "This post is under review and can't be verified right now.",
+      });
+    }
+
     const author = await User.findById(post.user);
     const isFriend = author?.friends?.some(
       (id) => id.toString() === req.user._id.toString()
@@ -275,6 +403,7 @@ export const verifyPost = async (req, res) => {
     }
 
     const result = applyVerifyAward(post);
+    if (result.ok) post.verifiedBy = "friend";
     if (!result.ok) {
       return res.status(400).json({
         success: false,
@@ -320,5 +449,19 @@ export const verifyPost = async (req, res) => {
     });
   } catch (error) {
     return sendServerError(res, "Unable to verify post");
+  }
+};
+
+// PUT /api/posts/:id/save — bookmark toggle.
+export const toggleSave = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id).select("savedBy isHidden");
+    if (!post || post.isHidden) return res.status(404).json({ success: false, message: "Post not found" });
+    const me = req.user._id.toString();
+    const saved = (post.savedBy || []).some((id) => id.toString() === me);
+    await Post.updateOne({ _id: post._id }, saved ? { $pull: { savedBy: req.user._id } } : { $addToSet: { savedBy: req.user._id } });
+    res.json({ success: true, saved: !saved });
+  } catch (error) {
+    return sendServerError(res, "Unable to save post");
   }
 };

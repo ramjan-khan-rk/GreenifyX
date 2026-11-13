@@ -7,7 +7,29 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>GreenifyX checks your location to confirm field verification reports are made at the approved campaign site.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>GreenifyX uses the microphone for voice and video calls with friends.</string>
+	<string>GreenifyX uses the microphone for voice notes and for voice and video calls with friends.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Greeny uses speech recognition so you can control GreenifyX with your voice.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>GreenifyX lets you pick photos and videos to share eco moments and send in chat.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>GreenifyX lets you add a soundtrack from your device to your posts.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>audio</string>
+		<string>voip</string>
+	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>comgooglemaps</string>
+	</array>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ar</string>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

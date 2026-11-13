@@ -1,250 +1,153 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/i18n/app_locale.dart';
+import '../../../../core/services/session_user.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/friendly_error.dart';
 import '../../../../core/widgets/app_status.dart';
 import '../../../../core/widgets/brand_icons.dart';
 import '../../../../core/widgets/count_badge.dart';
-import '../../../../core/widgets/points_status_chip.dart';
-import '../../../../core/utils/friendly_error.dart';
-import '../../../../core/widgets/user_avatar.dart';
 import '../../../auth/application/providers/auth_provider.dart';
-import '../../../comment/presentation/widgets/comment_bottom_sheet.dart';
 import '../../../notifications/application/providers/notification_provider.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
-import '../../../profile/application/providers/my_profile_provider.dart';
+import '../../../post/presentation/screens/create_post_screen.dart';
+import '../../../social/foryou_feed.dart';
+import '../../../social/reels_screen.dart';
+import '../../../social/stories.dart';
+import '../../../social/trending_screens.dart';
+import '../../../live/live_screens.dart';
+import '../../../sponsored/sponsored.dart';
 import '../../application/providers/feed_provider.dart';
-import '../widgets/moment_media.dart';
-import '../widgets/report_post_sheet.dart';
+import '../widgets/post_card.dart';
 
-class FeedScreen extends ConsumerWidget {
+/// Moments: stories on top, then "For you" (AI ranked) or "Friends" (latest).
+class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({super.key});
+
+  @override
+  ConsumerState<FeedScreen> createState() => _FeedScreenState();
+}
+
+class _FeedScreenState extends ConsumerState<FeedScreen> {
+  final _storiesA = GlobalKey<StoriesBarState>();
+  final _storiesB = GlobalKey<StoriesBarState>();
+
+  @override
+  Widget build(BuildContext context) {
+    final meId = ref.watch(authProvider).user?.id ?? SessionUser.id;
+    final unread = ref.watch(unreadNotificationCountProvider);
+
+    Future<void> create() async {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => const CreatePostScreen()));
+      ref.read(feedProvider.notifier).refresh();
+    }
+
+    Widget stories(GlobalKey<StoriesBarState> key, {bool sponsored = false}) => Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Column(children: [
+            StoriesBar(key: key, meId: meId, myName: SessionUser.name, myImage: SessionUser.profileImage),
+            if (sponsored) const Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: SponsoredStrip()),
+          ]),
+        );
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: AppColors.surface,
+          titleSpacing: 18,
+          title: Text(tr("Moments"), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.ink, letterSpacing: -0.5)),
+          actions: [
+            IconButton(
+              tooltip: tr("Reels"),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ReelsScreen(meId: meId))),
+              icon: const Icon(Icons.slow_motion_video_rounded, size: 27),
+            ),
+            IconButton(
+              tooltip: tr("Live"),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LiveListScreen())),
+              icon: const Icon(Icons.sensors_rounded, size: 26),
+            ),
+            IconButton(
+              tooltip: tr("Trending"),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => TrendingScreen(meId: meId))),
+              icon: const Icon(Icons.tag_rounded, size: 26),
+            ),
+            IconButton(tooltip: tr("New post"), onPressed: create, icon: const Icon(Icons.add_box_outlined, size: 27)),
+            IconButton(
+              tooltip: tr("Updates"),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
+              icon: CountBadge(count: unread, child: const Icon(Icons.favorite_border_rounded, size: 27)),
+            ),
+            const SizedBox(width: 6),
+          ],
+          bottom: TabBar(
+            labelColor: AppColors.ink,
+            unselectedLabelColor: AppColors.subtitle,
+            indicatorColor: AppColors.joy,
+            indicatorWeight: 3,
+            labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+            tabs: [Tab(text: tr("For you")), Tab(text: tr("Friends"))],
+          ),
+        ),
+        body: TabBarView(children: [
+          ForYouFeed(meId: meId, header: stories(_storiesA, sponsored: true)),
+          _FriendsFeed(meId: meId, header: stories(_storiesB), onCreate: create),
+        ]),
+      ),
+    );
+  }
+}
+
+class _FriendsFeed extends ConsumerWidget {
+  final String meId;
+  final Widget header;
+  final VoidCallback onCreate;
+  const _FriendsFeed({required this.meId, required this.header, required this.onCreate});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final feed = ref.watch(feedProvider);
-    final meId = ref.watch(authProvider).user?.id ?? "";
-    final unread = ref.watch(unreadNotificationCountProvider);
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text("Moments", style: AppTextStyles.title),
-        actions: [
-          IconButton(
-            tooltip: "Updates",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const NotificationsScreen(),
-                ),
-              );
-            },
-            icon: CountBadge(
-              count: unread,
-              child: const Icon(BrandGlyph.updates),
-            ),
-          ),
-        ],
-      ),
-      body: feed.when(
-        data: (page) {
-          final posts = page.posts;
-          if (posts.isEmpty) {
-            return const AppEmptyState(
-              icon: BrandGlyph.post,
-              title: "No posts yet",
-              message:
-                  "Share a moment from Home. Points land after a friend verifies it.",
-            );
-          }
-
-          return RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: () => ref.read(feedProvider.notifier).refresh(),
-            child: ListView.builder(
-              itemCount: posts.length + (page.hasMore ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index >= posts.length) {
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                    child: TextButton(
-                      onPressed: () =>
-                          ref.read(feedProvider.notifier).loadMore(),
-                      child: const Text("Load more"),
-                    ),
-                  );
-                }
-                final post = posts[index];
-
-                return Card(
-                  elevation: 0,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: const BorderSide(color: AppColors.border),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListTile(
-                        leading: UserAvatar(
-                          imageUrl: post.profileImage,
-                          semanticLabel: "${post.name} photo",
-                        ),
-                        title: Text(post.name, style: AppTextStyles.body),
-                        subtitle: Text(
-                          "${post.cause} · ${post.activity}",
-                          style: AppTextStyles.subtitle.copyWith(
-                            color: AppColors.joy,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        trailing: post.userId.isNotEmpty && post.userId != meId
-                            ? PopupMenuButton<String>(
-                                tooltip: "More",
-                                icon: const Icon(Icons.more_vert_rounded),
-                                onSelected: (_) async {
-                                  final reason = await showReportPostSheet(context);
-                                  if (reason == null) return;
-                                  try {
-                                    await ref
-                                        .read(feedRepositoryProvider)
-                                        .reportPost(post.id, reason);
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text("Thanks. Our team will review this post."),
-                                        ),
-                                      );
-                                    }
-                                  } catch (e) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(friendlyError(e))),
-                                      );
-                                    }
-                                  }
-                                },
-                                itemBuilder: (_) => const [
-                                  PopupMenuItem(
-                                    value: "report",
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.flag_outlined, size: 20),
-                                        SizedBox(width: 12),
-                                        Text("Report post"),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : null,
-                      ),
-                      MomentMedia(url: post.image, mediaType: post.mediaType),
-                      if (post.description.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Text(post.description, style: AppTextStyles.body),
-                        ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: PointsStatusChip(
-                          ecoPoints: post.ecoPoints,
-                          isVerified: post.isVerified,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      OverflowBar(
-                        alignment: MainAxisAlignment.start,
-                        children: [
-                          TextButton.icon(
-                            onPressed: () async {
-                              try {
-                                await ref
-                                    .read(feedRepositoryProvider)
-                                    .toggleLike(post.id);
-                                await ref.read(feedProvider.notifier).refresh();
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(friendlyError(e))),
-                                  );
-                                }
-                              }
-                            },
-                            icon: Icon(
-                              post.isLiked
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: post.isLiked ? AppColors.error : null,
-                            ),
-                            label: Text("${post.likes}"),
-                          ),
-                          TextButton.icon(
-                            onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (_) => CommentBottomSheet(
-                                  postId: post.id,
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.comment_outlined),
-                            label: Text("${post.comments}"),
-                          ),
-                          if (!post.isVerified &&
-                              post.userId.isNotEmpty &&
-                              post.userId != meId)
-                            TextButton.icon(
-                              onPressed: () async {
-                                try {
-                                  await ref
-                                      .read(feedRepositoryProvider)
-                                      .verifyPost(post.id);
-                                  await ref.read(feedProvider.notifier).refresh();
-                                  ref.invalidate(myProfileProvider);
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          "Verified. Eco Points awarded to your friend.",
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(friendlyError(e))),
-                                    );
-                                  }
-                                }
-                              },
-                              icon: const Icon(BrandGlyph.verified),
-                              label: const Text("Verify"),
-                            ),
-                        ],
-                      ),
-                    ],
+    return feed.when(
+      data: (page) {
+        final posts = page.posts;
+        return RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: () => ref.read(feedProvider.notifier).refresh(),
+          child: ListView.builder(
+            padding: const EdgeInsets.only(bottom: 24),
+            itemCount: posts.length + 1 + (page.hasMore ? 1 : 0) + (posts.isEmpty ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == 0) return header;
+              if (posts.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 40),
+                  child: AppEmptyState(
+                    icon: BrandGlyph.post,
+                    title: tr("No posts yet"),
+                    message: tr("Share your first eco moment. Points land after a friend verifies it."),
+                    actionLabel: tr("Share a moment"),
+                    onAction: onCreate,
                   ),
                 );
-              },
-            ),
-          );
-        },
-        loading: () => const AppLoading(),
-        error: (e, _) => AppErrorState(
-          message: friendlyError(e, fallback: "Could not load moments."),
-          onRetry: () => ref.invalidate(feedProvider),
-        ),
-      ),
+              }
+              final i = index - 1;
+              if (i >= posts.length) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  child: OutlinedButton(onPressed: () => ref.read(feedProvider.notifier).loadMore(), child: Text(tr("Load more"))),
+                );
+              }
+              return PostCard(key: ValueKey(posts[i].id), post: posts[i], meId: meId);
+            },
+          ),
+        );
+      },
+      loading: () => const AppLoading(),
+      error: (e, _) => AppErrorState(message: friendlyError(e, fallback: "Could not load moments."), onRetry: () => ref.invalidate(feedProvider)),
     );
   }
 }

@@ -1,8 +1,9 @@
 import Message from "../models/Message.js";
 import User from "../models/User.js";
-import { emitToUser } from "../socket/socket.js";
+import { emitToUser, isUserOnline } from "../socket/socket.js";
 import Notification from "../models/Notification.js";
 import { assertCanMessage } from "../utils/friendOps.js";
+import { marketplaceCanMessage } from "./marketController.js";
 import { sendServerError } from "../utils/httpError.js";
 import { parsePagination } from "../utils/pagination.js";
 
@@ -11,7 +12,10 @@ const loadPair = async (senderId, receiverId) => {
     User.findById(senderId),
     User.findById(receiverId),
   ]);
-  return { sender, receiver, gate: assertCanMessage(sender, receiver) };
+  let gate = assertCanMessage(sender, receiver);
+  // Swap & Share: a seller and someone interested in their item may chat without being friends.
+  if (!gate.ok && gate.reason === "not_friends" && (await marketplaceCanMessage(senderId, receiverId))) gate = { ok: true };
+  return { sender, receiver, gate };
 };
 
 const rejectGate = (res, gate) => {
@@ -65,6 +69,8 @@ export const getMessages = async (req, res) => {
 export const sendMessage = async (req, res) => {
   try {
     const { receiverId, text, image } = req.body;
+    const audio = typeof req.body.audio === "string" && /^https:\/\//.test(req.body.audio) ? req.body.audio : "";
+    const durationSec = Math.max(0, Math.min(300, Math.round(Number(req.body.durationSec) || 0)));
 
     if (!receiverId) {
       return res.status(400).json({
@@ -73,7 +79,7 @@ export const sendMessage = async (req, res) => {
       });
     }
 
-    if ((!text || text.trim() === "") && !image) {
+    if ((!text || text.trim() === "") && !image && !audio) {
       return res.status(400).json({
         success: false,
         message: "Message cannot be empty.",
@@ -88,7 +94,9 @@ export const sendMessage = async (req, res) => {
       receiver: receiverId,
       text: text?.trim() ?? "",
       image: image ?? "",
-      messageType: image ? "image" : "text",
+      audio,
+      durationSec: audio ? durationSec : 0,
+      messageType: audio ? "audio" : image ? "image" : "text",
     });
 
     const populatedMessage = await Message.findById(message._id)
@@ -100,7 +108,11 @@ export const sendMessage = async (req, res) => {
       sender: req.user._id,
       type: "message",
       title: "New Message",
-      message: `${sender.name} sent you a message.`,
+      message: audio
+        ? `${sender.name} sent you a voice note.`
+        : image
+          ? `${sender.name} sent you a photo.`
+          : `${sender.name}: ${String(text || "").trim().slice(0, 80)}`,
       referenceId: message._id,
     });
 
@@ -130,6 +142,8 @@ export const markAsRead = async (req, res) => {
         isRead: true,
       }
     );
+
+    emitToUser(userId, "messagesRead", { by: req.user._id.toString() });
 
     res.status(200).json({
       success: true,
@@ -172,7 +186,9 @@ export const getChatList = async (req, res) => {
 
       finalChats.push({
         user: other,
-        lastMessage: msg.text,
+        lastMessage:
+          msg.messageType === "audio" ? "🎤 Voice note" : msg.messageType === "image" ? "📷 Photo" : msg.text,
+        lastFromMe: msg.sender._id.toString() === myId.toString(),
         time: msg.createdAt,
         unread:
           !msg.isRead && msg.receiver._id.toString() === myId.toString(),
@@ -185,6 +201,20 @@ export const getChatList = async (req, res) => {
       chats: finalChats.filter((chat) => !chat.blocked),
     });
   } catch (e) {
+    return sendServerError(res, "Request failed");
+  }
+};
+
+// GET /api/messages/presence/:userId — friend's online state and last seen.
+export const getPresence = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const me = await User.findById(req.user._id).select("friends");
+    const isFriend = me?.friends?.some((id) => id.toString() === String(userId));
+    if (!isFriend) return res.status(403).json({ success: false, message: "You can only see friends' status." });
+    const other = await User.findById(userId).select("lastSeenAt");
+    res.json({ success: true, online: isUserOnline(userId), lastSeenAt: other?.lastSeenAt || null });
+  } catch (error) {
     return sendServerError(res, "Request failed");
   }
 };

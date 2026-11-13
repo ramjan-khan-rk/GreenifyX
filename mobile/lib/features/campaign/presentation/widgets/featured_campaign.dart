@@ -7,6 +7,7 @@ import '../../application/campaign_providers.dart';
 import '../screens/campaign_detail_screen.dart';
 import '../screens/campaigns_screen.dart';
 import 'campaign_visuals.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 /// Home-screen highlight of the next open campaign. Hides itself when there is none.
 class FeaturedCampaign extends ConsumerWidget {
@@ -22,7 +23,7 @@ class FeaturedCampaign extends ConsumerWidget {
         return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           const SizedBox(height: 22),
           Row(children: [
-            Expanded(child: Text("Campaigns near you", style: AppTextStyles.title.copyWith(fontSize: 18))),
+            Expanded(child: Text(tr("Campaigns near you"), style: AppTextStyles.title.copyWith(fontSize: 18))),
             TextButton(
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CampaignsScreen())),
               child: Text("See all ${items.length}"),

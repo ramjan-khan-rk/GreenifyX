@@ -7,11 +7,15 @@ import {
   markAsRead,
   markAllAsRead,
   deleteNotification,
+  getInbox,
+  bulkNotifications,
 } from "../controllers/notificationController.js";
 
 const router = express.Router();
 
 router.get("/", protect, getNotifications);
+router.get("/inbox", protect, getInbox);
+router.post("/bulk", protect, bulkNotifications);
 
 router.put("/read-all", protect, markAllAsRead);
 

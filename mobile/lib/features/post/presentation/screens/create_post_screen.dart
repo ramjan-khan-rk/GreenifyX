@@ -1,19 +1,33 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../../../core/services/upload_queue.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/deeds.dart';
+import '../../domain/eco_activity.dart';
+import '../../../../core/widgets/user_avatar.dart';
+import '../../../friends/data/repositories/friend_repository.dart';
+import '../../../friends/domain/models/friend_model.dart';
 import '../../domain/looks.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:video_player/video_player.dart';
+import '../../../../core/services/media_upload.dart';
 import '../../data/repositories/post_repository.dart';
 import '../../../../core/utils/friendly_error.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class CreatePostScreen extends StatefulWidget {
-  const CreatePostScreen({super.key});
+  /// Share into this community (optional).
+  final String? communityId;
+  const CreatePostScreen({super.key, this.communityId});
 
   @override
   State<CreatePostScreen> createState() => _CreatePostScreenState();
@@ -29,12 +43,151 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   bool submitting = false;
   String lane = deedLanes.first;
   String activity = deeds.first.name;
+  List<EcoActivity> activities = fallbackActivities;
+  String query = "";
+  final List<FriendModel> tagged = [];
+  bool everyone = true;
+
+  @override
+  void initState() {
+    super.initState();
+    EcoActivityApi.load().then((list) {
+      if (!mounted) return;
+      setState(() {
+        activities = list;
+        final first = list.where((a) => a.lane == lane);
+        if (first.isNotEmpty && !list.any((a) => a.name == activity)) activity = first.first.name;
+      });
+    });
+  }
+
+  Future<void> _pickTags() async {
+    List<FriendModel> friends;
+    try {
+      friends = await FriendRepository().getFriends();
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+      return;
+    }
+    if (!mounted) return;
+    if (friends.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("Add friends first to tag them"))));
+      return;
+    }
+    final picked = {for (final t in tagged) t.id};
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) => SafeArea(
+          child: SizedBox(
+            height: MediaQuery.of(ctx).size.height * 0.6,
+            child: Column(children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Row(children: [
+                  Icon(Icons.person_add_alt_1_rounded, color: AppColors.joy),
+                  SizedBox(width: 10),
+                  Text(tr("Who was with you?"), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                ]),
+              ),
+              Expanded(
+                child: ListView(children: [
+                  for (final f in friends)
+                    CheckboxListTile(
+                      value: picked.contains(f.id),
+                      onChanged: (v) => setSheet(() => v == true ? picked.add(f.id) : picked.remove(f.id)),
+                      secondary: UserAvatar(imageUrl: f.profileImage, name: f.name, radius: 20),
+                      title: Text(f.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    ),
+                ]),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(picked.isEmpty ? "Done" : "Tag ${picked.length} friend${picked.length == 1 ? "" : "s"}"),
+                  ),
+                ),
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
+    if (!mounted) return;
+    setState(() {
+      tagged
+        ..clear()
+        ..addAll(friends.where((f) => picked.contains(f.id)));
+    });
+  }
   String look = "hd";
+
+  // Sound
+  File? musicFile;
+  String musicTitle = "";
+  bool muteOriginal = false;
+  final AudioPlayer musicPreview = AudioPlayer();
+  bool previewingMusic = false;
+  VideoPlayerController? videoPreview;
 
   @override
   void dispose() {
     descriptionController.dispose();
+    musicPreview.dispose();
+    videoPreview?.dispose();
     super.dispose();
+  }
+
+  Future<void> _setupVideoPreview(File file) async {
+    await videoPreview?.dispose();
+    final c = VideoPlayerController.file(file);
+    videoPreview = c;
+    await c.initialize();
+    await c.setLooping(true);
+    await c.setVolume(muteOriginal ? 0 : 1);
+    if (mounted) setState(() {});
+  }
+
+  Future<void> pickMusic() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+    final path = result?.files.single.path;
+    if (path == null) return;
+    final name = result!.files.single.name;
+    final title = name.contains(".") ? name.substring(0, name.lastIndexOf(".")) : name;
+    await musicPreview.stop();
+    setState(() {
+      musicFile = File(path);
+      musicTitle = title.replaceAll(RegExp(r"[_-]+"), " ").trim();
+      previewingMusic = false;
+    });
+  }
+
+  Future<void> toggleMusicPreview() async {
+    if (musicFile == null) return;
+    if (previewingMusic) {
+      await musicPreview.pause();
+      videoPreview?.pause();
+      setState(() => previewingMusic = false);
+      return;
+    }
+    await musicPreview.setFilePath(musicFile!.path);
+    setState(() => previewingMusic = true);
+    videoPreview?.play();
+    await musicPreview.play();
+  }
+
+  Future<void> removeMusic() async {
+    await musicPreview.stop();
+    setState(() {
+      musicFile = null;
+      musicTitle = "";
+      previewingMusic = false;
+    });
   }
 
   Future<void> pick(bool video) async {
@@ -45,95 +198,97 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           )
         : await picker.pickImage(
             source: ImageSource.gallery,
-            imageQuality: 95,
-            maxWidth: 3840,
+            imageQuality: 85,
+            maxWidth: 2160,
           );
 
     if (file == null) return;
     setState(() {
       selectedFile = File(file.path);
       isVideo = video;
-      if (video) look = "natural";
     });
+    if (video) {
+      await _setupVideoPreview(File(file.path));
+    } else {
+      await videoPreview?.dispose();
+      setState(() {
+        videoPreview = null;
+        muteOriginal = false;
+      });
+    }
   }
 
   Future<void> submit() async {
     if (selectedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Add a photo or a short video")),
+        SnackBar(content: Text(tr("Add a photo or a short video"))),
       );
       return;
     }
 
-    setState(() => submitting = true);
+    // Snapshot everything now; the upload carries on in the background
+    // (with progress, automatic retries and a Retry button) while they scroll.
+    final file = selectedFile!;
+    final video = isVideo;
+    final music = musicFile;
+    final title = musicTitle;
+    final fields = <String, dynamic>{
+      "description": descriptionController.text.trim(),
+      "activity": activity,
+      if (tagged.isNotEmpty) "taggedUsers": jsonEncode([for (final t in tagged) t.id]),
+      "cause": lane,
+      "look": look,
+      "visibility": everyone ? "public" : "friends",
+      "community": ?widget.communityId,
+      "muteOriginal": video && muteOriginal ? "true" : "false",
+    };
+    await musicPreview.stop();
+    videoPreview?.pause();
+    String? musicUrl;
 
-    try {
-      final name = selectedFile!.path.split(RegExp(r"[/\\]")).last;
-      final media = isVideo
-          ? MediaType("video", name.toLowerCase().endsWith(".mov") ? "quicktime" : "mp4")
-          : MediaType("image", "jpeg");
-
-      final formData = FormData.fromMap({
-        "description": descriptionController.text.trim(),
-        "activity": activity,
-        "cause": lane,
-        "look": look,
-        "image": await MultipartFile.fromFile(
-          selectedFile!.path,
-          filename: name,
-          contentType: media,
-        ),
-      });
-
-      await repository.createPost(formData);
-      if (!mounted) return;
-      await showDialog<void>(
-        context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: AppColors.card,
-          title: Text("You put something good out there", style: AppTextStyles.title),
-          content: Text(
-            "Friends can feel it now. Eco Points arrive when one of them verifies it.",
-            style: AppTextStyles.body,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Love that"),
-            ),
-          ],
-        ),
-      );
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(friendlyError(e))),
-      );
-    } finally {
-      if (mounted) setState(() => submitting = false);
-    }
+    UploadQueue.instance.enqueue(UploadJob(
+      path: "/posts/create",
+      label: activity,
+      thumbPath: video ? null : file.path,
+      isVideo: video,
+      build: () async {
+        if (music != null) musicUrl ??= await uploadAudioFile(music);
+        final name = file.path.split(RegExp(r"[/\\]")).last;
+        final media = video ? MediaType("video", name.toLowerCase().endsWith(".mov") ? "quicktime" : "mp4") : MediaType("image", "jpeg");
+        return FormData.fromMap({
+          ...fields,
+          "musicUrl": ?musicUrl,
+          if (musicUrl != null) "musicTitle": title,
+          "image": await MultipartFile.fromFile(file.path, filename: name, contentType: media),
+        });
+      },
+    ));
+    HapticFeedback.mediumImpact();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(tr("Posting in the background. Keep scrolling!"))),
+    );
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    final laneDeeds = deeds.where((deed) => deed.lane == lane).toList();
-    final selectedDeed = laneDeeds.firstWhere(
-      (deed) => deed.name == activity,
-      orElse: () => laneDeeds.first,
-    );
+    final shown = query.trim().isEmpty
+        ? activities.where((a) => a.lane == lane).toList()
+        : activities.where((a) => a.matches(query)).toList();
+    final selected = activities.firstWhere((a) => a.name == activity, orElse: () => activities.first);
     final selectedLook = lookById(look);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text("Share a moment", style: AppTextStyles.title),
+        title: Text(tr("Share a moment"), style: AppTextStyles.title),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
           Text(
-            "Planet, people, animals, or the feeling after you helped.",
+            tr("Planet, people, animals, or the feeling after you helped."),
             style: AppTextStyles.subtitle.copyWith(height: 1.4),
           ),
           const SizedBox(height: 16),
@@ -141,15 +296,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             file: selectedFile,
             isVideo: isVideo,
             look: selectedLook,
+            video: videoPreview,
             onPhoto: () => pick(false),
             onVideo: () => pick(true),
           ),
-          if (!isVideo && selectedFile != null) ...[
+          if (selectedFile != null) ...[
             const SizedBox(height: 14),
-            Text("Look", style: AppTextStyles.title.copyWith(fontSize: 16)),
+            Text(tr("Filter"), style: AppTextStyles.title.copyWith(fontSize: 16)),
             const SizedBox(height: 4),
             Text(
-              "A cleaner finish on the photo. The original stays yours.",
+              isVideo ? "Applied when friends watch your clip." : "A cleaner finish on the photo. The original stays yours.",
               style: AppTextStyles.subtitle,
             ),
             const SizedBox(height: 10),
@@ -171,70 +327,173 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               ),
             ),
           ],
+          if (selectedFile != null) ...[
+            const SizedBox(height: 18),
+            Text(tr("Sound"), style: AppTextStyles.title.copyWith(fontSize: 16)),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(children: [
+                if (musicFile == null)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [AppColors.joy, AppColors.sun]),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.library_music_rounded, color: Colors.white),
+                    ),
+                    title: Text(tr("Add music"), style: TextStyle(fontWeight: FontWeight.w800)),
+                    subtitle: Text(tr("Pick a track from your phone")),
+                    trailing: const Icon(Icons.add_rounded),
+                    onTap: pickMusic,
+                  )
+                else
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: IconButton.filled(
+                      style: IconButton.styleFrom(backgroundColor: AppColors.joy),
+                      onPressed: toggleMusicPreview,
+                      icon: Icon(previewingMusic ? Icons.pause_rounded : Icons.play_arrow_rounded, color: Colors.white),
+                    ),
+                    title: Text(musicTitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
+                    subtitle: Text(tr("Tap play to preview")),
+                    trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                      IconButton(tooltip: tr("Change"), onPressed: pickMusic, icon: const Icon(Icons.swap_horiz_rounded)),
+                      IconButton(tooltip: tr("Remove"), onPressed: removeMusic, icon: const Icon(Icons.close_rounded)),
+                    ]),
+                  ),
+                if (isVideo) ...[
+                  const Divider(height: 16),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    secondary: Icon(muteOriginal ? Icons.volume_off_rounded : Icons.volume_up_rounded, color: AppColors.navy),
+                    title: Text(tr("Original sound"), style: TextStyle(fontWeight: FontWeight.w700)),
+                    subtitle: Text(muteOriginal ? "Muted" : "On"),
+                    value: !muteOriginal,
+                    onChanged: (on) {
+                      setState(() => muteOriginal = !on);
+                      videoPreview?.setVolume(on ? 1 : 0);
+                    },
+                  ),
+                ],
+              ]),
+            ),
+            if (musicFile != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 6, left: 4),
+                child: Text(tr("Only use music you have the right to share."), style: AppTextStyles.subtitle.copyWith(fontSize: 12)),
+              ),
+          ],
           const SizedBox(height: 18),
-          Text("Who is this for?", style: AppTextStyles.title.copyWith(fontSize: 16)),
+          Text(tr("What did you do?"), style: AppTextStyles.title.copyWith(fontSize: 16)),
           const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          TextField(
+            onChanged: (v) => setState(() => query = v),
+            decoration: InputDecoration(
+              prefixIcon: Icon(Icons.search_rounded),
+              hintText: tr("Search: beach, metro, compost, e-waste…"),
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (query.trim().isEmpty)
+            SizedBox(
+              height: 40,
+              child: ListView(scrollDirection: Axis.horizontal, children: [
+                for (final item in deedLanes)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(tr(item)),
+                      selected: lane == item,
+                      onSelected: (_) => setState(() => lane = item),
+                    ),
+                  ),
+              ]),
+            ),
+          const SizedBox(height: 12),
+          if (shown.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text("No activity matches \"$query\"", style: AppTextStyles.subtitle),
+            ),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            childAspectRatio: 1.55,
             children: [
-              for (final item in deedLanes)
-                ChoiceChip(
-                  label: Text(item),
-                  selected: lane == item,
-                  onSelected: (_) {
-                    final next = deeds.firstWhere((deed) => deed.lane == item);
-                    setState(() {
-                      lane = item;
-                      activity = next.name;
-                    });
-                  },
+              for (final a in shown)
+                _ActivityTile(
+                  activity: a,
+                  selected: activity == a.name,
+                  onTap: () => setState(() {
+                    activity = a.name;
+                    lane = a.lane;
+                  }),
                 ),
             ],
           ),
-          const SizedBox(height: 16),
-          for (final deed in laneDeeds)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Material(
-                color: activity == deed.name ? AppColors.blush : AppColors.card,
-                borderRadius: BorderRadius.circular(16),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () => setState(() => activity = deed.name),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    child: Row(
-                      children: [
-                        Icon(
-                          activity == deed.name
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          color: AppColors.joy,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(deed.name, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700)),
-                              Text(deed.line, style: AppTextStyles.subtitle),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+          const SizedBox(height: 18),
+          Material(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(18),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(18),
+              onTap: _pickTags,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(children: [
+                  const Icon(Icons.person_add_alt_1_rounded, color: AppColors.joy),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: tagged.isEmpty
+                        ? Text(tr("Tag friends"), style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700))
+                        : Wrap(spacing: 6, runSpacing: 6, children: [
+                            for (final t in tagged)
+                              Chip(
+                                avatar: UserAvatar(imageUrl: t.profileImage, name: t.name, radius: 11),
+                                label: Text(t.name.split(" ").first),
+                                onDeleted: () => setState(() => tagged.remove(t)),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                          ]),
                   ),
-                ),
+                  Icon(Icons.chevron_right_rounded, color: AppColors.subtitle),
+                ]),
               ),
             ),
+          ),
+          const SizedBox(height: 10),
+          Material(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(18),
+            child: SwitchListTile(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              secondary: Icon(everyone ? Icons.public_rounded : Icons.people_alt_rounded, color: AppColors.joy),
+              title: Text(everyone ? tr("Everyone can see this") : tr("Friends only"), style: const TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: Text(everyone ? tr("Shown in For you and Reels") : tr("Only your friends see it")),
+              value: everyone,
+              onChanged: (v) => setState(() => everyone = v),
+            ),
+          ),
           const SizedBox(height: 8),
           TextField(
             controller: descriptionController,
             maxLines: 4,
             textCapitalization: TextCapitalization.sentences,
             decoration: InputDecoration(
-              labelText: selectedDeed.lane == "Stories"
+              labelText: selected.lane == "Stories"
                   ? "What stayed with you?"
                   : "Tell it the way it happened",
             ),
@@ -251,7 +510,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       height: 22,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
-                  : const Text("Share the moment"),
+                  : Text(tr("Share the moment")),
             ),
           ),
         ],
@@ -264,6 +523,7 @@ class _MediaStage extends StatelessWidget {
   final File? file;
   final bool isVideo;
   final MomentLook look;
+  final VideoPlayerController? video;
   final VoidCallback onPhoto;
   final VoidCallback onVideo;
 
@@ -273,6 +533,7 @@ class _MediaStage extends StatelessWidget {
     required this.look,
     required this.onPhoto,
     required this.onVideo,
+    this.video,
   });
 
   @override
@@ -282,7 +543,7 @@ class _MediaStage extends StatelessWidget {
       child: Container(
         height: 280,
         width: double.infinity,
-        color: AppColors.ink,
+        color: AppColors.inkFixedFixed,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -293,15 +554,29 @@ class _MediaStage extends StatelessWidget {
                   const Icon(Icons.auto_awesome_rounded, color: AppColors.sun, size: 42),
                   const SizedBox(height: 8),
                   Text(
-                    "A photo or a short clip",
+                    tr("A photo or a short clip"),
                     style: AppTextStyles.body.copyWith(color: Colors.white),
                   ),
                 ],
               )
-            else if (isVideo)
-              const Center(
-                child: Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 64),
+            else if (isVideo && video != null && video!.value.isInitialized)
+              GestureDetector(
+                onTap: () => video!.value.isPlaying ? video!.pause() : video!.play(),
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.matrix(look.matrix),
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    clipBehavior: Clip.hardEdge,
+                    child: SizedBox(
+                      width: video!.value.size.width,
+                      height: video!.value.size.height,
+                      child: VideoPlayer(video!),
+                    ),
+                  ),
+                ),
               )
+            else if (isVideo)
+              const Center(child: CircularProgressIndicator(color: Colors.white))
             else
               ColorFiltered(
                 colorFilter: ColorFilter.matrix(look.matrix),
@@ -313,9 +588,9 @@ class _MediaStage extends StatelessWidget {
               bottom: 12,
               child: Row(
                 children: [
-                  _PickButton(label: "Photo", icon: Icons.photo_rounded, onTap: onPhoto),
+                  _PickButton(label: tr("Photo"), icon: Icons.photo_rounded, onTap: onPhoto),
                   const SizedBox(width: 8),
-                  _PickButton(label: "Video", icon: Icons.videocam_rounded, onTap: onVideo),
+                  _PickButton(label: tr("Video"), icon: Icons.videocam_rounded, onTap: onVideo),
                 ],
               ),
             ),
@@ -345,8 +620,51 @@ class _PickButton extends StatelessWidget {
         icon: Icon(icon, size: 18),
         label: Text(label),
         style: FilledButton.styleFrom(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           foregroundColor: AppColors.ink,
+        ),
+      ),
+    );
+  }
+}
+
+
+class _ActivityTile extends StatelessWidget {
+  final EcoActivity activity;
+  final bool selected;
+  final VoidCallback onTap;
+  const _ActivityTile({required this.activity, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = laneColor(activity.lane);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 160),
+      decoration: BoxDecoration(
+        color: selected ? c.withValues(alpha: 0.10) : AppColors.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: selected ? c : AppColors.border, width: selected ? 2 : 1),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(color: c.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(11)),
+                child: Icon(activityIcon(activity.icon), color: c, size: 20),
+              ),
+              const Spacer(),
+              Text("+${activity.points}", style: TextStyle(color: c, fontWeight: FontWeight.w800, fontSize: 13)),
+            ]),
+            const Spacer(),
+            Text(activity.label, maxLines: 2, overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, height: 1.2, color: AppColors.ink)),
+          ]),
         ),
       ),
     );

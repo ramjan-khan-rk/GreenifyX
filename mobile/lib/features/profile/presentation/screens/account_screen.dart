@@ -18,13 +18,27 @@ import '../../../home/presentation/screens/leaderboard_screen.dart';
 import '../../../home/presentation/widgets/eco_points_card.dart';
 import '../../application/providers/my_profile_provider.dart';
 import '../../application/providers/profile_provider.dart';
-import 'edit_profile_screen.dart';
+import '../../../settings/settings_screen.dart';
+import '../../../social/creator_profile_screen.dart';
+import '../../../communities/community_screens.dart';
+import '../../../impact/impact_screen.dart';
+import '../../../carbon/carbon_screen.dart';
+import '../../../battles/battles_screen.dart';
+import '../../../market/market_screens.dart';
+import '../../../checkin/scan_screen.dart';
+import '../../../companion/companion_screen.dart';
+import '../../../rewards/rewards_screen.dart';
+import '../../../events/events_screen.dart';
+import '../../../pickup/pickup_screen.dart';
 import '../../../campaign/presentation/screens/points_history_screen.dart';
 import '../../../campaign/presentation/screens/verifier_home_screen.dart';
 import '../../../challenge/presentation/screens/challenge_screen.dart';
 import '../../../issues/presentation/issues_hub_screen.dart';
 import '../../../map/eco_map_screen.dart';
+import '../../../orgs/teams_screen.dart';
 import '../../../../core/utils/friendly_error.dart';
+import '../../../../core/services/push_service.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -39,7 +53,7 @@ class AccountScreen extends ConsumerWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Profile", style: AppTextStyles.title),
+            Text(tr("Profile"), style: AppTextStyles.title),
             Text(BrandCopy.tagline, style: AppTextStyles.tagline),
           ],
         ),
@@ -59,6 +73,7 @@ class AccountScreen extends ConsumerWidget {
               children: [
                 Center(
                   child: UserAvatar(
+                    name: user.name,
                     imageUrl: user.profileImage,
                     radius: 52,
                     semanticLabel: "${user.name} photo",
@@ -110,7 +125,7 @@ class AccountScreen extends ConsumerWidget {
                             label: Text(_badgeLabel(badge)),
                             backgroundColor:
                                 AppColors.mint.withValues(alpha: 0.7),
-                            side: const BorderSide(color: AppColors.border),
+                            side: BorderSide(color: AppColors.border),
                           ),
                         )
                         .toList(),
@@ -123,12 +138,12 @@ class AccountScreen extends ConsumerWidget {
                     color: AppColors.eco,
                     child: ListTile(
                       leading: const Icon(Icons.verified_user_rounded, color: Colors.white),
-                      title: const Text(
-                        "Field verification",
+                      title: Text(
+                        tr("Field verification"),
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
                       ),
                       subtitle: Text(
-                        "Your assignments and on-site reports",
+                        tr("Your assignments and on-site reports"),
                         style: TextStyle(color: Colors.white.withValues(alpha: 0.85)),
                       ),
                       trailing: const Icon(Icons.chevron_right, color: Colors.white),
@@ -142,7 +157,7 @@ class AccountScreen extends ConsumerWidget {
                   ),
                 _ProfileLink(
                   icon: Icons.stars_rounded,
-                  title: "Eco Points",
+                  title: tr("Eco Points"),
                   subtitle: "Balance and full history",
                   onTap: () {
                     Navigator.push(
@@ -152,8 +167,88 @@ class AccountScreen extends ConsumerWidget {
                   },
                 ),
                 _ProfileLink(
+                  icon: Icons.person_pin_rounded,
+                  title: tr("My creator profile"),
+                  subtitle: tr("How others see you: posts, followers, likes"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CreatorProfileScreen(userId: user.id, meId: user.id))),
+                ),
+                _ProfileLink(
+                  icon: Icons.insights_rounded,
+                  title: tr("Creator analytics"),
+                  subtitle: tr("Reach, likes and followers over 30 days"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreatorAnalyticsScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.workspace_premium_rounded,
+                  title: tr("My impact & certificate"),
+                  subtitle: tr("Verified totals and a shareable certificate"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ImpactScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.co2_rounded,
+                  title: tr("Carbon footprint"),
+                  subtitle: tr("Your yearly CO₂ and how much you've cut"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CarbonScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.sports_kabaddi_rounded,
+                  title: tr("Weekly battles"),
+                  subtitle: tr("Live rankings for friends, schools and companies"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BattlesScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.groups_rounded,
+                  title: tr("Communities"),
+                  subtitle: tr("Join, host challenges and group chat"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunitiesScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.autorenew_rounded,
+                  title: tr("Swap & Share"),
+                  subtitle: tr("Give away, swap or sell second-hand"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MarketScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.qr_code_scanner_rounded,
+                  title: tr("Scan QR check-in"),
+                  subtitle: tr("At bins, refill stations and events"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.auto_awesome_rounded,
+                  title: tr("Eco companion"),
+                  subtitle: tr("Your daily plan and weekly goal"),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CompanionScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.redeem_rounded,
+                  title: tr("Rewards"),
+                  subtitle: "Spend Eco Points on vouchers and experiences",
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RewardsScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.event_rounded,
+                  title: tr("Green events"),
+                  subtitle: "Clean-ups, plantings and workshops near you",
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EventsScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.local_shipping_rounded,
+                  title: tr("Recycling pickup"),
+                  subtitle: "Book a doorstep collection",
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PickupScreen())),
+                ),
+                _ProfileLink(
+                  icon: Icons.groups_rounded,
+                  title: tr("Teams"),
+                  subtitle: "Your company, school or community impact",
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const TeamsScreen()));
+                  },
+                ),
+                _ProfileLink(
                   icon: Icons.map_rounded,
-                  title: "Smart Eco Map",
+                  title: tr("Smart Eco Map"),
                   subtitle: "Campaigns, recycling and refill points near you",
                   onTap: () {
                     Navigator.push(
@@ -164,7 +259,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: Icons.report_gmailerrorred_rounded,
-                  title: "My environmental reports",
+                  title: tr("My environmental reports"),
                   subtitle: "Track what you reported",
                   onTap: () {
                     Navigator.push(
@@ -175,7 +270,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: BrandGlyph.challenges,
-                  title: "Challenges",
+                  title: tr("Challenges"),
                   subtitle: "Friendly eco challenges",
                   onTap: () {
                     Navigator.push(
@@ -186,20 +281,20 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: BrandGlyph.settings,
-                  title: "Settings",
-                  subtitle: "Name, photo, bio and emirate",
+                  title: tr("Settings"),
+                  subtitle: "Profile, password, notifications, language",
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const EditProfileScreen(),
+                        builder: (_) => const SettingsScreen(),
                       ),
                     );
                   },
                 ),
                 _ProfileLink(
                   icon: BrandGlyph.friends,
-                  title: "Friends",
+                  title: tr("Friends"),
                   subtitle: "${user.friendsCount} connections",
                   onTap: () {
                     Navigator.push(
@@ -212,7 +307,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: BrandGlyph.leaderboard,
-                  title: "Leaderboard",
+                  title: tr("Leaderboard"),
                   subtitle: "Verified Eco Points ranking",
                   onTap: () {
                     Navigator.push(
@@ -225,7 +320,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: BrandGlyph.post,
-                  title: "Posts",
+                  title: tr("Posts"),
                   subtitle: "Community feed and verify",
                   onTap: () {
                     Navigator.push(
@@ -238,7 +333,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 _ProfileLink(
                   icon: BrandGlyph.chat,
-                  title: "Chat",
+                  title: tr("Chat"),
                   subtitle: "Friends-only messages",
                   onTap: () {
                     Navigator.push(
@@ -259,7 +354,8 @@ class AccountScreen extends ConsumerWidget {
                       minimumSize: const Size.fromHeight(48),
                     ),
                     onPressed: () async {
-                      await ref.read(profileProvider.notifier).logout();
+                      await PushService.instance.unregister();
+    await ref.read(profileProvider.notifier).logout();
                       await ref.read(authProvider.notifier).logout();
                       ref.invalidate(myProfileProvider);
                       ref.invalidate(friendsProvider);
@@ -270,7 +366,7 @@ class AccountScreen extends ConsumerWidget {
                       }
                     },
                     icon: const Icon(Icons.logout),
-                    label: const Text("Log out"),
+                    label: Text(tr("Log out")),
                   ),
                 ),
               ],
@@ -303,7 +399,7 @@ class _ProfileLink extends StatelessWidget {
         leading: Icon(icon, color: AppColors.primary),
         title: Text(title, style: AppTextStyles.body),
         subtitle: Text(subtitle, style: AppTextStyles.subtitle),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.navy),
+        trailing: Icon(Icons.chevron_right, color: AppColors.navy),
         onTap: onTap,
       ),
     );

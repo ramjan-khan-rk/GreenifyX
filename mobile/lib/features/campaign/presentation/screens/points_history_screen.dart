@@ -9,6 +9,7 @@ import '../../../../core/widgets/app_status.dart';
 import '../../../profile/application/providers/my_profile_provider.dart';
 import '../../application/campaign_providers.dart';
 import '../../domain/campaign_model.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class PointsHistoryScreen extends ConsumerWidget {
   const PointsHistoryScreen({super.key});
@@ -22,7 +23,7 @@ class PointsHistoryScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text("Eco Points", style: AppTextStyles.title)),
+      appBar: AppBar(title: Text(tr("Eco Points"), style: AppTextStyles.title)),
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
@@ -45,25 +46,25 @@ class PointsHistoryScreen extends ConsumerWidget {
               child: Row(children: [
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text("Balance", style: TextStyle(color: Colors.white.withValues(alpha: 0.8))),
+                    Text(tr("Balance"), style: TextStyle(color: Colors.white.withValues(alpha: 0.8))),
                     const SizedBox(height: 4),
                     Text(balance == null ? "—" : NumberFormat.decimalPattern().format(balance),
                         style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w800)),
                     const SizedBox(height: 4),
-                    Text("Credited only for verified actions",
+                    Text(tr("Credited only for verified actions"),
                         style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12.5)),
                   ]),
                 ),
                 Container(
                   width: 56,
                   height: 56,
-                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), shape: BoxShape.circle),
+                  decoration: BoxDecoration(color: AppColors.surface.withValues(alpha: 0.15), shape: BoxShape.circle),
                   child: const Icon(Icons.stars_rounded, color: AppColors.sun, size: 32),
                 ),
               ]),
             ),
             const SizedBox(height: 20),
-            Text("History", style: AppTextStyles.title.copyWith(fontSize: 17)),
+            Text(tr("History"), style: AppTextStyles.title.copyWith(fontSize: 17)),
             const SizedBox(height: 10),
             history.when(
               loading: () => const Padding(padding: EdgeInsets.all(32), child: AppLoading()),
@@ -72,17 +73,17 @@ class PointsHistoryScreen extends ConsumerWidget {
                 onRetry: () => ref.invalidate(myPointsProvider),
               ),
               data: (items) => items.isEmpty
-                  ? const Padding(
+                  ? Padding(
                       padding: EdgeInsets.only(top: 24),
                       child: AppEmptyState(
                         icon: Icons.receipt_long_rounded,
-                        title: "No points yet",
-                        message: "Join a campaign or get a post verified by a friend to earn your first Eco Points.",
+                        title: tr("No points yet"),
+                        message: tr("Join a campaign or get a post verified by a friend to earn your first Eco Points."),
                       ),
                     )
                   : Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(color: AppColors.border),
                       ),
@@ -129,7 +130,7 @@ class _EntryTile extends StatelessWidget {
         e.reason.isNotEmpty ? e.reason : e.campaignTitle,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink, fontSize: 14),
+        style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink, fontSize: 14),
       ),
       subtitle: Text(e.status == "reversed" ? "$date · reversed" : date, style: const TextStyle(fontSize: 12.5)),
       trailing: Text(

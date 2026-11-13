@@ -5,6 +5,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../application/call_coordinator.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class CallScreen extends StatefulWidget {
   const CallScreen({super.key});
@@ -71,12 +72,12 @@ class _CallScreenState extends State<CallScreen> {
     return PopScope(
       canPop: call.phase == "idle" || ended,
       child: Scaffold(
-        backgroundColor: AppColors.ink,
+        backgroundColor: AppColors.inkFixedFixed,
         body: Stack(fit: StackFit.expand, children: [
           if (showVideo)
             RTCVideoView(call.remoteRenderer, objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover)
           else
-            const DecoratedBox(
+            DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [AppColors.ink, Color(0xFF1F5A4B)],
@@ -128,11 +129,11 @@ class _CallScreenState extends State<CallScreen> {
                   const SizedBox(height: 68)
                 else if (incoming)
                   Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                    _RoundButton(color: AppColors.error, icon: Icons.call_end_rounded, label: "Decline", onTap: call.reject),
+                    _RoundButton(color: AppColors.error, icon: Icons.call_end_rounded, label: tr("Decline"), onTap: call.reject),
                     _RoundButton(
                       color: AppColors.eco,
                       icon: call.video ? Icons.videocam_rounded : Icons.call_rounded,
-                      label: "Accept",
+                      label: tr("Accept"),
                       onTap: call.accept,
                     ),
                   ])
@@ -146,7 +147,7 @@ class _CallScreenState extends State<CallScreen> {
                     ),
                     _ToggleButton(
                       icon: call.speakerOn ? Icons.volume_up_rounded : Icons.volume_down_rounded,
-                      label: "Speaker",
+                      label: tr("Speaker"),
                       active: call.speakerOn,
                       onTap: call.toggleSpeaker,
                     ),
@@ -157,11 +158,11 @@ class _CallScreenState extends State<CallScreen> {
                         active: call.cameraOff,
                         onTap: call.toggleCamera,
                       ),
-                      _ToggleButton(icon: Icons.cameraswitch_rounded, label: "Flip", active: false, onTap: call.switchCamera),
+                      _ToggleButton(icon: Icons.cameraswitch_rounded, label: tr("Flip"), active: false, onTap: call.switchCamera),
                     ],
                   ]),
                   const SizedBox(height: 28),
-                  _RoundButton(color: AppColors.error, icon: Icons.call_end_rounded, label: "End", onTap: () => call.hangUp()),
+                  _RoundButton(color: AppColors.error, icon: Icons.call_end_rounded, label: tr("End"), onTap: () => call.hangUp()),
                 ],
               ]),
             ),

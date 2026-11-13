@@ -37,6 +37,8 @@ class CampaignModel {
   final String description;
   final String category;
   final String organiserName;
+  final String organizationName;
+  final bool organizationVerified;
   final String emirate;
   final String locationName;
   final double lat;
@@ -76,6 +78,8 @@ class CampaignModel {
     required this.description,
     required this.category,
     required this.organiserName,
+    this.organizationName = '',
+    this.organizationVerified = false,
     required this.emirate,
     required this.locationName,
     required this.lat,
@@ -123,6 +127,8 @@ class CampaignModel {
       description: _str(j['description']),
       category: _str(j['category']),
       organiserName: _str(j['organiserName']),
+      organizationName: _str((j['organization'] as Map?)?['name']),
+      organizationVerified: (j['organization'] as Map?)?['verified'] == true,
       emirate: _str(j['emirate']),
       locationName: _str(j['locationName']),
       lat: _dbl(loc['lat']),

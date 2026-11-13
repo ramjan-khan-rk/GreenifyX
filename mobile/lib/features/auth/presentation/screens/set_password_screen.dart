@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../application/providers/auth_provider.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class SetPasswordScreen extends ConsumerStatefulWidget {
   final String email;
@@ -40,8 +41,8 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
 
     if (password.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Password must be at least 6 characters"),
+        SnackBar(
+          content: Text(tr("Password must be at least 6 characters")),
         ),
       );
       return;
@@ -49,7 +50,7 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
 
     if (password != confirm) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Passwords do not match")),
+        SnackBar(content: Text(tr("Passwords do not match"))),
       );
       return;
     }
@@ -116,7 +117,7 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
                 controller: passwordController,
                 obscureText: obscurePassword,
                 decoration: InputDecoration(
-                  labelText: "Password",
+                  labelText: tr("Password"),
                   suffixIcon: IconButton(
                     icon: Icon(
                       obscurePassword
@@ -136,7 +137,7 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
                 controller: confirmController,
                 obscureText: obscureConfirm,
                 decoration: InputDecoration(
-                  labelText: "Confirm password",
+                  labelText: tr("Confirm password"),
                   suffixIcon: IconButton(
                     icon: Icon(
                       obscureConfirm

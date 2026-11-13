@@ -13,36 +13,36 @@ class BrandCopy {
 class AppTextStyles {
   AppTextStyles._();
 
-  static final heading = GoogleFonts.manrope(
+  static TextStyle get heading => GoogleFonts.manrope(
     fontSize: 28,
     fontWeight: FontWeight.bold,
     color: AppColors.forest,
   );
 
-  static final title = GoogleFonts.manrope(
+  static TextStyle get title => GoogleFonts.manrope(
     fontSize: 20,
     fontWeight: FontWeight.w600,
     color: AppColors.forest,
   );
 
-  static final body = GoogleFonts.manrope(
+  static TextStyle get body => GoogleFonts.manrope(
     fontSize: 16,
     color: AppColors.text,
   );
 
-  static final subtitle = GoogleFonts.manrope(
+  static TextStyle get subtitle => GoogleFonts.manrope(
     fontSize: 14,
     color: AppColors.subtitle,
   );
 
-  static final tagline = GoogleFonts.manrope(
+  static TextStyle get tagline => GoogleFonts.manrope(
     fontSize: 13,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.2,
     color: AppColors.navy,
   );
 
-  static final button = GoogleFonts.manrope(
+  static TextStyle get button => GoogleFonts.manrope(
     fontSize: 16,
     fontWeight: FontWeight.w600,
     color: Colors.white,

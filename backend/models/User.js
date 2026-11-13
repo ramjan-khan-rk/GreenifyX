@@ -55,6 +55,14 @@ const userSchema = new mongoose.Schema(
       min: 0,
     },
 
+    // Points spent on rewards. Spending never lowers ecoPoints (lifetime, drives level);
+    // the spendable balance is ecoPoints - pointsSpent.
+    pointsSpent: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
     // Legacy fields — read for migration only; prefer ecoPoints
     ecoScore: {
       type: Number,
@@ -144,6 +152,78 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
       maxlength: 200,
+    },
+
+    notificationPrefs: {
+      messages: { type: Boolean, default: true },
+      calls: { type: Boolean, default: true },
+      social: { type: Boolean, default: true },
+      campaigns: { type: Boolean, default: true },
+      points: { type: Boolean, default: true },
+    },
+
+    // Push notification device tokens (Firebase Cloud Messaging).
+    // Weekly goal accepted from the AI companion.
+    weeklyGoal: {
+      points: { type: Number, default: 0 },
+      actions: { type: Number, default: 0 },
+      setAt: { type: Date },
+    },
+
+    // Carbon footprint questionnaire and result (kg CO2e / year).
+    carbon: {
+      answers: { type: mongoose.Schema.Types.Mixed, default: undefined },
+      baselineKg: { type: Number },
+      targetKg: { type: Number },
+      updatedAt: { type: Date },
+    },
+
+    onboardedAt: { type: Date },
+
+    // Referrals
+    referralCode: { type: String, unique: true, sparse: true, uppercase: true, trim: true },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    referralRewardedAt: { type: Date },
+
+    // Streak protection
+    streakFreezes: { type: Number, default: 1, min: 0, max: 3 },
+    streakReminderAt: { type: Date },
+
+    // Verified badge (blue tick)
+    verifiedBadge: { type: String, enum: ["", "creator", "organisation", "verifier", "official"], default: "" },
+    badgeRequest: {
+      type: { type: String, enum: ["creator", "organisation", "verifier", "official"] },
+      note: { type: String, maxlength: 500 },
+      links: { type: String, maxlength: 300 },
+      status: { type: String, enum: ["pending", "approved", "rejected"] },
+      requestedAt: Date,
+      decidedAt: Date,
+    },
+
+    // Topics picked by the member (boost the For you feed).
+    interests: [{ type: String, trim: true, maxlength: 40 }],
+
+    pushTokens: [
+      {
+        token: { type: String },
+        platform: { type: String, default: "android" },
+        updatedAt: { type: Date, default: Date.now },
+        _id: false,
+      },
+    ],
+
+    language: {
+      type: String,
+      enum: ["en", "ar"],
+      default: "en",
+    },
+
+    lastSeenAt: {
+      type: Date,
+    },
+
+    deletedAt: {
+      type: Date,
     },
 
     // Marks records created by scripts/seedDemo.js so they can be cleared.

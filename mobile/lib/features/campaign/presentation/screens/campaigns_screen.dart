@@ -9,6 +9,7 @@ import '../../application/campaign_providers.dart';
 import '../widgets/campaign_visuals.dart';
 import 'campaign_detail_screen.dart';
 import '../../../map/eco_map_screen.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class CampaignsScreen extends ConsumerWidget {
   const CampaignsScreen({super.key});
@@ -23,18 +24,18 @@ class CampaignsScreen extends ConsumerWidget {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Campaigns", style: AppTextStyles.title),
-              Text("Verified environmental action across the UAE", style: AppTextStyles.tagline),
+              Text(tr("Campaigns"), style: AppTextStyles.title),
+              Text(tr("Verified environmental action across the UAE"), style: AppTextStyles.tagline),
             ],
           ),
           actions: [
             IconButton(
-              tooltip: "Smart Eco Map",
+              tooltip: tr("Smart Eco Map"),
               icon: const Icon(Icons.map_rounded),
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EcoMapScreen())),
             ),
           ],
-          bottom: const TabBar(
+          bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.subtitle,
             indicatorColor: AppColors.primary,
@@ -75,20 +76,20 @@ class _CampaignList extends ConsumerWidget {
       data: (items) {
         if (items.isEmpty) {
           return switch (filter) {
-            "mine" => const AppEmptyState(
+            "mine" => AppEmptyState(
                 icon: Icons.volunteer_activism_rounded,
-                title: "You haven't joined yet",
-                message: "Join a campaign near you. Eco Points are credited once a field verifier confirms your participation.",
+                title: tr("You haven't joined yet"),
+                message: tr("Join a campaign near you. Eco Points are credited once a field verifier confirms your participation."),
               ),
-            "past" => const AppEmptyState(
+            "past" => AppEmptyState(
                 icon: Icons.history_rounded,
-                title: "No past campaigns",
-                message: "Finished campaigns and their verified impact will show here.",
+                title: tr("No past campaigns"),
+                message: tr("Finished campaigns and their verified impact will show here."),
               ),
-            _ => const AppEmptyState(
+            _ => AppEmptyState(
                 icon: Icons.forest_rounded,
-                title: "No open campaigns right now",
-                message: "New tree planting, beach clean-ups and recycling drives are added every week.",
+                title: tr("No open campaigns right now"),
+                message: tr("New tree planting, beach clean-ups and recycling drives are added every week."),
               ),
           };
         }
@@ -128,7 +129,7 @@ class _HowItWorks extends StatelessWidget {
             Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.14), shape: BoxShape.circle),
+              decoration: BoxDecoration(color: AppColors.surface.withValues(alpha: 0.14), shape: BoxShape.circle),
               child: Icon(icon, color: AppColors.sun, size: 20),
             ),
             const SizedBox(height: 8),
@@ -144,7 +145,7 @@ class _HowItWorks extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [AppColors.ink, Color(0xFF3A3256)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

@@ -8,6 +8,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/brand_icons.dart';
 import '../../application/providers/profile_provider.dart';
 import '../widgets/profile_avatar.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class CompleteProfileScreen extends ConsumerStatefulWidget {
   const CompleteProfileScreen({super.key});
@@ -37,16 +38,16 @@ class _CompleteProfileScreenState
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text("Set up your profile", style: AppTextStyles.title),
+        title: Text(tr("Set up your profile"), style: AppTextStyles.title),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            const Icon(BrandGlyph.settings, color: AppColors.navy, size: 28),
+            Icon(BrandGlyph.settings, color: AppColors.navy, size: 28),
             const SizedBox(height: 8),
             Text(
-              "Add your name, a photo and where you live",
+              tr("Add your name, a photo and where you live"),
               style: AppTextStyles.subtitle,
             ),
             const SizedBox(height: 20),
@@ -59,8 +60,8 @@ class _CompleteProfileScreenState
             const SizedBox(height: 28),
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(
-                labelText: "Full Name",
+              decoration: InputDecoration(
+                labelText: tr("Full Name"),
               ),
             ),
             const SizedBox(height: 16),
@@ -68,16 +69,16 @@ class _CompleteProfileScreenState
               controller: bioController,
               maxLines: 4,
               maxLength: 150,
-              decoration: const InputDecoration(
-                labelText: "Bio",
-                hintText: "Tell something about yourself",
+              decoration: InputDecoration(
+                labelText: tr("Bio"),
+                hintText: tr("Tell something about yourself"),
               ),
             ),
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "Your emirate",
+                tr("Your emirate"),
                 style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w700),
               ),
             ),
@@ -134,7 +135,7 @@ class _CompleteProfileScreenState
                           color: Colors.white,
                         ),
                       )
-                    : const Text("Save profile"),
+                    : Text(tr("Save profile")),
               ),
             ),
           ],

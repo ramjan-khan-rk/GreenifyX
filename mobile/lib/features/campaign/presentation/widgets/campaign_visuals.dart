@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/media_url.dart';
 import '../../domain/campaign_model.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class CategoryStyle {
   final IconData icon;
@@ -45,11 +46,11 @@ String campaignDates(CampaignModel c) {
 }
 
 ({String label, Color color}) phaseBadge(CampaignModel c) => switch (c.phase) {
-      'live' => (label: 'Happening now', color: AppColors.eco),
-      'upcoming' => (label: 'Upcoming', color: AppColors.sun),
-      'ended' => (label: 'Ended', color: AppColors.subtitle),
-      'completed' => (label: 'Completed', color: const Color(0xFF4A78B5)),
-      'cancelled' => (label: 'Cancelled', color: AppColors.error),
+      'live' => (label: tr('Happening now'), color: AppColors.eco),
+      'upcoming' => (label: tr('Upcoming'), color: AppColors.sun),
+      'ended' => (label: tr('Ended'), color: AppColors.subtitle),
+      'completed' => (label: tr('Completed'), color: const Color(0xFF4A78B5)),
+      'cancelled' => (label: tr('Cancelled'), color: AppColors.error),
       _ => (label: c.phase, color: AppColors.subtitle),
     };
 
@@ -92,7 +93,7 @@ class CampaignCover extends StatelessWidget {
                 child: Container(
                   width: height * 1.1,
                   height: height * 1.1,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.06)),
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.surface.withValues(alpha: 0.06)),
                 ),
               ),
             ],
@@ -125,7 +126,7 @@ class GlassChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.94), borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: AppColors.surface.withValues(alpha: 0.94), borderRadius: BorderRadius.circular(20)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         if (dot != null) ...[
           Container(width: 7, height: 7, decoration: BoxDecoration(color: dot, shape: BoxShape.circle)),
@@ -135,7 +136,7 @@ class GlassChip extends StatelessWidget {
           Icon(icon, size: 13, color: AppColors.ink),
           const SizedBox(width: 4),
         ],
-        Text(label, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.ink)),
+        Text(label, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.ink)),
       ]),
     );
   }
@@ -153,9 +154,9 @@ class ProgressMeter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
-        Text(label, style: const TextStyle(fontSize: 12.5, color: AppColors.subtitle, fontWeight: FontWeight.w600)),
+        Text(label, style: TextStyle(fontSize: 12.5, color: AppColors.subtitle, fontWeight: FontWeight.w600)),
         const Spacer(),
-        Text(value, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.ink)),
+        Text(value, style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.ink)),
       ]),
       const SizedBox(height: 6),
       ClipRRect(
@@ -186,7 +187,7 @@ class CampaignCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppColors.border),
+        side: BorderSide(color: AppColors.border),
       ),
       child: InkWell(
         onTap: onTap,
@@ -224,21 +225,21 @@ class CampaignCard extends StatelessWidget {
                   Text(c.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.ink, height: 1.2)),
+                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.ink, height: 1.2)),
                   const SizedBox(height: 6),
                   Row(children: [
                     const Icon(Icons.place_rounded, size: 15, color: AppColors.primary),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(c.locationName,
-                          maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, color: AppColors.subtitle)),
+                          maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: AppColors.subtitle)),
                     ),
                   ]),
                   const SizedBox(height: 4),
                   Row(children: [
                     const Icon(Icons.event_rounded, size: 15, color: AppColors.primary),
                     const SizedBox(width: 4),
-                    Text(campaignDates(c), style: const TextStyle(fontSize: 13, color: AppColors.subtitle)),
+                    Text(campaignDates(c), style: TextStyle(fontSize: 13, color: AppColors.subtitle)),
                     const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -249,7 +250,7 @@ class CampaignCard extends StatelessWidget {
                   ]),
                   const SizedBox(height: 14),
                   ProgressMeter(
-                    label: 'Volunteers',
+                    label: tr('Volunteers'),
                     value: '${c.participantCount} / ${c.targetParticipants}',
                     progress: c.participantProgress,
                     color: AppColors.primary,

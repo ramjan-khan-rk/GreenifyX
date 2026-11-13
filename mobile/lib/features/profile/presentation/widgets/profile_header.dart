@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/user_avatar.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 /// Photo with a camera badge. Shows a newly picked [file] before it is uploaded.
 class ProfileHeader extends StatelessWidget {
@@ -25,7 +26,7 @@ class ProfileHeader extends StatelessWidget {
       children: [
         Semantics(
           button: true,
-          label: "Change profile photo",
+          label: tr("Change profile photo"),
           child: GestureDetector(
             onTap: onChangePhoto,
             child: Stack(
@@ -54,7 +55,7 @@ class ProfileHeader extends StatelessWidget {
         const SizedBox(height: 10),
         TextButton(
           onPressed: onChangePhoto,
-          child: Text("Change photo", style: AppTextStyles.subtitle.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
+          child: Text(tr("Change photo"), style: AppTextStyles.subtitle.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
         ),
       ],
     );

@@ -4,9 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/user_avatar.dart';
-import '../../../chat/presentation/screens/chat_screen.dart';
+import '../../../../core/utils/chat_launcher.dart';
 import '../../application/providers/friend_provider.dart';
 import '../../domain/models/friend_model.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class FriendProfileScreen extends ConsumerWidget {
   final FriendModel friend;
@@ -31,7 +32,7 @@ class FriendProfileScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel"),
+            child: Text(tr("Cancel")),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
@@ -69,8 +70,29 @@ class FriendProfileScreen extends ConsumerWidget {
               style: AppTextStyles.title.copyWith(fontSize: 24),
             ),
             const SizedBox(height: 8),
-            Text(friend.bio),
-            const SizedBox(height: 30),
+            if (friend.bio.isNotEmpty) Text(friend.bio, textAlign: TextAlign.center, style: AppTextStyles.subtitle),
+            const SizedBox(height: 20),
+            Row(children: [
+              _ProfileAction(
+                icon: Icons.chat_bubble_rounded,
+                label: tr("Message"),
+                primary: true,
+                onTap: () => openChat(context, userId: friend.id, name: friend.name, profileImage: friend.profileImage),
+              ),
+              const SizedBox(width: 10),
+              _ProfileAction(
+                icon: Icons.call_rounded,
+                label: tr("Call"),
+                onTap: () => startCall(context, userId: friend.id, name: friend.name, video: false),
+              ),
+              const SizedBox(width: 10),
+              _ProfileAction(
+                icon: Icons.videocam_rounded,
+                label: tr("Video"),
+                onTap: () => startCall(context, userId: friend.id, name: friend.name, video: true),
+              ),
+            ]),
+            const SizedBox(height: 24),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -78,17 +100,17 @@ class FriendProfileScreen extends ConsumerWidget {
                   children: [
                     ListTile(
                       leading: const Icon(Icons.monetization_on_rounded, color: AppColors.accent),
-                      title: const Text("Eco Points"),
+                      title: Text(tr("Eco Points")),
                       trailing: Text(friend.ecoPoints.toString()),
                     ),
                     ListTile(
                       leading: const Icon(Icons.star),
-                      title: const Text("Level"),
+                      title: Text(tr("Level")),
                       trailing: Text(friend.level.toString()),
                     ),
                     ListTile(
                       leading: const Icon(Icons.local_fire_department),
-                      title: const Text("Streak"),
+                      title: Text(tr("Streak")),
                       trailing: Text(friend.streak.toString()),
                     ),
                   ],
@@ -98,35 +120,16 @@ class FriendProfileScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.chat),
-                label: const Text("Message"),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ChatScreen(
-                        userId: friend.id,
-                        userName: friend.name,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
               child: OutlinedButton(
                 onPressed: () => _confirm(
                   context,
                   ref,
-                  title: "Unfriend",
+                  title: tr("Unfriend"),
                   body: "Remove ${friend.name} from your friends?",
                   action: () =>
                       ref.read(friendRepositoryProvider).unfriend(friend.id),
                 ),
-                child: const Text("Unfriend"),
+                child: Text(tr("Unfriend")),
               ),
             ),
             const SizedBox(height: 8),
@@ -139,15 +142,49 @@ class FriendProfileScreen extends ConsumerWidget {
                 onPressed: () => _confirm(
                   context,
                   ref,
-                  title: "Block",
+                  title: tr("Block"),
                   body: "Block ${friend.name}? They won't be able to send requests.",
                   action: () =>
                       ref.read(friendRepositoryProvider).blockUser(friend.id),
                 ),
-                child: const Text("Block"),
+                child: Text(tr("Block")),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool primary;
+  final VoidCallback onTap;
+  const _ProfileAction({required this.icon, required this.label, required this.onTap, this.primary = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Material(
+        color: primary ? AppColors.primary : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: primary ? null : Border.all(color: AppColors.border),
+            ),
+            child: Column(children: [
+              Icon(icon, color: primary ? Colors.white : AppColors.primary),
+              const SizedBox(height: 4),
+              Text(label, style: TextStyle(fontWeight: FontWeight.w700, color: primary ? Colors.white : AppColors.ink)),
+            ]),
+          ),
         ),
       ),
     );

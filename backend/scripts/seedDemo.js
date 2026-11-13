@@ -16,6 +16,17 @@ import VerificationReport from "../models/VerificationReport.js";
 import PointsTransaction from "../models/PointsTransaction.js";
 import EnvironmentalReport from "../models/EnvironmentalReport.js";
 import EcoPlace from "../models/EcoPlace.js";
+import Organization from "../models/Organization.js";
+import Reward from "../models/Reward.js";
+import Redemption from "../models/Redemption.js";
+import PickupRequest from "../models/PickupRequest.js";
+import Event from "../models/Event.js";
+import Community from "../models/Community.js";
+import Listing from "../models/Listing.js";
+import Checkpoint from "../models/Checkpoint.js";
+import SponsoredChallenge from "../models/SponsoredChallenge.js";
+import crypto from "crypto";
+import { makeJoinCode } from "../controllers/orgController.js";
 import { evaluateEvidence } from "../utils/geo.js";
 import { creditPoints } from "../utils/ledger.js";
 import { repairUserIndexes } from "../utils/repairUserIndexes.js";
@@ -337,6 +348,42 @@ const seedCampaigns = async ({ users, admin, userHash, now }) => {
   return `${campaigns.length} campaigns, 2 field verifiers, ${reports} verification reports (incl. tree survival checks), ${credited} campaign Eco Points credited`;
 };
 
+// Fictional organisations for the demo. [name, type, emirate, status, memberIndexes, campaignTitles]
+const DEMO_ORGS = [
+  ["Emirates Green Volunteers", "NGO", "Abu Dhabi", "verified", [0, 2, 4, 6, 8, 10, 12, 14], ["Eastern Mangroves Planting Day", "Al Wathba Ghaf Belt"]],
+  ["Gulf Horizon Logistics", "Company", "Dubai", "verified", [1, 3, 5, 7, 9, 11], ["Jumeirah Beach Clean-Up"]],
+  ["Al Noor International School", "School", "Sharjah", "verified", [13, 15, 17, 19], ["Ghaf Trees for Sharjah"]],
+  ["Desert Rose University Eco Club", "University", "Ras Al Khaimah", "verified", [16, 18, 20, 22], ["Al Marjan Recycling Drive"]],
+  ["Marina Towers Residents", "Community", "Dubai", "pending", [21, 23], []],
+];
+
+const seedOrgs = async ({ users }) => {
+  let linked = 0;
+  for (const [name, type, emirate, status, idx, campaignTitles] of DEMO_ORGS) {
+    const members = idx.filter((i) => users[i]).map((i, k) => ({ user: users[i]._id, role: k === 0 ? "owner" : k === 1 ? "manager" : "member" }));
+    let code = makeJoinCode();
+    while (await Organization.exists({ joinCode: code })) code = makeJoinCode();
+    const org = await Organization.create({
+      name,
+      type,
+      emirate,
+      description: `${name} takes part in verified environmental action across the UAE.`,
+      registrationRef: status === "verified" ? `DEMO-REG-${code.slice(0, 4)}` : "",
+      status,
+      verifiedAt: status === "verified" ? new Date() : undefined,
+      joinCode: code,
+      members,
+      createdBy: members[0]?.user,
+      isDemo: true,
+    });
+    if (campaignTitles.length) {
+      const r = await Campaign.updateMany({ title: { $in: campaignTitles }, isDemo: true }, { $set: { organization: org._id } });
+      linked += r.modifiedCount;
+    }
+  }
+  return `${DEMO_ORGS.length} organisations (${DEMO_ORGS.filter((o) => o[3] === "verified").length} verified), ${linked} campaigns linked`;
+};
+
 // [name, type, emirate, lat, lng, materials, hours, verified]  Demo listings, not real partners.
 const DEMO_PLACES = [
   ["Al Quoz Recycling Hub", "Recycling Centre", "Dubai", 25.1406, 55.2364, ["Plastic", "Paper", "Cans", "Glass"], "Daily 8am–8pm", true],
@@ -423,6 +470,194 @@ const seedIssues = async ({ users, admin, now }) => {
   return `${ISSUES.length} environmental reports (${resolvedPoints} reward points for resolved ones)`;
 };
 
+const DEMO_REWARDS = [
+  ["Free coffee in a reusable cup", "Sustainable Café partners", "voucher", 150, null, "Bring your own cup to any partner café and get a free drink."],
+  ["Nol card AED 20 top-up", "Public transport", "transport", 400, 200, "Leave the car at home — AED 20 credit on your Nol card."],
+  ["Plant a Ghaf tree in your name", "Emirates Nature (demo)", "donation", 300, null, "A native Ghaf sapling planted and tracked for 12 months."],
+  ["Mangrove kayak tour for two", "Abu Dhabi eco tours (demo)", "experience", 1200, 25, "Guided 90-minute kayak through the Eastern Mangroves."],
+  ["GreenifyX bamboo bottle", "GreenifyX store", "merch", 600, 80, "Insulated bamboo-steel bottle, collected at any event."],
+  ["15% off refill store", "Zero-waste refill shops (demo)", "voucher", 250, null, "Discount on your next refill basket."],
+];
+
+const DEMO_EVENTS = [
+  ["Jumeirah Beach Clean-up", "cleanup", "Dubai", "Jumeirah Public Beach", 25.2048, 55.2416, 3, 7, 3, 120],
+  ["Ghaf Tree Planting Morning", "planting", "Abu Dhabi", "Al Wathba Wetland Reserve", 24.2600, 54.6100, 6, 7, 4, 80],
+  ["Composting at Home Workshop", "workshop", "Sharjah", "Sharjah Sustainable City", 25.3200, 55.5200, 9, 18, 2, 40],
+  ["Zero-Waste Market", "market", "Dubai", "Expo City Dubai", 24.9600, 55.1500, 12, 16, 5, 0],
+  ["Mangrove Talk: Blue Carbon", "talk", "Ajman", "Ajman Mangrove Park", 25.4100, 55.4500, 15, 19, 2, 60],
+  ["Fujairah Coral Reef Dive Clean", "cleanup", "Fujairah", "Snoopy Island", 25.4900, 56.3600, 20, 8, 4, 24],
+];
+
+const seedRewardsEvents = async ({ users, now }) => {
+  const rewards = await Reward.insertMany(
+    DEMO_REWARDS.map(([title, partner, category, cost, stock, description], i) => ({
+      title, partner, category, cost, stock, description,
+      image: image(`reward-${i}`),
+      terms: "Demo reward. Show your code at the partner counter.",
+      isDemo: true,
+    }))
+  );
+  // A paid partner reward: points plus a card payment (needs STRIPE_SECRET_KEY).
+  await Reward.create({
+    title: "Desert eco-camp night for two",
+    partner: "Hatta eco lodges (demo)",
+    category: "experience",
+    cost: 500,
+    priceAed: 149,
+    stock: 20,
+    image: image("reward-camp"),
+    description: "A solar-powered desert camp with a guided night-sky walk. Points cover the eco-guide; the card payment covers the stay.",
+    terms: "Demo reward. Booking confirmed by the partner within 48 hours.",
+    isDemo: true,
+  });
+  const events = await Event.insertMany(
+    DEMO_EVENTS.map(([title, category, emirate, venue, lat, lng, inDays, hour, hours, capacity], i) => {
+      const startsAt = new Date(now.getTime() + inDays * DAY);
+      startsAt.setHours(hour, 0, 0, 0);
+      return {
+        title, category, emirate, venue, capacity,
+        description: `${title} with the GreenifyX community in ${emirate}. Bring water, a hat and a friend.`,
+        startsAt,
+        endsAt: new Date(startsAt.getTime() + hours * 3600 * 1000),
+        location: { lat, lng },
+        coverImage: image(`event-${i}`),
+        organizer: "GreenifyX Community",
+        attendees: users.slice(i, i + 4 + i).map((u) => u._id),
+        isDemo: true,
+      };
+    })
+  );
+  const pickups = await PickupRequest.insertMany(
+    users.slice(0, 6).map((u, i) => ({
+      user: u._id,
+      materials: [["plastic", "paper"], ["glass"], ["e-waste"], ["metal", "plastic"], ["textile"], ["cooking-oil"]][i],
+      estimatedKg: 3 + i * 2,
+      address: `Villa ${10 + i}, Street ${i + 3}`,
+      emirate: u.emirate || "Dubai",
+      preferredDate: new Date(now.getTime() + (i + 1) * DAY),
+      timeSlot: ["morning", "afternoon", "evening"][i % 3],
+      status: i < 4 ? "requested" : "scheduled",
+      scheduledFor: i < 4 ? undefined : new Date(now.getTime() + (i + 1) * DAY),
+      isDemo: true,
+    }))
+  );
+  return `${rewards.length} rewards, ${events.length} events, ${pickups.length} recycling pickups`;
+};
+
+const seedSocial = async ({ users, now }) => {
+  const pickUsers = (from, n) => users.slice(from, from + n).map((u) => u._id);
+  const communities = await Community.insertMany([
+    ["Dubai Beach Guardians", "Beach & Ocean", "Dubai", "Weekly sunrise clean-ups from JBR to Kite Beach."],
+    ["Abu Dhabi Ghaf Growers", "Trees & Gardens", "Abu Dhabi", "Planting and caring for native Ghaf and Sidr trees."],
+    ["Sharjah Zero Waste Families", "Zero Waste", "Sharjah", "Tips, swaps and refill runs for low-waste homes."],
+    ["UAE Cycle Commuters", "Cycling & Transport", "Dubai", "Ride to work, share safe routes, log your km."],
+  ].map(([name, category, emirate, description], i) => {
+    const members = pickUsers(i * 5, 12);
+    return {
+      name,
+      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      category,
+      emirate,
+      description,
+      coverImage: image(`community-${i}`),
+      owner: members[0],
+      moderators: [members[1]],
+      members,
+      challenges: [
+        {
+          title: ["Plastic-free beach week", "Plant 3 trees this month", "Zero-waste week", "Ride 5 times"][i],
+          description: "Post each action with a photo. Finish to earn bonus points.",
+          activity: ["Beach Clean-up", "Planted a Tree", "Refilled, No Plastic", "Cycled Instead of Driving"][i],
+          target: [3, 3, 5, 5][i],
+          rewardPoints: 50,
+          startsAt: new Date(now.getTime() - 2 * DAY),
+          endsAt: new Date(now.getTime() + 10 * DAY),
+          createdBy: members[0],
+          participants: members.slice(0, 6),
+        },
+      ],
+      isDemo: true,
+    };
+  }));
+  const listings = await Listing.insertMany([
+    ["Kids bicycle 16 inch", "Sports & Bikes", "give", 0, "good"],
+    ["Grade 7 school books (British curriculum)", "Books & School", "give", 0, "good"],
+    ["IKEA bookshelf", "Furniture", "sell", 80, "like-new"],
+    ["Baby stroller", "Kids & Baby", "swap", 0, "good"],
+    ["Old laptop for parts", "Electronics", "give", 0, "fair"],
+    ["Potted aloe vera plants", "Plants & Garden", "give", 0, "new"],
+  ].map(([title, category, type, priceAed, condition], i) => ({
+    user: users[i]._id,
+    title,
+    category,
+    type,
+    priceAed,
+    condition,
+    swapFor: type === "swap" ? "Kids car seat" : "",
+    description: "Demo listing. Pick up any evening this week.",
+    images: [image(`listing-${i}`)],
+    emirate: users[i].emirate || "Dubai",
+    area: ["JLT", "Al Reem", "Al Nahda", "Mirdif", "Al Khan", "Khalifa City"][i],
+    interested: users.slice(10 + i, 12 + i).map((u) => u._id),
+    isDemo: true,
+  })));
+  const checkpoints = await Checkpoint.insertMany([
+    ["Marina Walk recycling bins", "recycling_bin", "Dubai", 10, 25.0805, 55.1403],
+    ["Al Qasba refill station", "refill_station", "Sharjah", 5, 25.3238, 55.3786],
+    ["Corniche e-waste point", "recycling_bin", "Abu Dhabi", 15, 24.4764, 54.3213],
+    ["Zero-Waste Market entrance", "event", "Dubai", 20, 24.96, 55.15],
+  ].map(([name, type, emirate, points, lat, lng]) => ({
+    name,
+    type,
+    emirate,
+    points,
+    location: { lat, lng },
+    radiusM: 0,
+    code: `GXQ-${crypto.randomBytes(5).toString("hex").toUpperCase()}`,
+    partner: "Demo partner",
+    isDemo: true,
+  })));
+  await SponsoredChallenge.insertMany([
+    {
+      title: "Refill Rally",
+      description: "Skip single-use plastic: refill your bottle 5 times this month and post it with #RefillRally.",
+      sponsor: { name: "AquaPure (demo sponsor)", logo: image("sponsor-aqua"), website: "", color: "#0083B0" },
+      coverImage: image("sponsored-refill"),
+      activity: "Refilled, No Plastic",
+      hashtag: "refillrally",
+      target: 5,
+      rewardPoints: 150,
+      prize: "AED 25 voucher for the first 500 finishers",
+      maxWinners: 500,
+      startsAt: new Date(now.getTime() - 3 * DAY),
+      endsAt: new Date(now.getTime() + 25 * DAY),
+      budgetAed: 12500,
+      participants: users.slice(0, 9).map((u) => u._id),
+      impressions: 1840,
+      isDemo: true,
+    },
+    {
+      title: "Ride to Work Week",
+      description: "Cycle or take the metro to work 3 times this week.",
+      sponsor: { name: "GreenBank (demo sponsor)", logo: image("sponsor-bank"), website: "", color: "#1F8A70" },
+      coverImage: image("sponsored-ride"),
+      activity: "",
+      hashtag: "ridetowork",
+      target: 3,
+      rewardPoints: 100,
+      prize: "Free Nol top-up for winners",
+      maxWinners: 0,
+      startsAt: new Date(now.getTime() - DAY),
+      endsAt: new Date(now.getTime() + 6 * DAY),
+      budgetAed: 8000,
+      participants: users.slice(5, 12).map((u) => u._id),
+      impressions: 960,
+      isDemo: true,
+    },
+  ]);
+  return `${communities.length} communities, ${listings.length} Swap & Share listings, ${checkpoints.length} QR check-in points, 2 sponsored challenges`;
+};
+
 const clear = async () => {
   const demoUsers = await User.find({ isDemo: true }).select("_id");
   const ids = demoUsers.map((u) => u._id);
@@ -434,6 +669,15 @@ const clear = async () => {
     Campaign.deleteMany({ isDemo: true }),
     EnvironmentalReport.deleteMany({ $or: [{ isDemo: true }, { reporter: { $in: ids } }] }),
     EcoPlace.deleteMany({ isDemo: true }),
+    Organization.deleteMany({ isDemo: true }),
+    Reward.deleteMany({ isDemo: true }),
+    Redemption.deleteMany({ user: { $in: ids } }),
+    PickupRequest.deleteMany({ $or: [{ isDemo: true }, { user: { $in: ids } }] }),
+    Event.deleteMany({ isDemo: true }),
+    Community.deleteMany({ isDemo: true }),
+    Listing.deleteMany({ $or: [{ isDemo: true }, { user: { $in: ids } }] }),
+    Checkpoint.deleteMany({ isDemo: true }),
+    SponsoredChallenge.deleteMany({ isDemo: true }),
     PointsTransaction.deleteMany({ $or: [{ isDemo: true }, { user: { $in: ids } }] }),
   ]);
   // Real users who joined a demo campaign are simply detached by the delete above.
@@ -453,12 +697,23 @@ const clear = async () => {
     `Cleared demo data: ${users.deletedCount} users, ${results[3].deletedCount} posts, ` +
       `${results[2].deletedCount} challenges, ${results[0].deletedCount} comments, ` +
       `${extra[1].deletedCount} campaigns, ${extra[0].deletedCount} verification reports, ` +
-      `${extra[2].deletedCount} environmental reports, ${extra[3].deletedCount} eco places, ${extra[4].deletedCount} ledger entries.`
+      `${extra[2].deletedCount} environmental reports, ${extra[3].deletedCount} eco places, ` +
+      `${extra[4].deletedCount} organisations, ${extra[5].deletedCount} ledger entries.`
   );
 };
 
 const create = async () => {
   if (await User.exists({ isDemo: true })) {
+    if (!(await Community.exists({ isDemo: true }))) {
+      const users = await User.find({ isDemo: true, role: "user" }).limit(40);
+      console.log(`Added ${await seedSocial({ users, now: new Date() })} to the existing demo data.`);
+    }
+    // Older demo sets predate rewards/events/pickups: top them up without touching the rest.
+    if (!(await Reward.exists({ isDemo: true }))) {
+      const users = await User.find({ isDemo: true, role: "user" }).limit(30);
+      console.log(`Added ${await seedRewardsEvents({ users, now: new Date() })} to the existing demo data.`);
+      return;
+    }
     console.log("Demo data already exists. Run with --clear first to rebuild it.");
     return;
   }
@@ -591,6 +846,7 @@ const create = async () => {
 
   const campaignSummary = await seedCampaigns({ users, admin, userHash, now });
   const issueSummary = await seedIssues({ users, admin, now });
+  const orgSummary = await seedOrgs({ users, now });
   const places = await EcoPlace.insertMany(
     DEMO_PLACES.map(([name, type, emirate, lat, lng, materials, hours, verified]) => ({
       name,
@@ -607,10 +863,16 @@ const create = async () => {
     }))
   );
 
+  const rewardSummary = await seedRewardsEvents({ users, now: new Date() });
+  const socialSummary = await seedSocial({ users, now: new Date() });
+
   console.log("Demo data ready:");
+  console.log(`  ${rewardSummary}`);
+  console.log(`  ${socialSummary}`);
   console.log(`  ${users.length} users across all 7 emirates, ${savedPosts.length} posts, ${challenges.length} challenges, ${comments.length} comments`);
   console.log(`  ${campaignSummary}`);
   console.log(`  ${issueSummary}`);
+  console.log(`  ${orgSummary}`);
   console.log(`  ${places.length} eco places on the Smart Eco Map`);
   console.log("  Admin access: create your own account with  npm run create-admin -- --email you@company.com");
   console.log(`  Field verifier login: verifier@greenifyx.demo / ${DEMO_PASSWORD}`);

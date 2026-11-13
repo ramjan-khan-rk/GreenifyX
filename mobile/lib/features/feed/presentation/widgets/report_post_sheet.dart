@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import 'package:greenifyx/core/i18n/app_locale.dart';
 
 const _reasons = [
   ("Not an eco action", Icons.eco_outlined),
@@ -26,12 +27,12 @@ Future<String?> showReportPostSheet(BuildContext context) {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-              child: Text("Report this post", style: AppTextStyles.title),
+              child: Text(tr("Report this post"), style: AppTextStyles.title),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Text(
-                "Our team reviews every report. The author is not told who reported.",
+                tr("Our team reviews every report. The author is not told who reported."),
                 style: AppTextStyles.subtitle,
               ),
             ),
