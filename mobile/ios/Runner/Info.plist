@@ -12,6 +12,10 @@
 	<string>Greeny uses speech recognition so you can control GreenifyX with your voice.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>GreenifyX lets you pick photos and videos to share eco moments and send in chat.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>GreenifyX reads your steps and cycling workouts so they can earn Eco Points. Nothing is written to Apple Health.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>GreenifyX does not write to Apple Health.</string>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>GreenifyX lets you add a soundtrack from your device to your posts.</string>
 	<key>UIBackgroundModes</key>

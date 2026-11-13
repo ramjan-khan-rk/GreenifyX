@@ -13,6 +13,7 @@ import '../../core/i18n/app_locale.dart';
 import '../../core/services/api_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/friendly_error.dart';
+import '../wrapped/wrapped_screen.dart';
 
 typedef Json = Map<String, dynamic>;
 
@@ -111,6 +112,19 @@ class _ImpactScreenState extends State<ImpactScreen> {
               const SizedBox(height: 10),
               Text("${tr("This month")}: ${m!["verifiedActions"]} ${tr("actions")} · ${m["co2Kg"]} kg CO₂ · ${m["wasteKg"]} kg ${tr("waste")}",
                   style: TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 16),
+              Material(
+                color: const Color(0xFF0E3B2E),
+                borderRadius: BorderRadius.circular(18),
+                child: ListTile(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                  leading: const Text("🎁", style: TextStyle(fontSize: 26)),
+                  title: Text("${tr("Green Wrapped")} ${wrappedYear()}", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                  subtitle: Text(tr("Your year in green, ready to share"), style: const TextStyle(color: Colors.white70)),
+                  trailing: const Icon(Icons.play_circle_fill_rounded, color: Colors.white),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => WrappedScreen(year: wrappedYear()))),
+                ),
+              ),
               const SizedBox(height: 20),
               Text(tr("Impact certificate"), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
               const SizedBox(height: 4),

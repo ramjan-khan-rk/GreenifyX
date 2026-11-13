@@ -2,6 +2,7 @@ import express from "express";
 import {
   createPost,
   getPosts,
+  getChain,
   toggleLike,
   verifyPost,
   reportPost,
@@ -32,6 +33,7 @@ const acceptMedia = (req, res, next) => {
 
 router.post("/create", protect, acceptMedia, createPost);
 router.get("/", protect, getPosts);
+router.get("/:id/chain", protect, getChain);
 
 router.put("/:id/like", protect, toggleLike);
 router.put("/:id/verify", protect, verifyPost);

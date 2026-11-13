@@ -14,6 +14,7 @@ import crypto from "crypto";
 import { extractHashtags, extractMentionTokens, resolveMentions } from "../utils/textTags.js";
 import { reviewPost, REASON_TEXT, AUTO_VERIFY_CONFIDENCE } from "../utils/moderation.js";
 import { knownPeople } from "./commentController.js";
+import { chainCounts, chainFields, resolveChain } from "../utils/chains.js";
 
 const ecoPointsMap = {
   "Tree Plantation": 50,
@@ -89,6 +90,7 @@ export const createPost = async (req, res) => {
     const me = await User.findById(req.user._id).select("friends");
     const friendSet = new Set((me?.friends || []).map((f) => f.toString()));
     const taggedUsers = [...new Set(tagIds.map((t) => String(t).trim()))].filter((t) => friendSet.has(t)).slice(0, 20);
+    const chain = await resolveChain(req.body.chainParent);
 
     const post = await Post.create({
       user: req.user._id,
@@ -119,7 +121,25 @@ export const createPost = async (req, res) => {
       ecoPoints,
       isVerified: false,
       pointsAwarded: false,
+      ...(chain ? { chainOf: chain.chainOf, chainParent: chain.chainParent } : {}),
     });
+
+    // "Do it too": tell the person who inspired this post.
+    if (chain && String(chain.parentUser) !== String(req.user._id)) {
+      try {
+        const n = await Notification.create({
+          receiver: chain.parentUser,
+          sender: req.user._id,
+          type: "like",
+          title: "You inspired someone 🌱",
+          message: `${req.user.name} did it too: ${post.activity}.`,
+          referenceId: post._id,
+        });
+        emitToUser(chain.parentUser, "newNotification", n);
+      } catch {
+        /* best-effort */
+      }
+    }
 
     try {
       const currentUser = await User.findById(req.user._id);
@@ -246,8 +266,10 @@ export const getPosts = async (req, res) => {
 
     const currentUserId = req.user._id.toString();
 
+    const chains = await chainCounts(posts);
     const formattedPosts = await Promise.all(
       posts.map(async (post) => ({
+        ...chainFields(post, chains),
         _id: post._id,
         user: post.user,
         image: presentMediaUrl(post.image, post.look, post.mediaType),
@@ -463,5 +485,29 @@ export const toggleSave = async (req, res) => {
     res.json({ success: true, saved: !saved });
   } catch (error) {
     return sendServerError(res, "Unable to save post");
+  }
+};
+
+// GET /api/posts/:id/chain — who did it too, newest first.
+export const getChain = async (req, res) => {
+  try {
+    if (!/^[a-f\d]{24}$/i.test(req.params.id)) return res.status(404).json({ success: false, message: "Post not found" });
+    const post = await Post.findById(req.params.id).select("chainOf").lean();
+    if (!post) return res.status(404).json({ success: false, message: "Post not found" });
+    const rootId = post.chainOf || post._id;
+    const [root, members, count] = await Promise.all([
+      Post.findById(rootId).populate("user", "name profileImage").select("user activity image mediaType look createdAt").lean(),
+      Post.find({ chainOf: rootId, isHidden: { $ne: true } })
+        .sort({ createdAt: -1 })
+        .limit(60)
+        .populate("user", "name profileImage")
+        .select("user image mediaType look activity createdAt isVerified")
+        .lean(),
+      Post.countDocuments({ chainOf: rootId, isHidden: { $ne: true } }),
+    ]);
+    const present = (p) => ({ _id: p._id, user: p.user, activity: p.activity, image: presentMediaUrl(p.image, p.look, p.mediaType), mediaType: p.mediaType || "image", createdAt: p.createdAt, isVerified: p.isVerified === true });
+    res.json({ success: true, root: root ? present(root) : null, count, posts: members.map(present) });
+  } catch (error) {
+    return sendServerError(res, "Unable to load this chain");
   }
 };

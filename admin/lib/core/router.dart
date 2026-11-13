@@ -23,6 +23,8 @@ import '../pages/public_site_page.dart';
 import '../pages/enquiries_page.dart';
 import '../pages/checkpoints_page.dart';
 import '../pages/growth_pages.dart';
+import '../pages/forest_page.dart';
+import '../pages/deals_page.dart';
 import '../widgets/shell.dart';
 import 'session.dart';
 
@@ -68,6 +70,8 @@ final GoRouter adminRouter = GoRouter(
         GoRoute(path: '/rewards', pageBuilder: (context, state) => _page(state, const RewardsPage())),
         GoRoute(path: '/pickups', pageBuilder: (context, state) => _page(state, const PickupsPage())),
         GoRoute(path: '/events', pageBuilder: (context, state) => _page(state, const EventsPage())),
+        GoRoute(path: '/forest', pageBuilder: (context, state) => _page(state, const ForestPage())),
+        GoRoute(path: '/deals', pageBuilder: (context, state) => _page(state, const DealsPage())),
         GoRoute(path: '/analytics', pageBuilder: (context, state) => _page(state, const AnalyticsPage())),
         GoRoute(path: '/insights', pageBuilder: (context, state) => _page(state, const InsightsPage())),
         GoRoute(path: '/impact', pageBuilder: (context, state) => _page(state, const ImpactPage())),

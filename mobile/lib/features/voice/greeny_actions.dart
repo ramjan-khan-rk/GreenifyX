@@ -25,6 +25,7 @@ import '../settings/settings_screen.dart';
 import '../social/creator_profile_screen.dart';
 import '../social/reels_screen.dart';
 import '../social/trending_screens.dart';
+import '../wrapped/wrapped_screen.dart';
 import 'greeny.dart';
 
 Widget? _screen(String name) => switch (name) {
@@ -34,6 +35,7 @@ Widget? _screen(String name) => switch (name) {
       "map" => const EcoMapScreen(),
       "carbon" => const CarbonScreen(),
       "impact" => const ImpactScreen(),
+      "wrapped" => WrappedScreen(year: wrappedYear()),
       "market" => const MarketScreen(),
       "scan" => const ScanScreen(),
       "communities" => const CommunitiesScreen(),

@@ -8,6 +8,7 @@ const SCREENS = {
   map: ["map", "eco map", "recycling point", "خريطة", "الخريطة"],
   carbon: ["carbon", "footprint", "co2", "البصمة", "الكربون"],
   impact: ["impact", "certificate", "أثري", "شهادة"],
+  wrapped: ["wrapped", "green wrapped", "my year", "year in review", "سنتي", "حصاد العام"],
   market: ["swap", "market", "marketplace", "second hand", "بادل"],
   scan: ["scan", "qr", "check in", "check-in", "امسح"],
   communities: ["community", "communities", "group", "مجتمع", "المجتمعات"],

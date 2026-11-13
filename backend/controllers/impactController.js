@@ -11,11 +11,11 @@ import { computeFootprint, carbonTips, UAE_LIFESTYLE_AVG_KG, PARIS_TARGET_KG } f
 import { sendServerError } from "../utils/httpError.js";
 
 /** Everything a member has done that was verified, in real units. */
-export const impactTotals = async (userId, since) => {
-  const time = since ? { $gte: since } : undefined;
+export const impactTotals = async (userId, since, until) => {
+  const time = since || until ? { ...(since ? { $gte: since } : {}), ...(until ? { $lt: until } : {}) } : undefined;
   const [posts, campaigns, pickups, swaps, checkins, user] = await Promise.all([
     Post.find({ user: userId, isVerified: true, ...(time ? { createdAt: time } : {}) }).select("activity").lean(),
-    Campaign.find({ participants: { $elemMatch: { user: userId, status: "verified" } } }).select("startDate endDate outputUnit verifiedOutput participants category").lean(),
+    Campaign.find({ participants: { $elemMatch: { user: userId, status: "verified" } }, ...(time ? { endDate: time } : {}) }).select("startDate endDate outputUnit verifiedOutput participants category").lean(),
     PickupRequest.find({ user: userId, status: "collected", ...(time ? { updatedAt: time } : {}) }).select("collectedKg").lean(),
     Listing.find({ user: userId, status: "done", ...(time ? { completedAt: time } : {}) }).select("category").lean(),
     Checkin.countDocuments({ user: userId, ...(time ? { createdAt: time } : {}) }),

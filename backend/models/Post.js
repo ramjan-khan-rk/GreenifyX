@@ -104,6 +104,10 @@ const postSchema = new mongoose.Schema(
       checkedAt: Date,
     },
 
+    // "Do it too" chain: the first post of the chain, and the post that inspired this one.
+    chainOf: { type: mongoose.Schema.Types.ObjectId, ref: "Post", index: true },
+    chainParent: { type: mongoose.Schema.Types.ObjectId, ref: "Post" },
+
     // Sponsored challenge this post counts towards.
     sponsored: { type: mongoose.Schema.Types.ObjectId, ref: "SponsoredChallenge" },
 

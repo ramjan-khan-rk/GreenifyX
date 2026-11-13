@@ -35,6 +35,13 @@ import '../../../checkin/scan_screen.dart';
 import '../../../communities/community_screens.dart';
 import '../../../companion/companion_screen.dart';
 import '../../../impact/impact_screen.dart';
+import '../../../wrapped/wrapped_screen.dart';
+import '../../../health/health_sync.dart';
+import '../../../bills/bills_screen.dart';
+import '../../../forest/forest_screen.dart';
+import '../../../household/household_screen.dart';
+import '../../../academy/academy_screen.dart';
+import '../../../deals/deals_screen.dart';
 import '../../../market/market_screens.dart';
 import '../../../social/reels_screen.dart';
 import '../../../growth/growth_screens.dart';
@@ -79,6 +86,7 @@ class HomeScreen extends ConsumerWidget {
           error: (e, _) => AppErrorState(message: friendlyError(e), onRetry: () => ref.invalidate(myProfileProvider)),
           data: (user) {
             SessionUser.update(id: user.id, name: user.name, profileImage: user.profileImage);
+            HealthSync.syncIfOn();
             final first = user.name.trim().split(" ").first;
             final actions = [
               HomeAction(Icons.add_a_photo_rounded, tr("Post"), const [Color(0xFFE36A4A), Color(0xFFF2B544)], () => _go(context, const CreatePostScreen())),
@@ -100,6 +108,12 @@ class HomeScreen extends ConsumerWidget {
               HomeAction(Icons.sensors_rounded, tr("Live"), const [Color(0xFFE8384F), Color(0xFFFF8A65)], () => _go(context, const LiveListScreen())),
               HomeAction(Icons.tag_rounded, tr("Trending"), const [Color(0xFF1D6FD1), Color(0xFF6DD5FA)], () => _go(context, TrendingScreen(meId: user.id))),
               HomeAction(Icons.card_giftcard_rounded, tr("Invite"), const [Color(0xFFF2B544), Color(0xFFE36A4A)], () => _go(context, const InviteScreen())),
+              HomeAction(Icons.directions_walk_rounded, tr("Health sync"), const [Color(0xFF11998E), Color(0xFF38EF7D)], () => _go(context, const HealthSyncScreen())),
+              HomeAction(Icons.bolt_rounded, tr("My bills"), const [Color(0xFF0083B0), Color(0xFF00B4DB)], () => _go(context, const BillsScreen())),
+              HomeAction(Icons.park_rounded, tr("My Forest"), const [Color(0xFF0E3B2E), Color(0xFF56AB2F)], () => _go(context, const ForestScreen())),
+              HomeAction(Icons.cottage_rounded, tr("Household"), const [Color(0xFFF2B544), Color(0xFFE36A4A)], () => _go(context, const HouseholdScreen())),
+              HomeAction(Icons.school_rounded, tr("Eco Academy"), const [Color(0xFF7F53AC), Color(0xFF647DEE)], () => _go(context, const AcademyScreen())),
+              HomeAction(Icons.handshake_rounded, tr("Brand deals"), const [Color(0xFF2B2440), Color(0xFFE36A4A)], () => _go(context, const DealsScreen())),
               HomeAction(Icons.mic_rounded, "Greeny", const [Color(0xFF38EF7D), Color(0xFF11998E)], () => Greeny.instance.open(context)),
             ];
             return RefreshIndicator(
@@ -160,6 +174,7 @@ class HomeScreen extends ConsumerWidget {
                     onHistory: () => _go(context, const PointsHistoryScreen()),
                     onRewards: () => _go(context, const RewardsScreen()),
                   ),
+                  const WrappedBanner(),
                   const StreakCard(),
                   const CompanionCard(),
                   const SponsoredStrip(),

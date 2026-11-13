@@ -29,6 +29,8 @@ const navItems = [
   NavItem('/badges', 'Verified badges', Icons.verified_rounded),
   NavItem('/pickups', 'Recycling pickups', Icons.local_shipping_rounded),
   NavItem('/events', 'Events', Icons.event_rounded),
+  NavItem('/forest', 'My Forest', Icons.park_rounded),
+  NavItem('/deals', 'Brand deals', Icons.handshake_rounded),
   NavItem('/orgs', 'Organisations', Icons.business_rounded),
   NavItem('/enquiries', 'Website enquiries', Icons.inbox_rounded),
   NavItem('/users', 'Users', Icons.people_alt_rounded),

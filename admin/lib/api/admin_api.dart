@@ -330,4 +330,9 @@ class AdminApi {
   Future<Json> orgEsg(String orgId) async => await _send(() => _dio.get('/admin/orgs/$orgId/esg'));
 
   Future<Json> publicEsg(String token) async => Json.from((await _send(() => _dio.get('/public/esg/$token')))['report'] as Map);
+
+  // ---- Generic helpers (My Forest, Brand deals) ----
+  Future<Json> getJson(String path, {Map<String, dynamic>? query}) => _send(() => _dio.get(path, queryParameters: query));
+  Future<Json> postJson(String path, [Object? body]) => _send(() => _dio.post(path, data: body));
+  Future<Json> patchJson(String path, [Object? body]) => _send(() => _dio.patch(path, data: body));
 }

@@ -27,7 +27,8 @@ android {
 
     defaultConfig {
         applicationId = "com.ramjankhan.greenifyx"
-        minSdk = flutter.minSdkVersion
+        // Health Connect (health sync) needs Android 8.0+
+        minSdk = maxOf(26, flutter.minSdkVersion)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

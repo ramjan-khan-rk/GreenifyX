@@ -69,6 +69,7 @@ dependencies:
   just_audio: ^0.10.4
   path_provider: ^2.1.5
   file_picker: ^10.3.3
+  health: ^13.1.4
 dev_dependencies:
   flutter_test:
     sdk: flutter

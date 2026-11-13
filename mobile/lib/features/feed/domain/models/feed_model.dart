@@ -34,6 +34,9 @@ class FeedModel {
   final List<String> hashtags;
   /// Who verified it: "friend", "ai" (instant AI check) or "admin".
   final String verifiedBy;
+  /// "Do it too" chain: its first post and how many people joined it.
+  final String chainRoot;
+  final int chainCount;
 
   FeedModel({
     required this.id,
@@ -63,6 +66,8 @@ class FeedModel {
     this.userBadge = "",
     this.hashtags = const [],
     this.verifiedBy = "",
+    this.chainRoot = "",
+    this.chainCount = 0,
   });
 
   factory FeedModel.fromJson(Map<String, dynamic> json) {
@@ -102,6 +107,8 @@ class FeedModel {
       userBadge: (user is Map ? user["verifiedBadge"] : null)?.toString() ?? "",
       hashtags: (json["hashtags"] as List? ?? const []).map((e) => e.toString()).toList(),
       verifiedBy: json["verifiedBy"]?.toString() ?? "",
+      chainRoot: json["chainRoot"]?.toString() ?? "",
+      chainCount: (json["chainCount"] as num?)?.toInt() ?? 0,
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/i18n/app_locale.dart';
+import 'core/services/translation_service.dart';
 
 import 'core/routes/app_router.dart';
 import 'core/session/session_controller.dart';
@@ -17,6 +18,7 @@ Future<void> main() async {
 
   await ApiService.initialize();
   await AppLocale.load();
+  await TranslationService.load();
   await ThemeController.load();
   await SessionController.instance.syncFromStorage();
 

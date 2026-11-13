@@ -10,7 +10,7 @@ const pointsTransactionSchema = new mongoose.Schema(
     amount: { type: Number, required: true },
     type: {
       type: String,
-      enum: ["campaign_verified", "post_verified", "challenge_won", "report_resolved", "pickup_collected", "redemption", "refund", "battle_won", "community_challenge", "checkin", "swap_completed", "referral", "sponsored_challenge", "streak_freeze", "reversal", "adjustment"],
+      enum: ["campaign_verified", "post_verified", "challenge_won", "report_resolved", "pickup_collected", "redemption", "refund", "battle_won", "community_challenge", "checkin", "swap_completed", "referral", "sponsored_challenge", "streak_freeze", "health_sync", "bill_saving", "household_goal", "academy", "reversal", "adjustment"],
       required: true,
     },
     status: { type: String, enum: ["credited", "reversed"], default: "credited" },

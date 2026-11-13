@@ -20,6 +20,7 @@ import '../../application/providers/feed_provider.dart';
 import '../../domain/models/feed_model.dart';
 import 'moment_media.dart';
 import 'report_post_sheet.dart';
+import '../../../chains/do_it_too.dart';
 import 'package:greenifyx/core/i18n/app_locale.dart';
 
 String _ago(DateTime? t) {
@@ -343,8 +344,12 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            if (_likes > 0)
-              Text("$_likes ${_likes == 1 ? "like" : "likes"}", style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
+            Row(children: [
+              if (_likes > 0)
+                Text("$_likes ${_likes == 1 ? "like" : "likes"}", style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
+              const Spacer(),
+              DoItTooButton(postId: p.id, activity: p.activity, count: p.chainCount, mine: p.userId == widget.meId),
+            ]),
             if (p.description.isNotEmpty) ...[
               const SizedBox(height: 4),
               GestureDetector(

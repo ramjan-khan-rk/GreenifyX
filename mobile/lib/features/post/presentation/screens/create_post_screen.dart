@@ -12,6 +12,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/deeds.dart';
 import '../../domain/eco_activity.dart';
+import '../../../lens/eco_lens_screen.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../friends/data/repositories/friend_repository.dart';
 import '../../../friends/domain/models/friend_model.dart';
@@ -27,7 +28,10 @@ import 'package:greenifyx/core/i18n/app_locale.dart';
 class CreatePostScreen extends StatefulWidget {
   /// Share into this community (optional).
   final String? communityId;
-  const CreatePostScreen({super.key, this.communityId});
+  /// "Do it too": the post that inspired this one, and its action to preselect.
+  final String? chainParent;
+  final String? presetActivity;
+  const CreatePostScreen({super.key, this.communityId, this.chainParent, this.presetActivity});
 
   @override
   State<CreatePostScreen> createState() => _CreatePostScreenState();
@@ -42,7 +46,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   bool isVideo = false;
   bool submitting = false;
   String lane = deedLanes.first;
-  String activity = deeds.first.name;
+  late String activity = widget.presetActivity ?? deeds.first.name;
   List<EcoActivity> activities = fallbackActivities;
   String query = "";
   final List<FriendModel> tagged = [];
@@ -240,6 +244,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       "look": look,
       "visibility": everyone ? "public" : "friends",
       "community": ?widget.communityId,
+      "chainParent": ?widget.chainParent,
       "muteOriginal": video && muteOriginal ? "true" : "false",
     };
     await musicPreview.stop();
@@ -300,6 +305,17 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             onPhoto: () => pick(false),
             onVideo: () => pick(true),
           ),
+          if (selectedFile != null && !isVideo) ...[
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () async {
+                final out = await Navigator.push<File>(context, MaterialPageRoute(builder: (_) => EcoLensScreen(photo: selectedFile!)));
+                if (out != null && mounted) setState(() => selectedFile = out);
+              },
+              icon: const Text("✨"),
+              label: Text(tr("Eco Lens: add an impact effect")),
+            ),
+          ],
           if (selectedFile != null) ...[
             const SizedBox(height: 14),
             Text(tr("Filter"), style: AppTextStyles.title.copyWith(fontSize: 16)),

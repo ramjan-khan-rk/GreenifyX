@@ -17,6 +17,7 @@ import '../profile/presentation/screens/edit_profile_screen.dart';
 import 'legal_screen.dart';
 import 'settings_api.dart';
 import '../../core/i18n/app_locale.dart';
+import '../../core/services/translation_service.dart';
 import '../../core/services/push_service.dart';
 import '../voice/greeny.dart';
 import '../growth/growth_screens.dart';
@@ -232,6 +233,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 trailing: _language == l.$1 ? const Icon(Icons.check_circle_rounded, color: AppColors.eco) : null,
                 onTap: () => _setLanguage(l.$1),
               ),
+          ]),
+          const _Label("Translate posts into"),
+          _Card(children: [
+            ValueListenableBuilder<String>(
+              valueListenable: TranslationService.chosen,
+              builder: (context, chosen, _) => Column(children: [
+                ListTile(
+                  leading: Icon(Icons.g_translate_rounded, color: AppColors.ink),
+                  title: Text(tr("Same as the app"), style: const TextStyle(fontWeight: FontWeight.w600)),
+                  trailing: chosen.isEmpty ? const Icon(Icons.check_circle_rounded, color: AppColors.eco) : null,
+                  onTap: () => TranslationService.set(""),
+                ),
+                for (final l in TranslationService.languages.entries)
+                  ListTile(
+                    leading: const SizedBox(width: 24),
+                    title: Text(l.value, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    trailing: chosen == l.key ? const Icon(Icons.check_circle_rounded, color: AppColors.eco) : null,
+                    onTap: () => TranslationService.set(l.key),
+                  ),
+              ]),
+            ),
           ]),
           const _Label("Appearance"),
           _Card(children: [
