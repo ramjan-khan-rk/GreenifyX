@@ -71,7 +71,7 @@ class _SponsoredStripState extends State<SponsoredStrip> {
                     Row(children: [
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(color: AppColors.surface24, borderRadius: BorderRadius.circular(8)),
+                        decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8)),
                         child: Text(tr("Sponsored"), style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w800)),
                       ),
                       const SizedBox(width: 6),

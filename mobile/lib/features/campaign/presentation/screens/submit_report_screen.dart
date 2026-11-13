@@ -461,7 +461,7 @@ class _Thumb extends StatelessWidget {
         bottom: 6,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(color: AppColors.inkFixedFixed.withValues(alpha: 0.75), borderRadius: BorderRadius.circular(6)),
+          decoration: BoxDecoration(color: AppColors.inkFixed.withValues(alpha: 0.75), borderRadius: BorderRadius.circular(6)),
           child: Text(shot.kind.toUpperCase(),
               style: const TextStyle(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
         ),

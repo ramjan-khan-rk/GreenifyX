@@ -317,7 +317,7 @@ class _InviteScreenState extends State<InviteScreen> {
                   ),
                   const SizedBox(height: 14),
                   FilledButton.icon(
-                    style: FilledButton.styleFrom(backgroundColor: AppColors.inkFixedFixed),
+                    style: FilledButton.styleFrom(backgroundColor: AppColors.inkFixed),
                     onPressed: () => SharePlus.instance.share(ShareParams(
                       text: "${tr("Join me on GreenifyX — the UAE's eco app! Use my code")} ${d["code"]} ${tr("and we both get bonus points")} 🌱\n${d["link"]}",
                     )),

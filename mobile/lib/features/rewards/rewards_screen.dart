@@ -215,7 +215,7 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
           SliverAppBar(
             pinned: true,
             expandedHeight: 210,
-            backgroundColor: AppColors.inkFixedFixed,
+            backgroundColor: AppColors.inkFixed,
             foregroundColor: Colors.white,
             title: Text(tr("Rewards")),
             flexibleSpace: FlexibleSpaceBar(

@@ -543,7 +543,7 @@ class _MediaStage extends StatelessWidget {
       child: Container(
         height: 280,
         width: double.infinity,
-        color: AppColors.inkFixedFixed,
+        color: AppColors.inkFixed,
         child: Stack(
           fit: StackFit.expand,
           children: [

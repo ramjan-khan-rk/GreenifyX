@@ -180,7 +180,7 @@ class _CommunitiesRow extends StatelessWidget {
                     width: 210,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), color: AppColors.inkFixedFixed),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), color: AppColors.inkFixed),
                     child: Stack(fit: StackFit.expand, children: [
                       if ((c["coverImage"] ?? "").toString().isNotEmpty)
                         CachedNetworkImage(imageUrl: c["coverImage"].toString(), fit: BoxFit.cover, color: Colors.black38, colorBlendMode: BlendMode.darken),

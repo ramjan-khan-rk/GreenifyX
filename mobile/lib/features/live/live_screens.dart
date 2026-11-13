@@ -324,7 +324,7 @@ class _LiveRoomScreenState extends State<LiveRoomScreen> {
                   if (_isHost)
                     IconButton(
                       onPressed: () => _room.localParticipant?.videoTrackPublications.isNotEmpty == true
-                          ? (_room.localParticipant!.videoTrackPublications.first.track as LocalVideoTrack?)?.setCameraPosition(CameraPosition.back)
+                          ? (_room.localParticipant!.videoTrackPublications.first.track)?.setCameraPosition(CameraPosition.back)
                           : null,
                       icon: const Icon(Icons.cameraswitch_rounded, color: Colors.white),
                     ),

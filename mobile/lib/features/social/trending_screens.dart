@@ -66,7 +66,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
                   for (final s in maps(d["sounds"]))
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: const CircleAvatar(backgroundColor: AppColors.inkFixedFixed, child: Icon(Icons.music_note_rounded, color: Colors.white)),
+                      leading: const CircleAvatar(backgroundColor: AppColors.inkFixed, child: Icon(Icons.music_note_rounded, color: Colors.white)),
                       title: Text(s["title"].toString(), style: const TextStyle(fontWeight: FontWeight.w700)),
                       subtitle: Text("${s["uses"]} ${tr("posts")}"),
                       trailing: const Icon(Icons.play_circle_fill_rounded, color: AppColors.joy, size: 30),

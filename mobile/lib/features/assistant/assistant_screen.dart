@@ -185,7 +185,7 @@ class _Welcome extends StatelessWidget {
       ),
       const SizedBox(height: 22),
       Material(
-        color: AppColors.inkFixedFixed,
+        color: AppColors.inkFixed,
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),

@@ -3,6 +3,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../core/i18n/app_locale.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/services/api_service.dart';
 import '../../core/utils/friendly_error.dart';
 import '../../core/utils/media_url.dart';
@@ -278,7 +279,7 @@ class _ReelPageState extends State<_ReelPage> {
               const SizedBox(height: 6),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: AppColors.surface24, borderRadius: BorderRadius.circular(14)),
+                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(14)),
                 child: Text("🌱 ${r["activity"]} · +${r["ecoPoints"]}", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12.5)),
               ),
               if ((r["description"] ?? "").toString().isNotEmpty)

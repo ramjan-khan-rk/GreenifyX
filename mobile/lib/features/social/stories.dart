@@ -542,7 +542,7 @@ class _Pick extends StatelessWidget {
         child: Container(
           width: 130,
           height: 110,
-          decoration: BoxDecoration(color: AppColors.surface10, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white24)),
+          decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white24)),
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(icon, color: Colors.white, size: 32),
             const SizedBox(height: 8),
