@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'strings_ar.dart';
+import 'strings_ar_features.dart';
 
 /// App language (English / Arabic). Arabic switches the whole UI to right-to-left.
 class AppLocale {
@@ -31,4 +32,4 @@ class AppLocale {
 }
 
 /// Translate an English UI string. Falls back to English when no Arabic entry exists.
-String tr(String en) => AppLocale.isArabic ? (stringsAr[en] ?? en) : en;
+String tr(String en) => AppLocale.isArabic ? (stringsAr[en] ?? stringsArFeatures[en] ?? en) : en;

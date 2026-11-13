@@ -7,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/friendly_error.dart';
 import '../../core/utils/media_url.dart';
 import '../../core/widgets/user_avatar.dart';
+import '../post/domain/eco_activity.dart';
 import '../post/presentation/screens/create_post_screen.dart';
 
 typedef Json = Map<String, dynamic>;
@@ -99,8 +100,8 @@ class _ChainScreenState extends State<ChainScreen> {
                   const SizedBox(height: 4),
                   Text(
                     starter == null
-                        ? "${tr("people did")} ${tr(widget.activity)}"
-                        : "${tr("people did")} ${tr(widget.activity)} ${tr("after")} ${starter["name"]}",
+                        ? "${tr("people did")} ${activityName(widget.activity)}"
+                        : "${tr("people did")} ${activityName(widget.activity)} ${tr("after")} ${starter["name"]}",
                     style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 6),

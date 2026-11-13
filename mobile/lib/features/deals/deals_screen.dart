@@ -8,6 +8,7 @@ import '../../core/services/session_user.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/friendly_error.dart';
 import '../../core/utils/media_url.dart';
+import '../post/domain/eco_activity.dart';
 import '../post/presentation/screens/create_post_screen.dart';
 
 typedef Json = Map<String, dynamic>;
@@ -204,7 +205,7 @@ class _DealCard extends StatelessWidget {
           if ((deal["brief"] ?? "").toString().isNotEmpty) ...[const SizedBox(height: 10), Text(deal["brief"].toString(), style: const TextStyle(height: 1.4))],
           const SizedBox(height: 10),
           Wrap(spacing: 6, runSpacing: 6, children: [
-            if ((deal["activity"] ?? "").toString().isNotEmpty) Chip(label: Text("🌱 ${tr(deal["activity"].toString())}"), visualDensity: VisualDensity.compact),
+            if ((deal["activity"] ?? "").toString().isNotEmpty) Chip(label: Text("🌱 ${activityName(deal["activity"].toString())}"), visualDensity: VisualDensity.compact),
             if ((deal["hashtag"] ?? "").toString().isNotEmpty) Chip(label: Text("#${deal["hashtag"]}"), visualDensity: VisualDensity.compact),
             if ((deal["minFollowers"] ?? 0) > 0) Chip(label: Text("${deal["minFollowers"]}+ ${tr("followers")}"), visualDensity: VisualDensity.compact),
             if (deadline != null) Chip(label: Text("${tr("Until")} ${DateFormat("d MMM").format(deadline)}"), visualDensity: VisualDensity.compact),

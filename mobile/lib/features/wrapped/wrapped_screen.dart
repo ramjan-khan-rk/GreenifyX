@@ -11,6 +11,7 @@ import '../../core/config/app_config.dart';
 import '../../core/i18n/app_locale.dart';
 import '../../core/services/api_service.dart';
 import '../../core/utils/friendly_error.dart';
+import '../post/domain/eco_activity.dart';
 
 typedef Json = Map<String, dynamic>;
 
@@ -65,6 +66,7 @@ class _WrappedScreenState extends State<WrappedScreen> with SingleTickerProvider
   Future<void> _load() async {
     try {
       final r = await ApiService.dio.get("/wrapped", queryParameters: {"year": widget.year ?? wrappedYear()});
+      await EcoActivityApi.load();
       if (!mounted) return;
       setState(() => _w = Json.from(r.data["wrapped"] as Map));
       _progress.forward(from: 0);
@@ -360,9 +362,9 @@ class _PersonaSlide extends StatelessWidget {
       const SizedBox(height: 10),
       _line(tr(p["line"].toString()), size: 16),
       const SizedBox(height: 26),
-      _line("${tr("Top action")}: ${tr(top["name"].toString())} × ${top["count"]}", size: 17, weight: FontWeight.w800),
+      _line("${tr("Top action")}: ${activityName(top["name"].toString())} × ${top["count"]}", size: 17, weight: FontWeight.w800),
       for (final a in (w["topActivities"] as List? ?? []).skip(1))
-        Padding(padding: const EdgeInsets.only(top: 6), child: _line("${tr((a as Map)["name"].toString())} × ${a["count"]}", size: 14)),
+        Padding(padding: const EdgeInsets.only(top: 6), child: _line("${activityName((a as Map)["name"].toString())} × ${a["count"]}", size: 14)),
     ]);
   }
 }

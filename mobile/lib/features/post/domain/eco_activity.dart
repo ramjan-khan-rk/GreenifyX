@@ -111,3 +111,14 @@ Color laneColor(String lane) => switch (lane) {
       "Stories" => const Color(0xFFF2B544),
       _ => const Color(0xFF1F8A70),
     };
+
+/// An activity's name in the app language, using the catalogue's Arabic names.
+/// Call [EcoActivityApi.load] first for admin-added activities; falls back to the built-in list.
+String activityName(String name) {
+  if (!AppLocale.isArabic) return name;
+  final all = [...?EcoActivityApi._cache, ...fallbackActivities];
+  for (final a in all) {
+    if (a.name == name && a.nameAr.isNotEmpty) return a.nameAr;
+  }
+  return tr(name);
+}
