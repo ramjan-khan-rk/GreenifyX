@@ -3,8 +3,9 @@ import { uploadBufferToCloudinary } from "../utils/cloudinaryUpload.js";
 // POST /api/upload/audio  (multipart field "audio")
 export const uploadAudio = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: "No audio selected" });
+    if (!req.file || !req.file.size) {
+      console.log("[voice] empty upload");
+      return res.status(400).json({ success: false, message: "The recording was empty. Hold the mic a little longer." });
     }
     // Cloudinary stores audio under the "video" resource type.
     const audioUrl = await uploadBufferToCloudinary(req.file.buffer, "GreenifyX/audio", "video");

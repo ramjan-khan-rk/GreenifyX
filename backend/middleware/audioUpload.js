@@ -25,6 +25,10 @@ const audioUpload = multer({
 
 export const acceptAudio = (req, res, next) => {
   audioUpload.single("audio")(req, res, (err) => {
+    // One line per voice note in the Render logs, so problems are visible.
+    console.log(
+      `[voice] user=${req.user?._id} type=${req.file?.mimetype || "-"} bytes=${req.file?.size ?? 0} ${err ? "REJECTED: " + (err.code || err.message) : "ok"}`
+    );
     if (!err) return next();
     res.status(400).json({
       success: false,

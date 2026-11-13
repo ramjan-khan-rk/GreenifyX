@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -321,7 +322,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ref.invalidate(chatsProvider);
       _toBottom();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyError(e, fallback: "Voice note failed to send."))));
+      if (mounted) {
+        // Show the real reason so a failure can be fixed, not guessed.
+        final code = e is DioException ? (e.response?.statusCode?.toString() ?? e.type.name) : e.runtimeType.toString();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          duration: const Duration(seconds: 6),
+          content: Text("${friendlyError(e, fallback: tr("Voice note failed to send."))} ($code)"),
+        ));
+      }
     } finally {
       if (mounted) setState(() => _sending = false);
     }
