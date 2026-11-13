@@ -129,7 +129,7 @@ class _CommunitiesScreenState extends State<CommunitiesScreen> {
             Padding(
               padding: const EdgeInsets.all(40),
               child: Column(children: [
-                const Icon(Icons.groups_rounded, size: 56, color: AppColors.subtitle),
+                Icon(Icons.groups_rounded, size: 56, color: AppColors.subtitle),
                 const SizedBox(height: 10),
                 Text(tr("No communities here yet. Start the first one!"), textAlign: TextAlign.center),
               ]),
@@ -156,7 +156,7 @@ class _CommunityTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Material(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -179,10 +179,10 @@ class _CommunityTile extends StatelessWidget {
                   Text(c["name"]?.toString() ?? "", maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5)),
                   const SizedBox(height: 2),
                   Text("${tr(c["category"].toString())}${(c["emirate"] ?? "").toString().isEmpty ? "" : " · ${c["emirate"]}"}",
-                      style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
+                      style: TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
                   const SizedBox(height: 6),
                   Row(children: [
-                    const Icon(Icons.people_alt_rounded, size: 15, color: AppColors.subtitle),
+                    Icon(Icons.people_alt_rounded, size: 15, color: AppColors.subtitle),
                     const SizedBox(width: 4),
                     Text("${c["members"]}", style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
                     if (((c["activeChallenges"] as num?) ?? 0) > 0) ...[
@@ -397,7 +397,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
             RefreshIndicator(
               onRefresh: _load,
               child: ListView(padding: const EdgeInsets.only(top: 8, bottom: 90), children: [
-                if (_posts.isEmpty) Padding(padding: const EdgeInsets.all(40), child: Center(child: Text(tr("No posts yet"), style: const TextStyle(color: AppColors.subtitle)))),
+                if (_posts.isEmpty) Padding(padding: const EdgeInsets.all(40), child: Center(child: Text(tr("No posts yet"), style: TextStyle(color: AppColors.subtitle)))),
                 for (final p in _posts) PostCard(key: ValueKey(p["_id"]), post: FeedModel.fromJson(p), meId: meId),
               ]),
             ),
@@ -406,7 +406,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                 Padding(
                   padding: const EdgeInsets.all(30),
                   child: Column(children: [
-                    Text(tr("No challenges yet"), style: const TextStyle(color: AppColors.subtitle)),
+                    Text(tr("No challenges yet"), style: TextStyle(color: AppColors.subtitle)),
                     if (manage) TextButton(onPressed: _hostChallenge, child: Text(tr("Host a challenge"))),
                   ]),
                 ),
@@ -417,14 +417,14 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                 Padding(
                   padding: const EdgeInsets.all(30),
                   child: Column(children: [
-                    Text(tr("No upcoming events"), style: const TextStyle(color: AppColors.subtitle)),
+                    Text(tr("No upcoming events"), style: TextStyle(color: AppColors.subtitle)),
                     if (manage) TextButton(onPressed: _hostEvent, child: Text(tr("Organise an event"))),
                   ]),
                 ),
               for (final e in _events)
                 Card(
                   child: ListTile(
-                    leading: const CircleAvatar(backgroundColor: AppColors.blush, child: Icon(Icons.event_rounded, color: AppColors.joy)),
+                    leading: CircleAvatar(backgroundColor: AppColors.blush, child: Icon(Icons.event_rounded, color: AppColors.joy)),
                     title: Text(e["title"].toString(), style: const TextStyle(fontWeight: FontWeight.w800)),
                     subtitle: Text("${DateFormat("EEE d MMM, h:mm a").format(DateTime.parse(e["startsAt"].toString()).toLocal())} · ${e["venue"] ?? ""}"),
                     trailing: const Icon(Icons.chevron_right_rounded),
@@ -509,7 +509,7 @@ class _ChallengeCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.border)),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.border)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           const Icon(Icons.flag_rounded, color: AppColors.joy),
@@ -521,7 +521,7 @@ class _ChallengeCard extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           "$target× ${(ch["activity"] ?? "").toString().isEmpty ? tr("any eco action") : ch["activity"]} · ${ch["participants"]} ${tr("joined")} · ${ended ? tr("Ended") : left!.inDays > 0 ? "${left.inDays}d ${tr("left")}" : "${left.inHours}h ${tr("left")}"}",
-          style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5),
+          style: TextStyle(color: AppColors.subtitle, fontSize: 12.5),
         ),
         if (ch["joined"] == true) ...[
           const SizedBox(height: 10),
@@ -737,12 +737,12 @@ class _CreatorAnalyticsScreenState extends State<CreatorAnalyticsScreen> {
     final maxLikes = daily.fold<num>(1, (m, x) => (x["likes"] as num) > m ? x["likes"] as num : m);
     Widget kpi(String label, Object? v, IconData icon, Color c) => Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(18)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Icon(icon, color: c),
             const SizedBox(height: 10),
             Text("${v ?? 0}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
-            Text(label, style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
+            Text(label, style: TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
           ]),
         );
     return Scaffold(
@@ -750,7 +750,7 @@ class _CreatorAnalyticsScreenState extends State<CreatorAnalyticsScreen> {
       body: d == null
           ? const Center(child: CircularProgressIndicator())
           : ListView(padding: const EdgeInsets.all(16), children: [
-              Text(tr("Last 30 days"), style: const TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w700)),
+              Text(tr("Last 30 days"), style: TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w700)),
               const SizedBox(height: 10),
               GridView.count(
                 crossAxisCount: 2,
@@ -771,7 +771,7 @@ class _CreatorAnalyticsScreenState extends State<CreatorAnalyticsScreen> {
               const SizedBox(height: 18),
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+                decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(18)),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(tr("Likes per day"), style: const TextStyle(fontWeight: FontWeight.w800)),
                   const SizedBox(height: 12),
@@ -797,7 +797,7 @@ class _CreatorAnalyticsScreenState extends State<CreatorAnalyticsScreen> {
               const SizedBox(height: 8),
               for (final p in maps(d["topPosts"]))
                 ListTile(
-                  tileColor: Colors.white,
+                  tileColor: AppColors.surface,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   leading: const Icon(Icons.photo_rounded),
                   title: Text(p["activity"].toString()),

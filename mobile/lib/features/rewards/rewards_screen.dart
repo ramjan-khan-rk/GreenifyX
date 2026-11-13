@@ -132,12 +132,12 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             Text(reward["title"] ?? "", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
             if ((reward["partner"] ?? "").toString().isNotEmpty)
-              Padding(padding: const EdgeInsets.only(top: 4), child: Text(reward["partner"], style: const TextStyle(color: AppColors.subtitle))),
+              Padding(padding: const EdgeInsets.only(top: 4), child: Text(reward["partner"], style: TextStyle(color: AppColors.subtitle))),
             const SizedBox(height: 12),
             Text(reward["description"] ?? "", style: const TextStyle(height: 1.45)),
             if ((reward["terms"] ?? "").toString().isNotEmpty) ...[
               const SizedBox(height: 10),
-              Text(reward["terms"], style: const TextStyle(fontSize: 12.5, color: AppColors.subtitle)),
+              Text(reward["terms"], style: TextStyle(fontSize: 12.5, color: AppColors.subtitle)),
             ],
             const SizedBox(height: 18),
             Row(children: [
@@ -146,11 +146,11 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
               Text(paid ? "AED ${price.toStringAsFixed(price % 1 == 0 ? 0 : 2)} + $cost pts" : "$cost points",
                   style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
               const Spacer(),
-              Text("You have $_balance", style: const TextStyle(color: AppColors.subtitle)),
+              Text("You have $_balance", style: TextStyle(color: AppColors.subtitle)),
             ]),
             const SizedBox(height: 14),
             if (paid && !_payments)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(bottom: 10),
                 child: Text("Card payments are coming soon for this partner.", style: TextStyle(color: AppColors.subtitle)),
               ),
@@ -164,7 +164,7 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
                       : "Redeem now"),
             ),
             if (paid)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 8),
                 child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Icon(Icons.lock_rounded, size: 14, color: AppColors.subtitle),
@@ -215,7 +215,7 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
           SliverAppBar(
             pinned: true,
             expandedHeight: 210,
-            backgroundColor: AppColors.ink,
+            backgroundColor: AppColors.inkFixedFixed,
             foregroundColor: Colors.white,
             title: Text(tr("Rewards")),
             flexibleSpace: FlexibleSpaceBar(
@@ -313,7 +313,7 @@ class _RewardCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Material(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(22),
         clipBehavior: Clip.antiAlias,
         elevation: 0,
@@ -362,13 +362,13 @@ class _RewardCard extends StatelessWidget {
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(reward["title"] ?? "", style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                     const SizedBox(height: 2),
-                    Text(reward["partner"] ?? "", style: const TextStyle(color: AppColors.subtitle, fontSize: 13)),
+                    Text(reward["partner"] ?? "", style: TextStyle(color: AppColors.subtitle, fontSize: 13)),
                   ]),
                 ),
                 const SizedBox(width: 10),
                 affordable
                     ? FilledButton(onPressed: onTap, child: Text(tr("Redeem")))
-                    : Text("${cost - balance} to go", style: const TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w700)),
+                    : Text("${cost - balance} to go", style: TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w700)),
               ]),
             ),
           ]),
@@ -389,7 +389,7 @@ class _RedemptionTile extends StatelessWidget {
     final date = DateTime.tryParse(item["createdAt"]?.toString() ?? "")?.toLocal();
     final color = status == "issued" ? AppColors.eco : status == "used" ? AppColors.subtitle : AppColors.error;
     return Material(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: BorderRadius.circular(18),
       child: ListTile(
         onTap: status == "issued" ? onTap : null,
@@ -425,7 +425,7 @@ class _CodeBox extends StatelessWidget {
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Text(code, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: 2)),
           const SizedBox(width: 10),
-          const Icon(Icons.copy_rounded, size: 18, color: AppColors.subtitle),
+          Icon(Icons.copy_rounded, size: 18, color: AppColors.subtitle),
         ]),
       ),
     );

@@ -54,7 +54,7 @@ class ImpactHero extends StatelessWidget {
             const Spacer(),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(20)),
+              decoration: BoxDecoration(color: AppColors.surface.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(20)),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 const Icon(Icons.local_fire_department_rounded, color: Color(0xFFFF9F43), size: 16),
                 const SizedBox(width: 4),

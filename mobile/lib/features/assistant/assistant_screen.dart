@@ -124,7 +124,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
           top: false,
           child: Container(
             padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
-            decoration: const BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: AppColors.border))),
+            decoration: BoxDecoration(color: AppColors.surface, border: Border(top: BorderSide(color: AppColors.border))),
             child: Row(children: [
               Expanded(
                 child: TextField(
@@ -137,8 +137,8 @@ class _AssistantScreenState extends State<AssistantScreen> {
                     hintText: tr("Ask about campaigns, recycling, your points…"),
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: const BorderSide(color: AppColors.border)),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: const BorderSide(color: AppColors.border)),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide(color: AppColors.border)),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide(color: AppColors.border)),
                   ),
                 ),
               ),
@@ -185,7 +185,7 @@ class _Welcome extends StatelessWidget {
       ),
       const SizedBox(height: 22),
       Material(
-        color: AppColors.ink,
+        color: AppColors.inkFixedFixed,
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
@@ -213,7 +213,7 @@ class _Welcome extends StatelessWidget {
           ActionChip(
             label: Text(s),
             backgroundColor: Colors.white,
-            side: const BorderSide(color: AppColors.border),
+            side: BorderSide(color: AppColors.border),
             onPressed: () => onPick(s),
           ),
       ]),
@@ -268,7 +268,7 @@ class _Typing extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: AppColors.border),
         ),

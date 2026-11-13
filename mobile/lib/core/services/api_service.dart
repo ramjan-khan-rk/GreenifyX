@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../config/app_config.dart';
+import 'offline_cache.dart';
 import 'storage_service.dart';
 
 class ApiService {
@@ -31,5 +32,6 @@ class ApiService {
         },
       ),
     );
+    dio.interceptors.add(OfflineCache.instance);
   }
 }

@@ -71,7 +71,7 @@ class _SponsoredStripState extends State<SponsoredStrip> {
                     Row(children: [
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8)),
+                        decoration: BoxDecoration(color: AppColors.surface24, borderRadius: BorderRadius.circular(8)),
                         child: Text(tr("Sponsored"), style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w800)),
                       ),
                       const SizedBox(width: 6),
@@ -176,10 +176,10 @@ class _SponsoredDetailScreenState extends State<SponsoredDetailScreen> {
               const SizedBox(height: 8),
               ClipRRect(borderRadius: BorderRadius.circular(6), child: LinearProgressIndicator(value: (mine / target).clamp(0, 1).toDouble(), minHeight: 12, color: color, backgroundColor: AppColors.border)),
               const SizedBox(height: 8),
-              Text(tr("Post your actions with the activity or hashtag above — they count automatically."), style: const TextStyle(color: AppColors.subtitle)),
+              Text(tr("Post your actions with the activity or hashtag above — they count automatically."), style: TextStyle(color: AppColors.subtitle)),
             ],
             const SizedBox(height: 14),
-            Text("${_c["participants"]} ${tr("joined")} · ${_c["completed"]} ${tr("completed")}", style: const TextStyle(color: AppColors.subtitle)),
+            Text("${_c["participants"]} ${tr("joined")} · ${_c["completed"]} ${tr("completed")}", style: TextStyle(color: AppColors.subtitle)),
           ]),
         ),
       ]),

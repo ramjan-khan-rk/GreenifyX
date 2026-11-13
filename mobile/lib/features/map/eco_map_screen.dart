@@ -347,7 +347,7 @@ class _PinCard extends StatelessWidget {
       elevation: 8,
       shadowColor: Colors.black26,
       borderRadius: BorderRadius.circular(20),
-      color: Colors.white,
+      color: AppColors.surface,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -361,9 +361,9 @@ class _PinCard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(pin.title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.ink)),
+                Text(pin.title, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.ink)),
                 const SizedBox(height: 2),
-                Text(pin.subtitle, style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
+                Text(pin.subtitle, style: TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
               ]),
             ),
             IconButton(onPressed: onClose, icon: const Icon(Icons.close_rounded), visualDensity: VisualDensity.compact),

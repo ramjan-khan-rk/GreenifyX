@@ -41,7 +41,7 @@ class IssueCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border),
       ),
@@ -69,17 +69,17 @@ class IssueCard extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(
               r.landmark.isNotEmpty ? r.landmark : "Pinned location",
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5, color: AppColors.ink),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5, color: AppColors.ink),
             ),
             const SizedBox(height: 2),
             Text(
               [if (r.emirate.isNotEmpty) r.emirate, if (r.distanceM != null) "${(r.distanceM! / 1000).toStringAsFixed(1)} km away", _when.format(r.createdAt)]
                   .join(" · "),
-              style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5),
+              style: TextStyle(color: AppColors.subtitle, fontSize: 12.5),
             ),
             if (r.description.isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text(r.description, style: const TextStyle(height: 1.45, color: AppColors.ink)),
+              Text(r.description, style: TextStyle(height: 1.45, color: AppColors.ink)),
             ],
             if (r.isMine) ...[
               const SizedBox(height: 12),
@@ -98,7 +98,7 @@ class IssueCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     r.confirmations == 0 ? "Be the first to confirm" : "${r.confirmations} resident${r.confirmations == 1 ? '' : 's'} confirmed",
-                    style: const TextStyle(fontSize: 13, color: AppColors.subtitle),
+                    style: TextStyle(fontSize: 13, color: AppColors.subtitle),
                   ),
                 ),
                 if (onConfirm != null)
@@ -146,12 +146,12 @@ class IssueTimeline extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
-                  Text(steps[i].label, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.ink)),
+                  Text(steps[i].label, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.ink)),
                   const SizedBox(width: 8),
-                  Text(_when.format(steps[i].at), style: const TextStyle(fontSize: 11.5, color: AppColors.subtitle)),
+                  Text(_when.format(steps[i].at), style: TextStyle(fontSize: 11.5, color: AppColors.subtitle)),
                 ]),
                 if (steps[i].note.isNotEmpty)
-                  Text(steps[i].note, style: const TextStyle(fontSize: 12.5, color: AppColors.subtitle, height: 1.35)),
+                  Text(steps[i].note, style: TextStyle(fontSize: 12.5, color: AppColors.subtitle, height: 1.35)),
               ]),
             ),
           ),

@@ -17,4 +17,14 @@ class NotificationApi {
   Future<void> markAllRead() async {
     await ApiService.dio.put("/notifications/read-all");
   }
+
+  /// Grouped, bundled inbox: {groups:[{label, items}], unreadByCategory, unread}.
+  Future<Map<String, dynamic>> inbox(String category) async {
+    final r = await ApiService.dio.get("/notifications/inbox", queryParameters: {"category": category});
+    return Map<String, dynamic>.from(r.data as Map);
+  }
+
+  Future<void> bulk(List<String> ids, String action) async {
+    await ApiService.dio.post("/notifications/bulk", data: {"ids": ids, "action": action});
+  }
 }

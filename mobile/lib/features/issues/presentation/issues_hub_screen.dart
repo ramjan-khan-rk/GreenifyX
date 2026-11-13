@@ -24,7 +24,7 @@ class IssuesHubScreen extends ConsumerWidget {
             Text(tr("Report & Restore"), style: AppTextStyles.title),
             Text(tr("Spot it. Report it. Track it."), style: AppTextStyles.tagline),
           ]),
-          bottom: const TabBar(
+          bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.subtitle,
             indicatorColor: AppColors.primary,

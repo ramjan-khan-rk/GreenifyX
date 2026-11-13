@@ -30,7 +30,7 @@ class VerifierHomeScreen extends ConsumerWidget {
               Text(tr("Authorised verifier"), style: AppTextStyles.tagline),
             ],
           ),
-          bottom: const TabBar(
+          bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.subtitle,
             indicatorColor: AppColors.primary,
@@ -90,7 +90,7 @@ class _AssignmentCard extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppColors.border)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: AppColors.border)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         CampaignCover(
           campaign: c,
@@ -107,9 +107,9 @@ class _AssignmentCard extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.all(16),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(c.title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.ink)),
+            Text(c.title, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.ink)),
             const SizedBox(height: 6),
-            Text("${c.locationName} · ${campaignDates(c)}", style: const TextStyle(color: AppColors.subtitle, fontSize: 13)),
+            Text("${c.locationName} · ${campaignDates(c)}", style: TextStyle(color: AppColors.subtitle, fontSize: 13)),
             const SizedBox(height: 12),
             Row(children: [
               PeopleRow(people: c.participants),
@@ -133,7 +133,7 @@ class _AssignmentCard extends ConsumerWidget {
               const SizedBox(height: 10),
               Text(
                 "Survival: ${c.survivalChecks.map((s) => "${s.days}d ${s.surviving}/${c.verifiedOutput}").join(" · ")}",
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.ink),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.ink),
               ),
             ],
             if (canCheckSurvival) ...[
@@ -222,14 +222,14 @@ class _Reports extends ConsumerWidget {
               return Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.border),
                 ),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(children: [
                     Expanded(
-                      child: Text(r.campaignTitle, style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
+                      child: Text(r.campaignTitle, style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -240,7 +240,7 @@ class _Reports extends ConsumerWidget {
                   const SizedBox(height: 6),
                   Text(
                     "${_fmt.format(r.submittedAt)} · ${r.attendeeCount} attendees · ${r.distanceM} m from site",
-                    style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5),
+                    style: TextStyle(color: AppColors.subtitle, fontSize: 12.5),
                   ),
                   if (r.status == "rejected" && r.reviewNote.isNotEmpty) ...[
                     const SizedBox(height: 8),

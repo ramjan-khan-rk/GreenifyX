@@ -89,6 +89,9 @@ class AdminApi {
 
   Future<Json> stats() => _send(() => _dio.get('/admin/stats'));
 
+  /// DAU/WAU/MAU, retention cohorts, funnel, emirates and heat-map points.
+  Future<Json> analytics() => _send(() => _dio.get('/admin/analytics'));
+
   Future<Paged> users({String q = '', String status = 'all', String emirate = '', String sort = 'recent', int page = 1, int limit = 20}) async {
     final data = await _send(() => _dio.get('/admin/users', queryParameters: {
           if (q.isNotEmpty) 'q': q,

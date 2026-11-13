@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../../../core/services/upload_queue.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -196,8 +198,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           )
         : await picker.pickImage(
             source: ImageSource.gallery,
-            imageQuality: 95,
-            maxWidth: 3840,
+            imageQuality: 85,
+            maxWidth: 2160,
           );
 
     if (file == null) return;
@@ -224,63 +226,49 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       return;
     }
 
-    setState(() => submitting = true);
+    // Snapshot everything now; the upload carries on in the background
+    // (with progress, automatic retries and a Retry button) while they scroll.
+    final file = selectedFile!;
+    final video = isVideo;
+    final music = musicFile;
+    final title = musicTitle;
+    final fields = <String, dynamic>{
+      "description": descriptionController.text.trim(),
+      "activity": activity,
+      if (tagged.isNotEmpty) "taggedUsers": jsonEncode([for (final t in tagged) t.id]),
+      "cause": lane,
+      "look": look,
+      "visibility": everyone ? "public" : "friends",
+      "community": ?widget.communityId,
+      "muteOriginal": video && muteOriginal ? "true" : "false",
+    };
+    await musicPreview.stop();
+    videoPreview?.pause();
+    String? musicUrl;
 
-    try {
-      final name = selectedFile!.path.split(RegExp(r"[/\\]")).last;
-      final media = isVideo
-          ? MediaType("video", name.toLowerCase().endsWith(".mov") ? "quicktime" : "mp4")
-          : MediaType("image", "jpeg");
-
-      await musicPreview.stop();
-      videoPreview?.pause();
-      final musicUrl = musicFile == null ? null : await uploadAudioFile(musicFile!);
-      final formData = FormData.fromMap({
-        "description": descriptionController.text.trim(),
-        "activity": activity,
-        if (tagged.isNotEmpty) "taggedUsers": jsonEncode([for (final t in tagged) t.id]),
-        "cause": lane,
-        "look": look,
-        "visibility": everyone ? "public" : "friends",
-        "community": ?widget.communityId,
-        "musicUrl": ?musicUrl,
-        if (musicUrl != null) "musicTitle": musicTitle,
-        "muteOriginal": isVideo && muteOriginal ? "true" : "false",
-        "image": await MultipartFile.fromFile(
-          selectedFile!.path,
-          filename: name,
-          contentType: media,
-        ),
-      });
-
-      await repository.createPost(formData);
-      if (!mounted) return;
-      await showDialog<void>(
-        context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: AppColors.card,
-          title: Text(tr("You put something good out there"), style: AppTextStyles.title),
-          content: Text(
-            tr("Friends can feel it now. Eco Points arrive when one of them verifies it."),
-            style: AppTextStyles.body,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(tr("Love that")),
-            ),
-          ],
-        ),
-      );
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(friendlyError(e))),
-      );
-    } finally {
-      if (mounted) setState(() => submitting = false);
-    }
+    UploadQueue.instance.enqueue(UploadJob(
+      path: "/posts/create",
+      label: activity,
+      thumbPath: video ? null : file.path,
+      isVideo: video,
+      build: () async {
+        if (music != null) musicUrl ??= await uploadAudioFile(music);
+        final name = file.path.split(RegExp(r"[/\\]")).last;
+        final media = video ? MediaType("video", name.toLowerCase().endsWith(".mov") ? "quicktime" : "mp4") : MediaType("image", "jpeg");
+        return FormData.fromMap({
+          ...fields,
+          "musicUrl": ?musicUrl,
+          if (musicUrl != null) "musicTitle": title,
+          "image": await MultipartFile.fromFile(file.path, filename: name, contentType: media),
+        });
+      },
+    ));
+    HapticFeedback.mediumImpact();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(tr("Posting in the background. Keep scrolling!"))),
+    );
+    Navigator.pop(context);
   }
 
   @override
@@ -481,7 +469,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                               ),
                           ]),
                   ),
-                  const Icon(Icons.chevron_right_rounded, color: AppColors.subtitle),
+                  Icon(Icons.chevron_right_rounded, color: AppColors.subtitle),
                 ]),
               ),
             ),
@@ -555,7 +543,7 @@ class _MediaStage extends StatelessWidget {
       child: Container(
         height: 280,
         width: double.infinity,
-        color: AppColors.ink,
+        color: AppColors.inkFixedFixed,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -632,7 +620,7 @@ class _PickButton extends StatelessWidget {
         icon: Icon(icon, size: 18),
         label: Text(label),
         style: FilledButton.styleFrom(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           foregroundColor: AppColors.ink,
         ),
       ),
@@ -675,7 +663,7 @@ class _ActivityTile extends StatelessWidget {
             ]),
             const Spacer(),
             Text(activity.label, maxLines: 2, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, height: 1.2, color: AppColors.ink)),
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, height: 1.2, color: AppColors.ink)),
           ]),
         ),
       ),

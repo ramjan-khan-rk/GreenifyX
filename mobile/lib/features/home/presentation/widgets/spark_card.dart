@@ -49,7 +49,7 @@ class SparkCard extends StatelessWidget {
           FilledButton(
             onPressed: onShare,
             style: FilledButton.styleFrom(
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.surface,
               foregroundColor: AppColors.ink,
             ),
             child: Text(tr("Share a moment")),

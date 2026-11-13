@@ -58,7 +58,7 @@ class PointsHistoryScreen extends ConsumerWidget {
                 Container(
                   width: 56,
                   height: 56,
-                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), shape: BoxShape.circle),
+                  decoration: BoxDecoration(color: AppColors.surface.withValues(alpha: 0.15), shape: BoxShape.circle),
                   child: const Icon(Icons.stars_rounded, color: AppColors.sun, size: 32),
                 ),
               ]),
@@ -83,7 +83,7 @@ class PointsHistoryScreen extends ConsumerWidget {
                     )
                   : Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(color: AppColors.border),
                       ),
@@ -130,7 +130,7 @@ class _EntryTile extends StatelessWidget {
         e.reason.isNotEmpty ? e.reason : e.campaignTitle,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink, fontSize: 14),
+        style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink, fontSize: 14),
       ),
       subtitle: Text(e.status == "reversed" ? "$date · reversed" : date, style: const TextStyle(fontSize: 12.5)),
       trailing: Text(

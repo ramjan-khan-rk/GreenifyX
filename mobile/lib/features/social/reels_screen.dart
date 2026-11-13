@@ -227,7 +227,7 @@ class _ReelPageState extends State<_ReelPage> {
               child: Stack(clipBehavior: Clip.none, alignment: Alignment.bottomCenter, children: [
                 Container(
                   padding: const EdgeInsets.all(2),
-                  decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.surface),
                   child: UserAvatar(imageUrl: _user["profileImage"]?.toString(), name: _user["name"]?.toString(), radius: 22),
                 ),
                 if (!isMe && !_following)
@@ -278,7 +278,7 @@ class _ReelPageState extends State<_ReelPage> {
               const SizedBox(height: 6),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(14)),
+                decoration: BoxDecoration(color: AppColors.surface24, borderRadius: BorderRadius.circular(14)),
                 child: Text("🌱 ${r["activity"]} · +${r["ecoPoints"]}", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12.5)),
               ),
               if ((r["description"] ?? "").toString().isNotEmpty)

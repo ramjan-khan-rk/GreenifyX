@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../pages/campaigns_page.dart';
 import '../pages/challenges_page.dart';
 import '../pages/impact_page.dart';
+import '../pages/analytics_page.dart';
 import '../pages/insights_page.dart';
 import '../pages/issues_page.dart';
 import '../pages/login_page.dart';
@@ -67,6 +68,7 @@ final GoRouter adminRouter = GoRouter(
         GoRoute(path: '/rewards', pageBuilder: (context, state) => _page(state, const RewardsPage())),
         GoRoute(path: '/pickups', pageBuilder: (context, state) => _page(state, const PickupsPage())),
         GoRoute(path: '/events', pageBuilder: (context, state) => _page(state, const EventsPage())),
+        GoRoute(path: '/analytics', pageBuilder: (context, state) => _page(state, const AnalyticsPage())),
         GoRoute(path: '/insights', pageBuilder: (context, state) => _page(state, const InsightsPage())),
         GoRoute(path: '/impact', pageBuilder: (context, state) => _page(state, const ImpactPage())),
         GoRoute(path: '/enquiries', pageBuilder: (context, state) => _page(state, const EnquiriesPage())),

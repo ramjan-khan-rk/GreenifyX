@@ -159,7 +159,7 @@ class _MarketScreenState extends State<MarketScreen> {
           if (items == null)
             const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
           else if (items.isEmpty)
-            SliverFillRemaining(child: Center(child: Text(tr("Nothing listed yet. Be the first!"), style: const TextStyle(color: AppColors.subtitle))))
+            SliverFillRemaining(child: Center(child: Text(tr("Nothing listed yet. Be the first!"), style: TextStyle(color: AppColors.subtitle))))
           else
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
@@ -189,7 +189,7 @@ class _ListingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final imgs = (l["images"] as List? ?? []);
     return Material(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: BorderRadius.circular(18),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -224,7 +224,7 @@ class _ListingCard extends StatelessWidget {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(l["title"].toString(), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
               Text("${l["area"]?.toString().isNotEmpty == true ? "${l["area"]}, " : ""}${l["emirate"] ?? ""}",
-                  maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.subtitle, fontSize: 12)),
+                  maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppColors.subtitle, fontSize: 12)),
             ]),
           ),
         ]),
@@ -315,7 +315,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                 child: Text(_price(l), style: TextStyle(color: _typeColor[l["type"]] ?? AppColors.eco, fontWeight: FontWeight.w900)),
               ),
               const SizedBox(width: 8),
-              Text("${tr(l["category"].toString())} · ${tr(l["condition"].toString())}", style: const TextStyle(color: AppColors.subtitle)),
+              Text("${tr(l["category"].toString())} · ${tr(l["condition"].toString())}", style: TextStyle(color: AppColors.subtitle)),
             ]),
             const SizedBox(height: 10),
             Text(l["title"].toString(), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
@@ -324,7 +324,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
             Text(l["description"]?.toString() ?? "", style: const TextStyle(fontSize: 15, height: 1.5)),
             const SizedBox(height: 14),
             Row(children: [
-              const Icon(Icons.place_rounded, size: 18, color: AppColors.subtitle),
+              Icon(Icons.place_rounded, size: 18, color: AppColors.subtitle),
               const SizedBox(width: 6),
               Text("${l["area"]?.toString().isNotEmpty == true ? "${l["area"]}, " : ""}${l["emirate"] ?? ""}"),
               const Spacer(),
@@ -483,7 +483,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                 child: Container(
                   width: 96,
                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border, width: 2)),
-                  child: const Icon(Icons.add_a_photo_rounded, color: AppColors.subtitle),
+                  child: Icon(Icons.add_a_photo_rounded, color: AppColors.subtitle),
                 ),
               ),
           ]),

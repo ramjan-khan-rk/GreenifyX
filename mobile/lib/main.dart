@@ -6,7 +6,10 @@ import 'core/i18n/app_locale.dart';
 
 import 'core/routes/app_router.dart';
 import 'core/session/session_controller.dart';
+import 'core/theme/app_colors.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_controller.dart';
+import 'core/widgets/app_banners.dart';
 import 'core/services/api_service.dart';
 
 Future<void> main() async {
@@ -14,6 +17,7 @@ Future<void> main() async {
 
   await ApiService.initialize();
   await AppLocale.load();
+  await ThemeController.load();
   await SessionController.instance.syncFromStorage();
 
   runApp(
@@ -31,22 +35,31 @@ class GreenifyX extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return ValueListenableBuilder<Locale>(
-      valueListenable: AppLocale.current,
-      builder: (context, locale, _) => MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        title: "GreenifyX",
-        theme: AppTheme.lightTheme,
-        locale: locale,
-        supportedLocales: const [Locale("en"), Locale("ar")],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        routerConfig: AppRouter.router,
-        // Rebuild every screen when the language flips so all text and layout direction update.
-        builder: (context, child) => KeyedSubtree(key: ValueKey(locale.languageCode), child: child ?? const SizedBox()),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeController.mode,
+      builder: (context, themeMode, _) => ValueListenableBuilder<Locale>(
+        valueListenable: AppLocale.current,
+        builder: (context, locale, _) => MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          title: "GreenifyX",
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          locale: locale,
+          supportedLocales: const [Locale("en"), Locale("ar")],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          routerConfig: AppRouter.router,
+          // Language or light/dark change: rebuild every screen with the new palette and direction.
+          builder: (context, child) {
+            final dark = Theme.of(context).brightness == Brightness.dark;
+            AppColors.isDark = dark;
+            return AppBanners(child: KeyedSubtree(key: ValueKey("${locale.languageCode}-$dark"), child: child ?? const SizedBox()));
+          },
+        ),
       ),
     );
 

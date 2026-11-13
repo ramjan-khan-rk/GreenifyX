@@ -158,7 +158,7 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
                         onTap: () => setState(() => _photos.removeAt(i)),
                         child: Container(
                           padding: const EdgeInsets.all(3),
-                          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                          decoration: BoxDecoration(color: AppColors.surface, shape: BoxShape.circle),
                           child: const Icon(Icons.close_rounded, size: 16),
                         ),
                       ),
@@ -172,7 +172,7 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
                   child: Container(
                     width: 100,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppColors.primary.withValues(alpha: 0.5), width: 1.5),
                     ),
@@ -191,7 +191,7 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: _position != null ? AppColors.eco.withValues(alpha: 0.5) : AppColors.border),
             ),

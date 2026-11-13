@@ -30,7 +30,7 @@ class UserAvatar extends StatelessWidget {
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(colors: [AppColors.blush, Color(0xFFFFD9C7)]),
       ),

@@ -44,7 +44,7 @@ class _CompleteProfileScreenState
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            const Icon(BrandGlyph.settings, color: AppColors.navy, size: 28),
+            Icon(BrandGlyph.settings, color: AppColors.navy, size: 28),
             const SizedBox(height: 8),
             Text(
               tr("Add your name, a photo and where you live"),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../core/theme/theme_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -225,11 +227,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _Card(children: [
             for (final l in const [("en", "English"), ("ar", "العربية")])
               ListTile(
-                leading: const Icon(Icons.translate_rounded, color: AppColors.ink),
+                leading: Icon(Icons.translate_rounded, color: AppColors.ink),
                 title: Text(l.$2, style: const TextStyle(fontWeight: FontWeight.w600)),
                 trailing: _language == l.$1 ? const Icon(Icons.check_circle_rounded, color: AppColors.eco) : null,
                 onTap: () => _setLanguage(l.$1),
               ),
+          ]),
+          const _Label("Appearance"),
+          _Card(children: [
+            ValueListenableBuilder<ThemeMode>(
+              valueListenable: ThemeController.mode,
+              builder: (context, mode, _) => Padding(
+                padding: const EdgeInsets.all(12),
+                child: SegmentedButton<ThemeMode>(
+                  showSelectedIcon: false,
+                  style: SegmentedButton.styleFrom(selectedBackgroundColor: AppColors.primary.withValues(alpha: 0.16)),
+                  segments: [
+                    ButtonSegment(value: ThemeMode.system, icon: const Icon(Icons.brightness_auto_rounded), label: Text(tr("Auto"))),
+                    ButtonSegment(value: ThemeMode.light, icon: const Icon(Icons.light_mode_rounded), label: Text(tr("Light"))),
+                    ButtonSegment(value: ThemeMode.dark, icon: const Icon(Icons.dark_mode_rounded), label: Text(tr("Dark"))),
+                  ],
+                  selected: {mode},
+                  onSelectionChanged: (v) {
+                    HapticFeedback.selectionClick();
+                    ThemeController.set(v.first);
+                  },
+                ),
+              ),
+            ),
           ]),
           const _Label("About"),
           _Card(children: [
@@ -254,7 +279,7 @@ class _Label extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.fromLTRB(8, 22, 8, 8),
-        child: Text(tr(text).toUpperCase(), style: const TextStyle(fontSize: 12, letterSpacing: 0.8, fontWeight: FontWeight.w800, color: AppColors.subtitle)),
+        child: Text(tr(text).toUpperCase(), style: TextStyle(fontSize: 12, letterSpacing: 0.8, fontWeight: FontWeight.w800, color: AppColors.subtitle)),
       );
 }
 
@@ -265,7 +290,7 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [BoxShadow(color: Color(0x0D000000), blurRadius: 14, offset: Offset(0, 4))],
         ),

@@ -61,7 +61,7 @@ class LeaderboardScreen extends ConsumerWidget {
                     tileColor: AppColors.card,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
-                      side: const BorderSide(color: AppColors.border),
+                      side: BorderSide(color: AppColors.border),
                     ),
                     leading: CircleAvatar(
                       backgroundColor: rank == 1

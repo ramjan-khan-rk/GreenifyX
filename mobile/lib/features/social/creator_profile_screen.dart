@@ -75,8 +75,8 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
   Widget build(BuildContext context) {
     final p = _p;
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(backgroundColor: Colors.white, title: Text(p?["name"]?.toString() ?? "")),
+      backgroundColor: AppColors.surface,
+      appBar: AppBar(backgroundColor: AppColors.surface, title: Text(p?["name"]?.toString() ?? "")),
       body: _error != null
           ? Center(child: TextButton(onPressed: _load, child: Text("$_error\n${tr("Try again")}", textAlign: TextAlign.center)))
           : p == null
@@ -92,7 +92,7 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
                           decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [AppColors.sun, AppColors.joy, Color(0xFF7F53AC)])),
                           child: Container(
                             padding: const EdgeInsets.all(3),
-                            decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                            decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.surface),
                             child: UserAvatar(imageUrl: p["profileImage"]?.toString(), name: p["name"]?.toString(), radius: 40),
                           ),
                         ),
@@ -121,7 +121,7 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
                         if ((p["bio"] ?? "").toString().isNotEmpty) Padding(padding: const EdgeInsets.only(top: 4), child: Text(p["bio"].toString(), style: const TextStyle(height: 1.4))),
                         const SizedBox(height: 6),
                         Text("⭐ ${compact(p["ecoPoints"] as num?)} ${tr("Eco Points")} · ❤ ${compact(p["likes"] as num?)} · 🔥 ${p["streak"] ?? 0}",
-                            style: const TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w600)),
+                            style: TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w600)),
                       ]),
                     ),
                     if (p["isMe"] != true)
@@ -156,7 +156,7 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
                     const SizedBox(height: 14),
                     const Divider(),
                     if (_posts.isEmpty)
-                      Padding(padding: const EdgeInsets.all(40), child: Center(child: Text(tr("No posts yet"), style: const TextStyle(color: AppColors.subtitle)))),
+                      Padding(padding: const EdgeInsets.all(40), child: Center(child: Text(tr("No posts yet"), style: TextStyle(color: AppColors.subtitle)))),
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -202,7 +202,7 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(children: [
-        Text(value, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.ink)),
-        Text(label, style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
+        Text(value, style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.ink)),
+        Text(label, style: TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
       ]);
 }

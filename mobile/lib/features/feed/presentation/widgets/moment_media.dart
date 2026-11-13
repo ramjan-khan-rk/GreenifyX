@@ -41,7 +41,7 @@ class MomentMedia extends StatelessWidget {
     final poster = isVideo ? videoPoster(resolved) : resolved;
 
     Widget picture = poster == null
-        ? Container(color: AppColors.ink)
+        ? Container(color: AppColors.inkFixedFixed)
         : CachedNetworkImage(
             imageUrl: poster,
             width: double.infinity,

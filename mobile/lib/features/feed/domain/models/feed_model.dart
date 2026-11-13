@@ -32,6 +32,8 @@ class FeedModel {
   final DateTime? createdAt;
   final String userBadge;
   final List<String> hashtags;
+  /// Who verified it: "friend", "ai" (instant AI check) or "admin".
+  final String verifiedBy;
 
   FeedModel({
     required this.id,
@@ -60,6 +62,7 @@ class FeedModel {
     this.createdAt,
     this.userBadge = "",
     this.hashtags = const [],
+    this.verifiedBy = "",
   });
 
   factory FeedModel.fromJson(Map<String, dynamic> json) {
@@ -98,6 +101,7 @@ class FeedModel {
       createdAt: DateTime.tryParse(json["createdAt"]?.toString() ?? "")?.toLocal(),
       userBadge: (user is Map ? user["verifiedBadge"] : null)?.toString() ?? "",
       hashtags: (json["hashtags"] as List? ?? const []).map((e) => e.toString()).toList(),
+      verifiedBy: json["verifiedBy"]?.toString() ?? "",
     );
   }
 }

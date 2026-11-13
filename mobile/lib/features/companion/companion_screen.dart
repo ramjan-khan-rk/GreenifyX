@@ -48,7 +48,7 @@ class _CompanionCardState extends State<CompanionCard> {
               Container(
                 width: 52,
                 height: 52,
-                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(16)),
+                decoration: BoxDecoration(color: AppColors.surface24, borderRadius: BorderRadius.circular(16)),
                 child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 28),
               ),
               const SizedBox(width: 14),
@@ -66,7 +66,7 @@ class _CompanionCardState extends State<CompanionCard> {
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(12)),
+                      decoration: BoxDecoration(color: AppColors.surface24, borderRadius: BorderRadius.circular(12)),
                       child: Text("${tr("Today")}: ${AppLocale.isArabic && (daily["nameAr"] ?? "").toString().isNotEmpty ? daily["nameAr"] : daily["name"]} · +${daily["points"]}",
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 12)),
                     ),
@@ -207,7 +207,7 @@ class _CompanionScreenState extends State<CompanionScreen> {
     return Container(
       margin: const EdgeInsets.only(top: 14),
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22)),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           const Icon(Icons.flag_rounded, color: AppColors.joy),
@@ -244,7 +244,7 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(14)),
+        decoration: BoxDecoration(color: AppColors.surface24, borderRadius: BorderRadius.circular(14)),
         child: Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12.5)),
       );
 }
@@ -262,7 +262,7 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         margin: const EdgeInsets.only(top: 14),
         padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22)),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22)),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
             Container(

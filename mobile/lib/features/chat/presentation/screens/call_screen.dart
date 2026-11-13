@@ -72,12 +72,12 @@ class _CallScreenState extends State<CallScreen> {
     return PopScope(
       canPop: call.phase == "idle" || ended,
       child: Scaffold(
-        backgroundColor: AppColors.ink,
+        backgroundColor: AppColors.inkFixedFixed,
         body: Stack(fit: StackFit.expand, children: [
           if (showVideo)
             RTCVideoView(call.remoteRenderer, objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover)
           else
-            const DecoratedBox(
+            DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [AppColors.ink, Color(0xFF1F5A4B)],

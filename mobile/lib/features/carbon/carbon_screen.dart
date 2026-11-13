@@ -92,7 +92,7 @@ class _Dashboard extends StatelessWidget {
       const SizedBox(height: 16),
       Container(
         padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22)),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22)),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(tr("How you compare"), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
           const SizedBox(height: 12),
@@ -120,7 +120,7 @@ class _Dashboard extends StatelessWidget {
       const SizedBox(height: 16),
       Container(
         padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22)),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22)),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(tr("Where it comes from"), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
           const SizedBox(height: 12),
@@ -159,7 +159,7 @@ class _Dashboard extends StatelessWidget {
         ),
       const SizedBox(height: 6),
       Text(tr("Estimates for awareness, based on typical UAE factors. Savings come from your verified actions."),
-          style: const TextStyle(fontSize: 12, color: AppColors.subtitle)),
+          style: TextStyle(fontSize: 12, color: AppColors.subtitle)),
     ]);
   }
 }
@@ -207,7 +207,7 @@ class _QuizState extends State<_Quiz> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(18)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [Expanded(child: Text(tr(label), style: const TextStyle(fontWeight: FontWeight.w700))), Text("${v.round()}$unit", style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.joy))]),
         Slider(value: v, max: max, divisions: div > 0 ? div : max.round(), onChanged: (x) => setState(() => _a[key] = x.round())),
@@ -218,7 +218,7 @@ class _QuizState extends State<_Quiz> {
   Widget _choice(String key, String label, Map<String, String> options) => Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(18)),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(tr(label), style: const TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 10),
@@ -243,7 +243,7 @@ class _QuizState extends State<_Quiz> {
   @override
   Widget build(BuildContext context) {
     return ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 30), children: [
-      Text(tr("Answer 11 quick questions to see your yearly CO₂ — about 2 minutes."), style: const TextStyle(color: AppColors.subtitle, height: 1.4)),
+      Text(tr("Answer 11 quick questions to see your yearly CO₂ — about 2 minutes."), style: TextStyle(color: AppColors.subtitle, height: 1.4)),
       const SizedBox(height: 14),
       _choice("carType", "Your main car", {"petrol": "Petrol", "hybrid": "Hybrid", "electric": "Electric", "none": "No car"}),
       _slider("carKmPerWeek", "Car travel per week", 1000, div: 50, unit: " km"),

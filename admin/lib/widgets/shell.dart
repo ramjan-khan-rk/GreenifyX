@@ -14,6 +14,7 @@ class NavItem {
 
 const navItems = [
   NavItem('/', 'Overview', Icons.space_dashboard_rounded),
+  NavItem('/analytics', 'Analytics', Icons.insights_rounded),
   NavItem('/campaigns', 'Campaigns', Icons.forest_rounded),
   NavItem('/verification', 'Verification', Icons.fact_check_rounded),
   NavItem('/issues', 'Report & Restore', Icons.report_gmailerrorred_rounded),

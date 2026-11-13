@@ -75,14 +75,14 @@ class _ForYouFeedState extends State<ForYouFeed> with AutomaticKeepAliveClientMi
     final items = <Widget>[widget.header];
     if (_interests.isNotEmpty) {
       items.add(Container(
-        color: Colors.white,
+        color: AppColors.surface,
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
         child: Row(children: [
           const Icon(Icons.auto_awesome_rounded, color: AppColors.joy, size: 18),
           const SizedBox(width: 6),
           Expanded(
             child: Text("${tr("Picked for you")}: ${_interests.join(" · ")}",
-                maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w600, fontSize: 12.5)),
+                maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w600, fontSize: 12.5)),
           ),
         ]),
       ));
@@ -96,7 +96,7 @@ class _ForYouFeedState extends State<ForYouFeed> with AutomaticKeepAliveClientMi
       items.add(Padding(
         padding: const EdgeInsets.all(40),
         child: Column(children: [
-          const Icon(Icons.auto_awesome_rounded, size: 48, color: AppColors.subtitle),
+          Icon(Icons.auto_awesome_rounded, size: 48, color: AppColors.subtitle),
           const SizedBox(height: 10),
           Text(_error ?? tr("Your feed learns what you love. Like and post a few moments to tune it."), textAlign: TextAlign.center),
         ]),
@@ -125,7 +125,7 @@ class _CreatorsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        color: Colors.white,
+        color: AppColors.surface,
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -146,7 +146,7 @@ class _CreatorsRow extends StatelessWidget {
                       UserAvatar(imageUrl: c["profileImage"]?.toString(), name: c["name"]?.toString(), radius: 30),
                       const SizedBox(height: 8),
                       Text(c["name"]?.toString() ?? "", maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
-                      Text("❤ ${compact(c["likes"] as num?)}", style: const TextStyle(color: AppColors.subtitle, fontSize: 12)),
+                      Text("❤ ${compact(c["likes"] as num?)}", style: TextStyle(color: AppColors.subtitle, fontSize: 12)),
                       const Spacer(),
                       Text(tr("View profile"), style: const TextStyle(color: AppColors.joy, fontWeight: FontWeight.w800, fontSize: 12.5)),
                     ]),
@@ -164,7 +164,7 @@ class _CommunitiesRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        color: Colors.white,
+        color: AppColors.surface,
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -180,7 +180,7 @@ class _CommunitiesRow extends StatelessWidget {
                     width: 210,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), color: AppColors.ink),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), color: AppColors.inkFixedFixed),
                     child: Stack(fit: StackFit.expand, children: [
                       if ((c["coverImage"] ?? "").toString().isNotEmpty)
                         CachedNetworkImage(imageUrl: c["coverImage"].toString(), fit: BoxFit.cover, color: Colors.black38, colorBlendMode: BlendMode.darken),

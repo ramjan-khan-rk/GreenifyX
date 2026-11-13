@@ -68,7 +68,7 @@ class _ScanScreenState extends State<ScanScreen> {
             const SizedBox(height: 12),
             Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
             const SizedBox(height: 6),
-            Text(body, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.subtitle, height: 1.4)),
+            Text(body, textAlign: TextAlign.center, style: TextStyle(color: AppColors.subtitle, height: 1.4)),
             const SizedBox(height: 18),
             SizedBox(width: double.infinity, child: FilledButton(onPressed: () => Navigator.pop(ctx), child: Text(tr("Done")))),
           ]),

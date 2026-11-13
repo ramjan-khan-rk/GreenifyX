@@ -158,7 +158,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                 Flexible(child: Text(u["name"]?.toString() ?? "", style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5))),
                 VerifiedTick(u["verifiedBadge"]?.toString() ?? "", size: 14),
                 const SizedBox(width: 6),
-                Text(_ago(c["createdAt"]?.toString()), style: const TextStyle(color: AppColors.subtitle, fontSize: 12)),
+                Text(_ago(c["createdAt"]?.toString()), style: TextStyle(color: AppColors.subtitle, fontSize: 12)),
                 if (c["pinned"] == true) ...[
                   const SizedBox(width: 6),
                   const Icon(Icons.push_pin_rounded, size: 13, color: AppColors.joy),
@@ -166,7 +166,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                 ],
               ]),
               const SizedBox(height: 2),
-              RichCaption(c["text"]?.toString() ?? "", style: const TextStyle(fontSize: 14.5, height: 1.35, color: AppColors.ink)),
+              RichCaption(c["text"]?.toString() ?? "", style: TextStyle(fontSize: 14.5, height: 1.35, color: AppColors.ink)),
               const SizedBox(height: 4),
               Wrap(spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
                 for (final e in reactions.entries)
@@ -184,8 +184,8 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                         child: Text("${e.key} ${(e.value as Map)["count"]}", style: const TextStyle(fontSize: 12.5)),
                       ),
                     ),
-                InkWell(onTap: () => _startReply(c), child: Text(tr("Reply"), style: const TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w700, fontSize: 12.5))),
-                InkWell(onTap: () => _more(c), child: const Icon(Icons.add_reaction_outlined, size: 17, color: AppColors.subtitle)),
+                InkWell(onTap: () => _startReply(c), child: Text(tr("Reply"), style: TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w700, fontSize: 12.5))),
+                InkWell(onTap: () => _more(c), child: Icon(Icons.add_reaction_outlined, size: 17, color: AppColors.subtitle)),
               ]),
             ]),
           ),
@@ -210,7 +210,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
               child: list == null
                   ? Center(child: _error != null ? TextButton(onPressed: _load, child: Text(_error!)) : const CircularProgressIndicator())
                   : list.isEmpty
-                      ? Center(child: Text(tr("No comments yet"), style: const TextStyle(color: AppColors.subtitle)))
+                      ? Center(child: Text(tr("No comments yet"), style: TextStyle(color: AppColors.subtitle)))
                       : ListView(padding: const EdgeInsets.only(bottom: 12), children: [
                           for (final c in list) ...[
                             _comment(c),
@@ -220,10 +220,10 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
             ),
             if (_replyTo != null)
               Container(
-                color: const Color(0xFFF3EEE9),
+                color: AppColors.background,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 child: Row(children: [
-                  Expanded(child: Text("${tr("Replying to")} ${(_replyTo!["user"] as Map?)?["name"] ?? ""}", style: const TextStyle(color: AppColors.subtitle))),
+                  Expanded(child: Text("${tr("Replying to")} ${(_replyTo!["user"] as Map?)?["name"] ?? ""}", style: TextStyle(color: AppColors.subtitle))),
                   IconButton(visualDensity: VisualDensity.compact, onPressed: () => setState(() => _replyTo = null), icon: const Icon(Icons.close_rounded, size: 18)),
                 ]),
               ),

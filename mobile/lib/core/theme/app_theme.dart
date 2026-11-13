@@ -7,15 +7,29 @@ import 'app_colors.dart';
 class AppTheme {
   AppTheme._();
 
-  static final ThemeData lightTheme = _build();
+  static ThemeData get lightTheme => build(dark: false);
+  static ThemeData get darkTheme => build(dark: true);
 
-  static ThemeData _build() {
-    final text = GoogleFonts.manropeTextTheme().apply(bodyColor: AppColors.text, displayColor: AppColors.text);
+  /// Builds the theme with the neutral palette of the requested mode.
+  static ThemeData build({required bool dark}) {
+    final previous = AppColors.isDark;
+    AppColors.isDark = dark;
+    try {
+      return _build(dark);
+    } finally {
+      AppColors.isDark = previous;
+    }
+  }
+
+  static ThemeData _build(bool dark) {
+    final base = dark ? ThemeData.dark().textTheme : ThemeData.light().textTheme;
+    final text = GoogleFonts.manropeTextTheme(base).apply(bodyColor: AppColors.text, displayColor: AppColors.text);
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: AppColors.background,
       splashFactory: InkSparkle.splashFactory,
-      colorScheme: const ColorScheme.light(
+      brightness: dark ? Brightness.dark : Brightness.light,
+      colorScheme: (dark ? const ColorScheme.dark() : const ColorScheme.light()).copyWith(
         primary: AppColors.primary,
         onPrimary: Colors.white,
         secondary: AppColors.navy,
@@ -51,7 +65,7 @@ class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         height: 68,
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.card,
         surfaceTintColor: Colors.transparent,
         indicatorColor: AppColors.primary.withValues(alpha: 0.14),
         indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -67,8 +81,8 @@ class AppTheme {
           ),
         ),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Colors.white,
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: AppColors.card,
         selectedItemColor: AppColors.joy,
         unselectedItemColor: AppColors.ink,
         type: BottomNavigationBarType.fixed,
@@ -80,19 +94,19 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.navy,
+        backgroundColor: AppColors.inkFixed,
         contentTextStyle: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w600),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        side: const BorderSide(color: AppColors.border),
+        side: BorderSide(color: AppColors.border),
         labelStyle: GoogleFonts.manrope(fontWeight: FontWeight.w600, color: AppColors.ink),
         selectedColor: AppColors.primary.withValues(alpha: 0.14),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.card,
       ),
-      dividerTheme: const DividerThemeData(color: AppColors.border, thickness: 1, space: 1),
+      dividerTheme: DividerThemeData(color: AppColors.border, thickness: 1, space: 1),
       listTileTheme: const ListTileThemeData(iconColor: AppColors.primary),
       // Buttons: one consistent, premium shape and rhythm everywhere.
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -142,12 +156,12 @@ class AppTheme {
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(foregroundColor: AppColors.ink, minimumSize: const Size(44, 44)),
       ),
-      iconTheme: const IconThemeData(color: AppColors.ink, size: 24),
+      iconTheme: IconThemeData(color: AppColors.ink, size: 24),
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: SegmentedButton.styleFrom(
           selectedBackgroundColor: AppColors.primary.withValues(alpha: 0.14),
           selectedForegroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.border),
+          side: BorderSide(color: AppColors.border),
           textStyle: GoogleFonts.manrope(fontWeight: FontWeight.w700),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
@@ -161,24 +175,24 @@ class AppTheme {
         fillColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? AppColors.primary : null),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: Colors.white,
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: AppColors.card,
         surfaceTintColor: Colors.transparent,
         showDragHandle: true,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.card,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         titleTextStyle: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.ink),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.card,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.border)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.border)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: AppColors.border)),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: AppColors.border)),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),

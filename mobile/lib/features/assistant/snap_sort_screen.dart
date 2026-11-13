@@ -80,7 +80,7 @@ class _SnapSortScreenState extends State<SnapSortScreen> {
                 Image.file(_photo!, fit: BoxFit.cover)
               else
                 Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(colors: [AppColors.ink, Color(0xFF3A3256)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                   ),
                   child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -137,7 +137,7 @@ class _SnapSortScreenState extends State<SnapSortScreen> {
                 avatar: CircleAvatar(backgroundColor: hexColor(item["binColor"]?.toString()), radius: 6),
                 label: Text(item["name"]?.toString() ?? ""),
                 backgroundColor: Colors.white,
-                side: const BorderSide(color: AppColors.border),
+                side: BorderSide(color: AppColors.border),
                 onPressed: _busy ? null : () => _pick(item["key"].toString()),
               ),
           ]),

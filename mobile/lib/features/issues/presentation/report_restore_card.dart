@@ -17,7 +17,7 @@ class ReportRestoreCard extends StatelessWidget {
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             colors: [AppColors.ink, Color(0xFF3A3256)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

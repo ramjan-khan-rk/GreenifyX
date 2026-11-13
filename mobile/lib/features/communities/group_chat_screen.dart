@@ -158,9 +158,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   Widget build(BuildContext context) {
     final me = SessionUser.id;
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F1EB),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         titleSpacing: 0,
         title: Row(children: [
           const CircleAvatar(backgroundColor: AppColors.eco, child: Icon(Icons.groups_rounded, color: Colors.white)),
@@ -168,7 +168,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(widget.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-              Text("$_members ${tr("members")}", style: const TextStyle(fontSize: 12, color: AppColors.subtitle)),
+              Text("$_members ${tr("members")}", style: TextStyle(fontSize: 12, color: AppColors.subtitle)),
             ]),
           ),
         ]),
@@ -233,7 +233,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         height: 48,
                         alignment: Alignment.centerLeft,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+                        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(24)),
                         child: Text("● ${formatDuration(_recorder.elapsed)}  ${tr("Recording…")}", style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.w700)),
                       )
                     : TextField(

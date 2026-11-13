@@ -173,9 +173,9 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
         children: [
-          Text(c.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.ink)),
+          Text(c.title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.ink)),
           const SizedBox(height: 4),
-          Text(c.locationName, style: const TextStyle(color: AppColors.subtitle)),
+          Text(c.locationName, style: TextStyle(color: AppColors.subtitle)),
           _step(1, "Confirm you're on site"),
           _LocationCard(
             locating: _locating,
@@ -275,7 +275,7 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
             else
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.border),
                 ),
@@ -341,7 +341,7 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
             child: Text("$n", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13)),
           ),
           const SizedBox(width: 10),
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.ink)),
+          Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.ink)),
         ]),
       );
 }
@@ -401,7 +401,7 @@ class _LocationCard extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(title, style: TextStyle(fontWeight: FontWeight.w800, color: color)),
             const SizedBox(height: 2),
-            Text(subtitle, style: const TextStyle(fontSize: 12.5, color: AppColors.subtitle, height: 1.35)),
+            Text(subtitle, style: TextStyle(fontSize: 12.5, color: AppColors.subtitle, height: 1.35)),
             if (position?.isMocked == true)
               Padding(
                 padding: EdgeInsets.only(top: 4),
@@ -425,7 +425,7 @@ class _ShotButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -436,7 +436,7 @@ class _ShotButton extends StatelessWidget {
           child: Column(children: [
             Icon(icon, color: AppColors.primary),
             const SizedBox(height: 6),
-            Text(label, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
+            Text(label, style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
           ]),
         ),
       ),
@@ -461,7 +461,7 @@ class _Thumb extends StatelessWidget {
         bottom: 6,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(color: AppColors.ink.withValues(alpha: 0.75), borderRadius: BorderRadius.circular(6)),
+          decoration: BoxDecoration(color: AppColors.inkFixedFixed.withValues(alpha: 0.75), borderRadius: BorderRadius.circular(6)),
           child: Text(shot.kind.toUpperCase(),
               style: const TextStyle(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
         ),
@@ -473,8 +473,8 @@ class _Thumb extends StatelessWidget {
           onTap: onRemove,
           child: Container(
             padding: const EdgeInsets.all(3),
-            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-            child: const Icon(Icons.close_rounded, size: 16, color: AppColors.ink),
+            decoration: BoxDecoration(color: AppColors.surface, shape: BoxShape.circle),
+            child: Icon(Icons.close_rounded, size: 16, color: AppColors.ink),
           ),
         ),
       ),

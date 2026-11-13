@@ -328,10 +328,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Widget build(BuildContext context) {
     final messages = ref.watch(chatProvider(widget.userId));
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F1EB),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: AppColors.surface,
         elevation: 0.5,
         shadowColor: Colors.black12,
         titleSpacing: 0,
@@ -357,7 +357,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(widget.userName,
-                  maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16.5, color: AppColors.ink)),
+                  maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16.5, color: AppColors.ink)),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
                 child: Text(
@@ -471,8 +471,8 @@ class _DayChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(20)),
-        child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.subtitle)),
+        decoration: BoxDecoration(color: AppColors.surface.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(20)),
+        child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.subtitle)),
       ),
     );
   }
@@ -572,7 +572,7 @@ class _EmptyChat extends StatelessWidget {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           UserAvatar(imageUrl: image, radius: 44),
           const SizedBox(height: 14),
-          Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.ink)),
+          Text(name, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.ink)),
           const SizedBox(height: 6),
           Text(
             tr("Say hello, send a voice note, or start a call from the top bar."),
@@ -623,7 +623,7 @@ class _Composer extends StatelessWidget {
               constraints: const BoxConstraints(minHeight: 50),
               padding: EdgeInsets.only(left: recording ? 16 : 4, right: 16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(26),
                 boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 8, offset: Offset(0, 2))],
               ),
@@ -640,7 +640,7 @@ class _Composer extends StatelessWidget {
                       IconButton(
                         tooltip: tr("Send a photo"),
                         onPressed: sending ? null : onAttach,
-                        icon: const Icon(Icons.add_photo_alternate_outlined, color: AppColors.subtitle),
+                        icon: Icon(Icons.add_photo_alternate_outlined, color: AppColors.subtitle),
                       ),
                       Expanded(child: TextField(
                       controller: controller,

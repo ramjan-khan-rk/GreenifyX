@@ -132,7 +132,7 @@ class OrgDashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 16),
                     Container(
                       padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
+                      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
                       child: Row(children: [
                         const Icon(Icons.key_rounded, color: AppColors.primary),
                         const SizedBox(width: 12),
@@ -161,7 +161,7 @@ class OrgDashboardScreen extends ConsumerWidget {
                       Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
+                        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
                         child: Row(children: [
                           const Icon(Icons.forest_rounded, color: AppColors.eco),
                           const SizedBox(width: 10),
@@ -174,7 +174,7 @@ class OrgDashboardScreen extends ConsumerWidget {
                   Text(tr("Top members"), style: AppTextStyles.title.copyWith(fontSize: 17)),
                   const SizedBox(height: 8),
                   Container(
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
+                    decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
                     child: Column(children: [
                       for (final m in members)
                         ListTile(

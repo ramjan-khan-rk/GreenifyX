@@ -164,7 +164,7 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
               _Section(children: [
                 Text(
                   "${c.verifiedOutput} trees verified as planted. Survival is checked on site so we only count trees that live.",
-                  style: const TextStyle(color: AppColors.subtitle, height: 1.4, fontSize: 13),
+                  style: TextStyle(color: AppColors.subtitle, height: 1.4, fontSize: 13),
                 ),
                 const SizedBox(height: 12),
                 for (final s in c.survivalChecks) ...[
@@ -180,7 +180,7 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
             ],
             if (c.description.isNotEmpty) ...[
               const _Heading("About"),
-              Text(c.description, style: const TextStyle(fontSize: 15, height: 1.55, color: AppColors.ink)),
+              Text(c.description, style: TextStyle(fontSize: 15, height: 1.55, color: AppColors.ink)),
             ],
             const _Heading("When & where"),
             _Section(children: [
@@ -258,7 +258,7 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
           child: Container(
             padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + MediaQuery.paddingOf(context).bottom),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 16, offset: const Offset(0, -4))],
             ),
             child: SizedBox(
@@ -323,14 +323,14 @@ class _Stat extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.border),
         ),
         child: Column(children: [
           Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: color)),
           const SizedBox(height: 2),
-          Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11.5, color: AppColors.subtitle)),
+          Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 11.5, color: AppColors.subtitle)),
         ]),
       ),
     );
@@ -344,7 +344,7 @@ class _Heading extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.fromLTRB(4, 22, 4, 10),
-        child: Text(text, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.ink)),
+        child: Text(text, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.ink)),
       );
 }
 
@@ -356,7 +356,7 @@ class _Section extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: AppColors.border),
         ),
@@ -383,9 +383,9 @@ class _InfoRow extends StatelessWidget {
       const SizedBox(width: 12),
       Expanded(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
+          Text(title, style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
           const SizedBox(height: 2),
-          Text(subtitle, style: const TextStyle(color: AppColors.subtitle, fontSize: 13, height: 1.35)),
+          Text(subtitle, style: TextStyle(color: AppColors.subtitle, fontSize: 13, height: 1.35)),
         ]),
       ),
     ]);

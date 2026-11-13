@@ -97,7 +97,7 @@ class _LiveListScreenState extends State<LiveListScreen> {
             Padding(
               padding: const EdgeInsets.all(40),
               child: Column(children: [
-                const Icon(Icons.sensors_off_rounded, size: 56, color: AppColors.subtitle),
+                Icon(Icons.sensors_off_rounded, size: 56, color: AppColors.subtitle),
                 const SizedBox(height: 10),
                 Text(tr("Nobody is live right now. Be the first!"), textAlign: TextAlign.center),
               ]),

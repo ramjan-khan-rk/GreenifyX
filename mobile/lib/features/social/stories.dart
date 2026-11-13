@@ -50,7 +50,7 @@ class StoriesBarState extends State<StoriesBar> {
     final mine = _groups.where((g) => (g["user"] as Map)["_id"] == widget.meId).toList();
     final others = _groups.where((g) => (g["user"] as Map)["_id"] != widget.meId).toList();
     return Container(
-      color: Colors.white,
+      color: AppColors.surface,
       height: 112,
       child: ListView(
         scrollDirection: Axis.horizontal,
@@ -124,7 +124,7 @@ class _Ring extends StatelessWidget {
                 ),
                 child: Container(
                   padding: const EdgeInsets.all(2.5),
-                  decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.surface),
                   child: UserAvatar(imageUrl: image, name: avatarName, radius: 28),
                 ),
               ),
@@ -144,7 +144,7 @@ class _Ring extends StatelessWidget {
                 ),
             ]),
             const SizedBox(height: 5),
-            Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.ink)),
+            Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.ink)),
           ]),
         ),
       ),
@@ -542,7 +542,7 @@ class _Pick extends StatelessWidget {
         child: Container(
           width: 130,
           height: 110,
-          decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white24)),
+          decoration: BoxDecoration(color: AppColors.surface10, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white24)),
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(icon, color: Colors.white, size: 32),
             const SizedBox(height: 8),

@@ -26,7 +26,7 @@ class TeamsScreen extends ConsumerWidget {
             Text(tr("Teams"), style: AppTextStyles.title),
             Text(tr("Your company, school or community, together"), style: AppTextStyles.tagline),
           ]),
-          bottom: const TabBar(
+          bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.subtitle,
             indicatorColor: AppColors.primary,
@@ -72,7 +72,7 @@ class _MyTeams extends ConsumerWidget {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(22),
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       colors: [AppColors.ink, Color(0xFF3A3256)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -128,7 +128,7 @@ class _OrgTile extends StatelessWidget {
     final pending = org["status"] == "pending";
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: AppColors.border)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: BorderSide(color: AppColors.border)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
@@ -219,7 +219,7 @@ class _RankRow extends StatelessWidget {
             Text(row["name"]?.toString() ?? "", maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
             Text(
               "${row["members"]} members · ${row["participations"]} verified actions${trees > 0 ? " · $trees trees" : ""}",
-              style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5),
+              style: TextStyle(color: AppColors.subtitle, fontSize: 12.5),
             ),
           ]),
         ),

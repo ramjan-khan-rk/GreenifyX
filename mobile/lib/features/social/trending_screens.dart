@@ -50,7 +50,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
               child: ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 30), children: [
                 Text(tr("Hashtags this week"), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
                 const SizedBox(height: 10),
-                if (maps(d["hashtags"]).isEmpty) Text(tr("No hashtags yet — add #tags to your posts!"), style: const TextStyle(color: AppColors.subtitle)),
+                if (maps(d["hashtags"]).isEmpty) Text(tr("No hashtags yet — add #tags to your posts!"), style: TextStyle(color: AppColors.subtitle)),
                 Wrap(spacing: 8, runSpacing: 8, children: [
                   for (final (i, h) in maps(d["hashtags"]).indexed)
                     ActionChip(
@@ -66,7 +66,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
                   for (final s in maps(d["sounds"]))
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: const CircleAvatar(backgroundColor: AppColors.ink, child: Icon(Icons.music_note_rounded, color: Colors.white)),
+                      leading: const CircleAvatar(backgroundColor: AppColors.inkFixedFixed, child: Icon(Icons.music_note_rounded, color: Colors.white)),
                       title: Text(s["title"].toString(), style: const TextStyle(fontWeight: FontWeight.w700)),
                       subtitle: Text("${s["uses"]} ${tr("posts")}"),
                       trailing: const Icon(Icons.play_circle_fill_rounded, color: AppColors.joy, size: 30),
@@ -124,7 +124,7 @@ class _HashtagScreenState extends State<HashtagScreen> {
                 const SizedBox(width: 14),
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text("#${widget.tag}", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
-                  Text("${p.length} ${tr("posts")}", style: const TextStyle(color: AppColors.subtitle)),
+                  Text("${p.length} ${tr("posts")}", style: TextStyle(color: AppColors.subtitle)),
                 ]),
               ]),
               const SizedBox(height: 16),

@@ -143,7 +143,7 @@ class _EventsScreenState extends State<EventsScreen> {
                               for (final g in groups.entries) ...[
                                 Padding(
                                   padding: const EdgeInsets.fromLTRB(4, 14, 4, 8),
-                                  child: Text(g.key, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.ink)),
+                                  child: Text(g.key, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.ink)),
                                 ),
                                 for (final e in g.value)
                                   _EventCard(
@@ -218,7 +218,7 @@ class _EventCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Material(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -253,10 +253,10 @@ class _EventCard extends StatelessWidget {
                     "${s == null ? "" : DateFormat("h:mm a").format(s)} · ${e["venue"] ?? e["emirate"] ?? ""}",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5),
+                    style: TextStyle(color: AppColors.subtitle, fontSize: 12.5),
                   ),
                   const SizedBox(height: 2),
-                  Text("${e["attendeeCount"] ?? 0} going", style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
+                  Text("${e["attendeeCount"] ?? 0} going", style: TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
                 ]),
               ),
             ),

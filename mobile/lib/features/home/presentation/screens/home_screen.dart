@@ -123,7 +123,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                         child: Container(
                           padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.background),
+                          decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.background),
                           child: UserAvatar(imageUrl: user.profileImage, name: user.name, radius: 22),
                         ),
                       ),
@@ -131,12 +131,12 @@ class HomeScreen extends ConsumerWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(_greeting(), style: const TextStyle(color: AppColors.subtitle, fontSize: 13, fontWeight: FontWeight.w600)),
+                        Text(_greeting(), style: TextStyle(color: AppColors.subtitle, fontSize: 13, fontWeight: FontWeight.w600)),
                         Text(
                           first.isEmpty ? tr("Welcome 👋") : "$first 👋",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: AppColors.ink, letterSpacing: -0.3),
+                          style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: AppColors.ink, letterSpacing: -0.3),
                         ),
                       ]),
                     ),
@@ -187,7 +187,7 @@ class HomeScreen extends ConsumerWidget {
                                   f.name.split(" ").first,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.ink),
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.ink),
                                 ),
                               ]),
                             ),
@@ -221,7 +221,7 @@ class _TopIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppColors.surface,
       shape: const CircleBorder(),
       elevation: 0,
       child: InkWell(
@@ -248,21 +248,21 @@ class _LeaderboardTeaser extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(22),
           boxShadow: const [BoxShadow(color: Color(0x0D000000), blurRadius: 14, offset: Offset(0, 4))],
         ),
         child: Row(children: [
-          const CircleAvatar(radius: 24, backgroundColor: AppColors.blush, child: Icon(Icons.leaderboard_rounded, color: AppColors.joy)),
+          CircleAvatar(radius: 24, backgroundColor: AppColors.blush, child: Icon(Icons.leaderboard_rounded, color: AppColors.joy)),
           const SizedBox(width: 14),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(tr("UAE weekly ranking"), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5, color: AppColors.ink)),
+              Text(tr("UAE weekly ranking"), style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5, color: AppColors.ink)),
               const SizedBox(height: 2),
-              Text(tr("See where you stand among friends and every emirate."), style: const TextStyle(color: AppColors.subtitle, fontSize: 13)),
+              Text(tr("See where you stand among friends and every emirate."), style: TextStyle(color: AppColors.subtitle, fontSize: 13)),
             ]),
           ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.subtitle),
+          Icon(Icons.chevron_right_rounded, color: AppColors.subtitle),
         ]),
       ),
     );

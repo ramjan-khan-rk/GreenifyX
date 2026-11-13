@@ -35,7 +35,7 @@ class CampaignsScreen extends ConsumerWidget {
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EcoMapScreen())),
             ),
           ],
-          bottom: const TabBar(
+          bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.subtitle,
             indicatorColor: AppColors.primary,
@@ -129,7 +129,7 @@ class _HowItWorks extends StatelessWidget {
             Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.14), shape: BoxShape.circle),
+              decoration: BoxDecoration(color: AppColors.surface.withValues(alpha: 0.14), shape: BoxShape.circle),
               child: Icon(icon, color: AppColors.sun, size: 20),
             ),
             const SizedBox(height: 8),
@@ -145,7 +145,7 @@ class _HowItWorks extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [AppColors.ink, Color(0xFF3A3256)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

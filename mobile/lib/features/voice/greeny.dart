@@ -253,7 +253,7 @@ class _GreenySheetState extends State<GreenySheet> with SingleTickerProviderStat
       child: SafeArea(
         top: false,
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.surface24, borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 18),
           GestureDetector(
             onTap: _listening ? () => Greeny.instance.stopListening() : _listen,
@@ -294,7 +294,7 @@ class _GreenySheetState extends State<GreenySheet> with SingleTickerProviderStat
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(18), border: Border.all(color: Colors.white12)),
+              decoration: BoxDecoration(color: AppColors.surface10, borderRadius: BorderRadius.circular(18), border: Border.all(color: Colors.white12)),
               child: Text(_reply, style: const TextStyle(color: Colors.white, fontSize: 15.5, fontWeight: FontWeight.w600, height: 1.4)),
             ),
           ],

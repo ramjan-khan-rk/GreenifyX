@@ -140,7 +140,7 @@ class _BattlesScreenState extends State<BattlesScreen> with SingleTickerProvider
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(color: AppColors.surface24, borderRadius: BorderRadius.circular(10)),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Container(width: 7, height: 7, decoration: const BoxDecoration(color: Color(0xFF2ECC71), shape: BoxShape.circle)),
                 const SizedBox(width: 5),
@@ -180,7 +180,7 @@ class _BattlesScreenState extends State<BattlesScreen> with SingleTickerProvider
               child: Container(
                 width: 104,
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white12)),
+                decoration: BoxDecoration(color: AppColors.surface10, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white12)),
                 child: Column(children: [
                   Icon(e.value.$2, color: e.value.$3, size: 30),
                   const SizedBox(height: 6),

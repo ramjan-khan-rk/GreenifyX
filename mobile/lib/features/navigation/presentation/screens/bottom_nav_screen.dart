@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/socket_service.dart';
@@ -16,6 +17,8 @@ import '../../../chat/presentation/screens/chat_screen.dart';
 import '../../../../core/utils/chat_launcher.dart';
 import '../../../feed/presentation/screens/feed_screen.dart';
 import '../../../feed/application/feed_audio.dart';
+import '../../../feed/application/providers/feed_provider.dart';
+import '../../../../core/services/upload_queue.dart';
 import '../../../friends/application/providers/friend_provider.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../notifications/application/providers/notification_provider.dart';
@@ -94,10 +97,16 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
     calls.bind();
     calls.addListener(_onIncomingCall);
     PushService.instance.register();
+    UploadQueue.instance.completed.addListener(_onPosted);
     Greeny.instance.loadPrefs();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) OnboardingScreen.maybeShow(context);
     });
+  }
+
+  /// A background upload finished: show the new post at the top of the feed.
+  void _onPosted() {
+    if (mounted) ref.invalidate(feedProvider);
   }
 
   void _onIncomingCall() {
@@ -112,6 +121,7 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
 
   @override
   void dispose() {
+    UploadQueue.instance.completed.removeListener(_onPosted);
     final socket = SocketService.instance;
     socket.off("receiveMessage", _onRealtimeEvent);
     socket.off("receiveMessage", _onMessagePopup);
@@ -151,7 +161,10 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
           selectedIndex: currentIndex,
           onDestinationSelected: (index) {
             // Feed soundtracks stop when you leave the feed.
-            if (index != currentIndex) FeedAudio.instance.stop();
+            if (index != currentIndex) {
+              FeedAudio.instance.stop();
+              HapticFeedback.selectionClick();
+            }
             setState(() => currentIndex = index);
           },
           destinations: [

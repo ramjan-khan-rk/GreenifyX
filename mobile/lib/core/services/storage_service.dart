@@ -1,5 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'offline_cache.dart';
+
 class StorageService {
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
@@ -20,5 +22,6 @@ class StorageService {
 
   static Future<void> clear() async {
     await _storage.deleteAll();
+    await OfflineCache.clear();
   }
 }

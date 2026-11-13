@@ -157,7 +157,7 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      color: Colors.white,
+      color: AppColors.surface,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         // Header
         Padding(
@@ -170,7 +170,7 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
                 decoration: BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [c, AppColors.sun])),
                 child: Container(
                   padding: const EdgeInsets.all(2),
-                  decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.surface),
                   child: UserAvatar(imageUrl: p.profileImage, name: p.name, radius: 18),
                 ),
               ),
@@ -181,7 +181,7 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
                 Row(children: [
                   Flexible(
                     child: Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5, color: AppColors.ink)),
+                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5, color: AppColors.ink)),
                   ),
                   VerifiedTick(p.userBadge),
                 ]),
@@ -197,7 +197,7 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
                           child: GestureDetector(
                             onTap: () => _openUser(p.tagged[i].id, p.tagged[i].name, p.tagged[i].profileImage),
                             child: Text(p.tagged[i].name.split(" ").first,
-                                style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink, fontSize: 12.5)),
+                                style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink, fontSize: 12.5)),
                           ),
                         ),
                       ],
@@ -208,13 +208,13 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
                   ]),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5),
+                  style: TextStyle(color: AppColors.subtitle, fontSize: 12.5),
                 ),
               ]),
             ),
             PopupMenuButton<String>(
               tooltip: tr("More"),
-              icon: const Icon(Icons.more_horiz_rounded, color: AppColors.ink),
+              icon: Icon(Icons.more_horiz_rounded, color: AppColors.ink),
               onSelected: (v) {
                 if (v == "report") _report();
                 if (v == "save") _toggleSave();
@@ -262,6 +262,27 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
                 ]),
               ),
             ),
+            if (_verified && p.verifiedBy == "ai")
+              Positioned(
+                right: 12,
+                top: 48,
+                child: Tooltip(
+                  message: tr("Checked instantly by GreenifyX AI"),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(colors: [Color(0xFF7B5CFF), AppColors.joy]),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 8, offset: Offset(0, 2))],
+                    ),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 13),
+                      const SizedBox(width: 4),
+                      Text(tr("AI verified"), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 11.5)),
+                    ]),
+                  ),
+                ),
+              ),
             IgnorePointer(
               child: AnimatedBuilder(
                 animation: _burst,
@@ -323,7 +344,7 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             if (_likes > 0)
-              Text("$_likes ${_likes == 1 ? "like" : "likes"}", style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
+              Text("$_likes ${_likes == 1 ? "like" : "likes"}", style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
             if (p.description.isNotEmpty) ...[
               const SizedBox(height: 4),
               GestureDetector(
@@ -332,7 +353,7 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
                   p.description,
                   lead: p.name.split(" ").first,
                   maxLines: _expanded ? null : 2,
-                  style: const TextStyle(color: AppColors.ink, fontSize: 14.5, height: 1.4),
+                  style: TextStyle(color: AppColors.ink, fontSize: 14.5, height: 1.4),
                   onHashtag: (tag) => Navigator.push(context, MaterialPageRoute(builder: (_) => HashtagScreen(tag: tag, meId: widget.meId))),
                 ),
               ),
@@ -342,7 +363,7 @@ class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderSt
               GestureDetector(
                 onTap: _comments,
                 child: Text("View ${p.comments == 1 ? "1 comment" : "all ${p.comments} comments"}",
-                    style: const TextStyle(color: AppColors.subtitle, fontSize: 13.5)),
+                    style: TextStyle(color: AppColors.subtitle, fontSize: 13.5)),
               ),
             ],
           ]),
@@ -371,10 +392,10 @@ class _Glass extends StatelessWidget {
 
 class _Action extends StatelessWidget {
   final IconData icon;
-  final Color color;
+  final Color? color;
   final VoidCallback onTap;
   final bool pop;
-  const _Action({required this.icon, required this.onTap, this.color = AppColors.ink, this.pop = false});
+  const _Action({required this.icon, required this.onTap, this.color, this.pop = false});
 
   @override
   Widget build(BuildContext context) => IconButton(
@@ -384,7 +405,7 @@ class _Action extends StatelessWidget {
           scale: pop ? 1.12 : 1,
           duration: const Duration(milliseconds: 160),
           curve: Curves.easeOutBack,
-          child: Icon(icon, color: color),
+          child: Icon(icon, color: color ?? AppColors.ink),
         ),
       );
 }

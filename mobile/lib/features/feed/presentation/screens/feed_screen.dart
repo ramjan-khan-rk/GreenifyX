@@ -54,12 +54,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF4EFEA),
+        backgroundColor: AppColors.background,
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: AppColors.surface,
           titleSpacing: 18,
-          title: Text(tr("Moments"), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.ink, letterSpacing: -0.5)),
+          title: Text(tr("Moments"), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.ink, letterSpacing: -0.5)),
           actions: [
             IconButton(
               tooltip: tr("Reels"),

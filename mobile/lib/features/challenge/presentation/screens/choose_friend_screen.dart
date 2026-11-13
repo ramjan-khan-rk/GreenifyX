@@ -120,11 +120,11 @@ class _ChooseFriendScreenState extends ConsumerState<ChooseFriendScreen> {
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColors.border),
+                      borderSide: BorderSide(color: AppColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColors.border),
+                      borderSide: BorderSide(color: AppColors.border),
                     ),
                   ),
                   onChanged: (_) => setState(() {}),
@@ -147,7 +147,7 @@ class _ChooseFriendScreenState extends ConsumerState<ChooseFriendScreen> {
                           final selected = selectedFriend?.id == friend.id;
 
                           return Material(
-                            color: Colors.white,
+                            color: AppColors.surface,
                             borderRadius: BorderRadius.circular(16),
                             child: InkWell(
                               borderRadius: BorderRadius.circular(16),

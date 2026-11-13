@@ -125,7 +125,7 @@ class AccountScreen extends ConsumerWidget {
                             label: Text(_badgeLabel(badge)),
                             backgroundColor:
                                 AppColors.mint.withValues(alpha: 0.7),
-                            side: const BorderSide(color: AppColors.border),
+                            side: BorderSide(color: AppColors.border),
                           ),
                         )
                         .toList(),
@@ -399,7 +399,7 @@ class _ProfileLink extends StatelessWidget {
         leading: Icon(icon, color: AppColors.primary),
         title: Text(title, style: AppTextStyles.body),
         subtitle: Text(subtitle, style: AppTextStyles.subtitle),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.navy),
+        trailing: Icon(Icons.chevron_right, color: AppColors.navy),
         onTap: onTap,
       ),
     );

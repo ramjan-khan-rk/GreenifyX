@@ -138,7 +138,7 @@ class _PickupTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Expanded(child: Text(mats, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5))),
@@ -150,13 +150,13 @@ class _PickupTile extends StatelessWidget {
         ]),
         const SizedBox(height: 8),
         Row(children: [
-          const Icon(Icons.event_rounded, size: 16, color: AppColors.subtitle),
+          Icon(Icons.event_rounded, size: 16, color: AppColors.subtitle),
           const SizedBox(width: 6),
           Text(date == null ? "-" : "${DateFormat("EEE d MMM").format(date)} · ${p["timeSlot"] ?? ""}"),
         ]),
         const SizedBox(height: 4),
         Row(children: [
-          const Icon(Icons.place_rounded, size: 16, color: AppColors.subtitle),
+          Icon(Icons.place_rounded, size: 16, color: AppColors.subtitle),
           const SizedBox(width: 6),
           Expanded(child: Text("${p["address"] ?? ""}${(p["emirate"] ?? "").toString().isEmpty ? "" : ", ${p["emirate"]}"}", maxLines: 1, overflow: TextOverflow.ellipsis)),
         ]),
@@ -167,7 +167,7 @@ class _PickupTile extends StatelessWidget {
         ],
         if ((p["adminNote"] ?? "").toString().isNotEmpty) ...[
           const SizedBox(height: 6),
-          Text(p["adminNote"], style: const TextStyle(color: AppColors.subtitle, fontSize: 13)),
+          Text(p["adminNote"], style: TextStyle(color: AppColors.subtitle, fontSize: 13)),
         ],
         if (status == "requested" || status == "scheduled")
           Align(alignment: Alignment.centerRight, child: TextButton(onPressed: onCancel, child: Text(tr("Cancel pickup")))),

@@ -98,7 +98,7 @@ class GuideCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
@@ -120,9 +120,9 @@ class GuideCard extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(data["title"]?.toString() ?? data["item"]?.toString() ?? "",
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.ink)),
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.ink)),
             if ((data["material"]?.toString() ?? "").isNotEmpty)
-              Text(data["material"].toString(), style: const TextStyle(color: AppColors.subtitle, fontSize: 13)),
+              Text(data["material"].toString(), style: TextStyle(color: AppColors.subtitle, fontSize: 13)),
             if (prep.isNotEmpty) ...[
               const SizedBox(height: 10),
               for (var i = 0; i < prep.length; i++)
@@ -146,7 +146,7 @@ class GuideCard extends StatelessWidget {
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 const Icon(Icons.lightbulb_rounded, size: 18, color: AppColors.sun),
                 const SizedBox(width: 6),
-                Expanded(child: Text(data["tip"].toString(), style: const TextStyle(color: AppColors.subtitle, fontSize: 13, height: 1.35))),
+                Expanded(child: Text(data["tip"].toString(), style: TextStyle(color: AppColors.subtitle, fontSize: 13, height: 1.35))),
               ]),
             ],
           ]),
@@ -180,7 +180,7 @@ class _Shell extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Material(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
@@ -198,8 +198,8 @@ class _Shell extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
-                  Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12.5, color: AppColors.subtitle)),
+                  Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
+                  Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.5, color: AppColors.subtitle)),
                 ]),
               ),
               const SizedBox(width: 8),
@@ -208,7 +208,7 @@ class _Shell extends StatelessWidget {
               else if (trailing != null)
                 Text(trailing!, style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 12.5))
               else
-                const Icon(Icons.chevron_right_rounded, color: AppColors.subtitle),
+                Icon(Icons.chevron_right_rounded, color: AppColors.subtitle),
             ]),
           ),
         ),

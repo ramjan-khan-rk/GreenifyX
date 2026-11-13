@@ -110,12 +110,12 @@ class _ImpactScreenState extends State<ImpactScreen> {
               ),
               const SizedBox(height: 10),
               Text("${tr("This month")}: ${m!["verifiedActions"]} ${tr("actions")} · ${m["co2Kg"]} kg CO₂ · ${m["wasteKg"]} kg ${tr("waste")}",
-                  style: const TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w600)),
+                  style: TextStyle(color: AppColors.subtitle, fontWeight: FontWeight.w600)),
               const SizedBox(height: 20),
               Text(tr("Impact certificate"), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
               const SizedBox(height: 4),
               Text(tr("Add it to your CV, university application or company ESG report. Anyone can scan the QR to verify it."),
-                  style: const TextStyle(color: AppColors.subtitle, height: 1.4)),
+                  style: TextStyle(color: AppColors.subtitle, height: 1.4)),
               const SizedBox(height: 14),
               if (_cert == null)
                 FilledButton.icon(
@@ -145,12 +145,12 @@ class _Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(18)),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text(emoji, style: const TextStyle(fontSize: 24)),
           const SizedBox(height: 6),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
-          Text(label, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.subtitle, fontSize: 11.5)),
+          Text(label, textAlign: TextAlign.center, style: TextStyle(color: AppColors.subtitle, fontSize: 11.5)),
         ]),
       );
 }
@@ -176,16 +176,16 @@ class _Certificate extends StatelessWidget {
         Row(children: [
           ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.asset("assets/brand/app_icon_rounded.png", width: 36, height: 36)),
           const SizedBox(width: 10),
-          const Text("GreenifyX", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppColors.ink)),
+          Text("GreenifyX", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppColors.ink)),
           const Spacer(),
           const Icon(Icons.workspace_premium_rounded, color: Color(0xFFD9B45A), size: 30),
         ]),
         const SizedBox(height: 16),
         Text(tr("CERTIFICATE OF VERIFIED IMPACT"), textAlign: TextAlign.center, style: const TextStyle(letterSpacing: 1.6, fontWeight: FontWeight.w800, fontSize: 12.5, color: Color(0xFF9A7B2F))),
         const SizedBox(height: 10),
-        Text(cert["name"]?.toString() ?? "", textAlign: TextAlign.center, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: AppColors.ink)),
+        Text(cert["name"]?.toString() ?? "", textAlign: TextAlign.center, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: AppColors.ink)),
         const SizedBox(height: 6),
-        Text(tr("has taken part in verified environmental action in the UAE"), textAlign: TextAlign.center, style: const TextStyle(color: AppColors.subtitle)),
+        Text(tr("has taken part in verified environmental action in the UAE"), textAlign: TextAlign.center, style: TextStyle(color: AppColors.subtitle)),
         const SizedBox(height: 16),
         Wrap(alignment: WrapAlignment.center, spacing: 18, runSpacing: 10, children: [
           _Stat("${stats["verifiedActions"]}", tr("actions")),
@@ -198,12 +198,12 @@ class _Certificate extends StatelessWidget {
         Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text("${tr("Issued")} ${DateFormat("d MMM yyyy").format(issued)}", style: const TextStyle(fontSize: 12, color: AppColors.subtitle)),
+              Text("${tr("Issued")} ${DateFormat("d MMM yyyy").format(issued)}", style: TextStyle(fontSize: 12, color: AppColors.subtitle)),
               Text(cert["code"]?.toString() ?? "", style: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: 1)),
-              Text(tr("Scan to verify"), style: const TextStyle(fontSize: 11, color: AppColors.subtitle)),
+              Text(tr("Scan to verify"), style: TextStyle(fontSize: 11, color: AppColors.subtitle)),
             ]),
           ),
-          QrImageView(data: url, size: 84, padding: EdgeInsets.zero, eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: AppColors.ink)),
+          QrImageView(data: url, size: 84, padding: EdgeInsets.zero, eyeStyle: QrEyeStyle(eyeShape: QrEyeShape.square, color: AppColors.ink)),
         ]),
       ]),
     );
@@ -217,6 +217,6 @@ class _Stat extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(children: [
         Text(value, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppColors.eco)),
-        Text(label, style: const TextStyle(fontSize: 11.5, color: AppColors.subtitle)),
+        Text(label, style: TextStyle(fontSize: 11.5, color: AppColors.subtitle)),
       ]);
 }

@@ -97,7 +97,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(title, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, height: 1.15, letterSpacing: -0.5)),
           const SizedBox(height: 8),
-          Text(sub, style: const TextStyle(color: AppColors.subtitle, fontSize: 15, height: 1.4)),
+          Text(sub, style: TextStyle(color: AppColors.subtitle, fontSize: 15, height: 1.4)),
         ]),
       );
 
@@ -107,9 +107,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final creators = _maps(_d["creators"]);
     final communities = _maps(_d["communities"]);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         automaticallyImplyLeading: false,
         title: Row(children: [
           for (var i = 0; i < 4; i++)
@@ -199,7 +199,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: CheckboxListTile(
                 value: _join.contains(c["_id"]),
                 onChanged: (v) => setState(() => v == true ? _join.add(c["_id"].toString()) : _join.remove(c["_id"])),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppColors.border)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppColors.border)),
                 secondary: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: SizedBox(
@@ -307,17 +307,17 @@ class _InviteScreenState extends State<InviteScreen> {
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16)),
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        Text(d["code"].toString(), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: 3, color: AppColors.ink)),
+                        Text(d["code"].toString(), style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: 3, color: AppColors.ink)),
                         const SizedBox(width: 10),
-                        const Icon(Icons.copy_rounded, color: AppColors.subtitle),
+                        Icon(Icons.copy_rounded, color: AppColors.subtitle),
                       ]),
                     ),
                   ),
                   const SizedBox(height: 14),
                   FilledButton.icon(
-                    style: FilledButton.styleFrom(backgroundColor: AppColors.ink),
+                    style: FilledButton.styleFrom(backgroundColor: AppColors.inkFixedFixed),
                     onPressed: () => SharePlus.instance.share(ShareParams(
                       text: "${tr("Join me on GreenifyX — the UAE's eco app! Use my code")} ${d["code"]} ${tr("and we both get bonus points")} 🌱\n${d["link"]}",
                     )),
@@ -367,10 +367,10 @@ class _Stat extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(18)),
         child: Column(children: [
           Text(v, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
-          Text(l, style: const TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
+          Text(l, style: TextStyle(color: AppColors.subtitle, fontSize: 12.5)),
         ]),
       );
 }
@@ -439,7 +439,7 @@ class _StreakCardState extends State<StreakCard> {
             Row(children: [
               for (var i = 0; i < 3; i++) Padding(padding: const EdgeInsets.only(right: 3), child: Text("❄️", style: TextStyle(fontSize: 15, color: i < freezes ? null : Colors.black12))),
               const SizedBox(width: 4),
-              Text("$freezes ${tr("freezes")}", style: const TextStyle(color: AppColors.subtitle, fontSize: 12)),
+              Text("$freezes ${tr("freezes")}", style: TextStyle(color: AppColors.subtitle, fontSize: 12)),
             ]),
           ]),
         ),

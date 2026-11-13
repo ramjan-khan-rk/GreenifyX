@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import 'skeleton.dart';
 import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class AppLoading extends StatelessWidget {
@@ -9,9 +10,19 @@ class AppLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: CircularProgressIndicator(color: AppColors.primary),
-    );
+    // Full pages get a shimmering skeleton; tight spaces keep a small spinner.
+    return LayoutBuilder(builder: (context, c) {
+      if (!c.hasBoundedHeight || c.maxHeight < 260 || !c.hasBoundedWidth) {
+        return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+      }
+      return ClipRect(
+        child: OverflowBox(
+          alignment: Alignment.topCenter,
+          maxHeight: double.infinity,
+          child: SkeletonList(count: (c.maxHeight / 170).ceil().clamp(2, 6)),
+        ),
+      );
+    });
   }
 }
 
