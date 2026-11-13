@@ -82,7 +82,9 @@ class OfflineCache extends Interceptor {
         }
       } catch (_) {}
     }
-    if (network) offline.value = true;
+    // On the web a blocked request (CORS) looks like a network error, so the
+    // offline pill is only shown in the phone app, where it means no signal.
+    if (network && !kIsWeb) offline.value = true;
     handler.next(err);
   }
 
