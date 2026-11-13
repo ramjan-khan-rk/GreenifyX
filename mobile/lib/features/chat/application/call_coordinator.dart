@@ -49,6 +49,43 @@ class CallCoordinator extends ChangeNotifier {
 
   bool get busy => phase != "idle" && phase != "ended";
 
+  /// Step-by-step call log: printed to the debug console as [call] lines and
+  /// kept here (last 60) so the call screen can show what stopped a call.
+  final List<String> log = [];
+
+  /// While the details panel is open, an ended call stays on screen until closed.
+  bool holdOpen = false;
+
+  void closeEnded() {
+    holdOpen = false;
+    if (phase == "ended") {
+      phase = "idle";
+      notifyListeners();
+    }
+  }
+  final Map<String, int> _candidateKinds = {};
+
+  void _log(String what) {
+    final t = DateTime.now();
+    final line = "${t.hour.toString().padLeft(2, "0")}:${t.minute.toString().padLeft(2, "0")}:${t.second.toString().padLeft(2, "0")} $what";
+    debugPrint("[call] $line");
+    // Also to the server log (Render → Logs), so a failed call can be traced there.
+    try {
+      SocketService.instance.emit("call:log", {"line": what});
+    } catch (_) {}
+    log.add(line);
+    if (log.length > 60) log.removeAt(0);
+  }
+
+  /// host = same Wi-Fi, srflx = through the internet (STUN), relay = through a TURN server.
+  void _countCandidate(String? c, String side) {
+    final m = RegExp(r" typ (w+)").firstMatch(c ?? "");
+    final kind = "$side ${m?.group(1) ?? "?"}";
+    _candidateKinds[kind] = (_candidateKinds[kind] ?? 0) + 1;
+  }
+
+  String get _candidateSummary => _candidateKinds.isEmpty ? "none" : _candidateKinds.entries.map((e) => "${e.key} x${e.value}").join(", ");
+
   void _onRaw(dynamic raw) {
     if (raw is Map) unawaited(_onSignal(Map<String, dynamic>.from(raw)));
   }
@@ -61,9 +98,16 @@ class CallCoordinator extends ChangeNotifier {
   }
 
   Future<void> start({required String userId, required String userName, required bool withVideo}) async {
-    if (busy) return;
+    if (busy) {
+      _log("start ignored: already on a call ($phase)");
+      return;
+    }
     _closeTimer?.cancel();
     _resetFlags();
+    log.clear();
+    holdOpen = false;
+    _candidateKinds.clear();
+    _log("calling $userName (${withVideo ? "video" : "voice"})");
     peerId = userId;
     peerName = userName;
     video = withVideo;
@@ -74,27 +118,42 @@ class CallCoordinator extends ChangeNotifier {
 
     bind();
     if (!await SocketService.instance.ensureConnected()) {
+      _log("STOPPED: socket not connected (offline or server asleep)");
       phase = "ended";
       detail = "You're offline. Check your internet and try again.";
       notifyListeners();
       return;
     }
 
+    _log("socket connected");
     await _ensureMedia();
     if (_local == null) {
+      _log("STOPPED: no microphone/camera (permission denied or device busy)");
       phase = "ended";
       detail = withVideo ? "Allow the camera and microphone to call." : "Allow the microphone to call.";
       notifyListeners();
       return;
     }
-    await _peer();
-    final offer = await _pc!.createOffer();
-    await _pc!.setLocalDescription(offer);
-    _send("offer", sdp: {"type": offer.type, "sdp": offer.sdp});
+    try {
+      await _peer();
+      _log("creating offer");
+      final offer = await _pc!.createOffer();
+      await _pc!.setLocalDescription(offer);
+      _send("offer", sdp: {"type": offer.type, "sdp": offer.sdp});
+    } catch (e) {
+      // Used to fail silently and leave the screen on "Calling…" forever.
+      _log("STOPPED: could not set up the call: $e");
+      _endWith("Couldn't start the call. Open Call details for the reason.");
+      return;
+    }
+    _log("offer sent, waiting for answer");
     detail = "Ringing…";
     notifyListeners();
     _ringTimer = Timer(_ringTimeout, () {
-      if (phase == "ringing") _endWith("No answer", notifyPeer: true);
+      if (phase == "ringing") {
+        _log("STOPPED: no answer in ${_ringTimeout.inSeconds}s");
+        _endWith("No answer", notifyPeer: true);
+      }
     });
   }
 
@@ -104,13 +163,18 @@ class CallCoordinator extends ChangeNotifier {
     _connectTimer?.cancel();
     _connectTimer = Timer(const Duration(seconds: 25), () {
       if (phase == "connecting") {
+        _log("STOPPED: phones could not reach each other in 25s. Candidates: $_candidateSummary");
         _endWith("Couldn't connect. Try on Wi-Fi, or ask the admin to set up call relay.", notifyPeer: true);
       }
     });
   }
 
   Future<void> accept() async {
-    if (_pendingOffer == null || phase != "incoming") return;
+    if (_pendingOffer == null || phase != "incoming") {
+      _log("accept ignored ($phase)");
+      return;
+    }
+    _log("accepted");
     _ringTimer?.cancel();
     outgoing = false;
     phase = "connecting";
@@ -119,14 +183,23 @@ class CallCoordinator extends ChangeNotifier {
     _watchConnect();
     await _ensureMedia();
     if (_local == null) {
+      _log("STOPPED: microphone permission denied");
       _endWith("Microphone permission is needed", notifyPeer: true);
       return;
     }
-    await _peer();
-    await _applyRemote(_pendingOffer!);
-    final answer = await _pc!.createAnswer();
-    await _pc!.setLocalDescription(answer);
-    _send("answer", sdp: {"type": answer.type, "sdp": answer.sdp});
+    try {
+      await _peer();
+      await _applyRemote(_pendingOffer!);
+      _log("creating answer");
+      final answer = await _pc!.createAnswer();
+      await _pc!.setLocalDescription(answer);
+      _send("answer", sdp: {"type": answer.type, "sdp": answer.sdp});
+    } catch (e) {
+      _log("STOPPED: could not answer the call: $e");
+      _endWith("Couldn't answer the call. Open Call details for the reason.", notifyPeer: true);
+      return;
+    }
+    _log("answer sent, connecting");
   }
 
   Future<void> reject() async {
@@ -138,6 +211,7 @@ class CallCoordinator extends ChangeNotifier {
     _ringTimer?.cancel();
     _closeTimer?.cancel();
     _connectTimer?.cancel();
+    if (phase != "idle") _log("hung up ($phase)");
     if (notifyPeer && peerId.isNotEmpty && phase != "ended" && phase != "idle") _send("end");
     // Close the screen first so ending always feels instant, then release
     // the camera and microphone (a stuck device must never trap the call).
@@ -189,6 +263,7 @@ class CallCoordinator extends ChangeNotifier {
 
   void _live() {
     if (phase == "live") return;
+    _log("CONNECTED. Candidates: $_candidateSummary");
     _ringTimer?.cancel();
     _connectTimer?.cancel();
     phase = "live";
@@ -204,6 +279,7 @@ class CallCoordinator extends ChangeNotifier {
   /// Shows why the call ended, then closes the call screen.
   void _endWith(String reason, {bool notifyPeer = false}) {
     if (phase == "idle") return;
+    _log("ended: $reason");
     _ringTimer?.cancel();
     _connectTimer?.cancel();
     if (notifyPeer && peerId.isNotEmpty) _send("end");
@@ -213,7 +289,7 @@ class CallCoordinator extends ChangeNotifier {
     notifyListeners();
     _closeTimer?.cancel();
     _closeTimer = Timer(const Duration(milliseconds: 1800), () {
-      if (phase == "ended") {
+      if (phase == "ended" && !holdOpen) {
         phase = "idle";
         notifyListeners();
       }
@@ -270,21 +346,33 @@ class CallCoordinator extends ChangeNotifier {
     try {
       final res = await ApiService.dio.get("/calls/ice-servers");
       final list = res.data["iceServers"];
-      if (list is List && list.isNotEmpty) return _iceServers = list;
-    } catch (_) {}
+      if (list is List && list.isNotEmpty) {
+        _log(res.data["relay"] == true ? "ice servers: STUN + TURN relay" : "ice servers: STUN only (no TURN relay, mobile data may fail)");
+        return _iceServers = list;
+      }
+    } catch (e) {
+      _log("could not load ice servers, using STUN fallback: $e");
+    }
     return _fallbackIce;
   }
 
   Future<void> _peer() async {
-    _pc = await createPeerConnection({
-      "iceServers": await _loadIceServers(),
-      "sdpSemantics": "unified-plan",
-    });
+    final servers = await _loadIceServers();
+    _log("creating connection");
+    try {
+      _pc = await createPeerConnection({"iceServers": servers, "sdpSemantics": "unified-plan"});
+    } catch (e) {
+      // A bad TURN setting (e.g. a typo in TURN_URLS) must not block calls on Wi-Fi.
+      _log("connection with relay failed ($e), retrying with STUN only");
+      _pc = await createPeerConnection({"iceServers": _fallbackIce, "sdpSemantics": "unified-plan"});
+    }
+    _log("adding ${_local?.getTracks().length ?? 0} media tracks");
     for (final track in _local?.getTracks() ?? <MediaStreamTrack>[]) {
       await _pc!.addTrack(track, _local!);
     }
     _pc!.onIceCandidate = (candidate) {
       if (candidate.candidate == null) return;
+      _countCandidate(candidate.candidate, "mine");
       _send("ice", candidate: {
         "candidate": candidate.candidate,
         "sdpMid": candidate.sdpMid,
@@ -297,6 +385,7 @@ class CallCoordinator extends ChangeNotifier {
       _live();
     };
     _pc!.onConnectionState = (state) {
+      _log("connection: ${state.name.replaceFirst("RTCPeerConnectionState", "")}");
       if (state == RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
         _live();
       } else if (state == RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
@@ -307,6 +396,7 @@ class CallCoordinator extends ChangeNotifier {
       }
     };
     _pc!.onIceConnectionState = (state) {
+      _log("ice: ${state.name.replaceFirst("RTCIceConnectionState", "")}");
       if (state == RTCIceConnectionState.RTCIceConnectionStateConnected ||
           state == RTCIceConnectionState.RTCIceConnectionStateCompleted) {
         _live();
@@ -320,15 +410,21 @@ class CallCoordinator extends ChangeNotifier {
     final type = data["type"]?.toString() ?? "";
     final from = data["from"]?.toString() ?? "";
     if (from.isEmpty) return;
+    if (type != "ice") _log("signal from server: $type");
 
     if (type == "offer") {
       if (busy) {
+        _log("incoming call refused: already busy ($phase)");
         // Already on a call: let the other caller know straight away.
         SocketService.instance.emit("call:signal", {"to": from, "type": "busy"});
         return;
       }
       _closeTimer?.cancel();
       _resetFlags();
+      log.clear();
+      holdOpen = false;
+      _candidateKinds.clear();
+      _log("incoming ${data["video"] == true ? "video" : "voice"} call from ${data["fromName"] ?? from}");
       peerId = from;
       peerName = data["fromName"]?.toString() ?? "Friend";
       video = data["video"] == true;
@@ -344,7 +440,10 @@ class CallCoordinator extends ChangeNotifier {
       return;
     }
 
-    if (from != peerId) return;
+    if (from != peerId) {
+      if (type != "ice") _log("ignored $type from someone else");
+      return;
+    }
 
     switch (type) {
       case "answer":
@@ -354,7 +453,12 @@ class CallCoordinator extends ChangeNotifier {
           detail = "Connecting…";
           notifyListeners();
           _watchConnect();
-          await _applyRemote(Map<String, dynamic>.from(data["sdp"] as Map));
+          try {
+            await _applyRemote(Map<String, dynamic>.from(data["sdp"] as Map));
+          } catch (e) {
+            _log("STOPPED: could not use the friend's answer: $e");
+            _endWith("Couldn't connect the call. Open Call details for the reason.", notifyPeer: true);
+          }
         }
       case "ice":
         if (data["candidate"] is Map) {
@@ -364,6 +468,7 @@ class CallCoordinator extends ChangeNotifier {
             raw["sdpMid"]?.toString(),
             raw["sdpMLineIndex"] is int ? raw["sdpMLineIndex"] as int : null,
           );
+          _countCandidate(raw["candidate"]?.toString(), "theirs");
           if (_pc == null || !_remoteReady) {
             _ice.add(ice);
           } else {

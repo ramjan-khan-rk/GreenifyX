@@ -4,6 +4,7 @@ import User from "../models/User.js";
 import Notification from "../models/Notification.js";
 import { getJwtSecret } from "../utils/jwtConfig.js";
 import { corsOriginDelegate } from "../utils/corsConfig.js";
+import { describeIce, parseIceConfig } from "../utils/iceServers.js";
 
 let io;
 
@@ -11,6 +12,42 @@ const onlineUsers = new Map();
 const liveCalls = new Set();
 
 const pairKey = (a, b) => [String(a), String(b)].sort().join(":");
+
+// ICE candidates that arrive while an offer is still being checked.
+const pendingIce = new Map();
+
+/** One line per call step in the server log (Render → Logs), e.g. "[call] 65ab… → 65cd… offer: STOPPED: not friends". */
+const callLog = (from, to, type, what) => {
+  const short = (id) => String(id || "?").slice(-6);
+  console.log(`[call] ${short(from)} → ${short(to)} ${type}: ${what}`);
+};
+
+/** Forward one call signal, keeping only the fields WebRTC needs. */
+const relaySignal = (from, to, type, payload, fromName) => {
+  const sdp = payload?.sdp;
+  const candidate = payload?.candidate;
+  emitToUser(to, "call:signal", {
+    from,
+    fromName,
+    type,
+    video: payload?.video === true,
+    sdp:
+      sdp && typeof sdp === "object"
+        ? {
+            type: String(sdp.type || ""),
+            sdp: String(sdp.sdp || "").slice(0, 120000),
+          }
+        : undefined,
+    candidate:
+      candidate && typeof candidate === "object"
+        ? {
+            candidate: String(candidate.candidate || "").slice(0, 4000),
+            sdpMid: candidate.sdpMid ?? null,
+            sdpMLineIndex: candidate.sdpMLineIndex ?? null,
+          }
+        : undefined,
+  });
+};
 
 const readHandshakeToken = (socket) => {
   const authToken = socket.handshake.auth?.token;
@@ -27,6 +64,7 @@ const readHandshakeToken = (socket) => {
 const roomFor = (userId) => `user:${userId}`;
 
 export const initializeSocket = (server) => {
+  console.log(`[call] startup: ${describeIce(parseIceConfig())}`);
   io = new Server(server, {
     cors: {
       origin: corsOriginDelegate,
@@ -113,20 +151,38 @@ export const initializeSocket = (server) => {
       onlineUsers.set(socket.userId, socket.id);
     });
 
+    // The phone's own call steps, so Render → Logs shows exactly where a call stopped.
+    let phoneLines = 0;
+    socket.on("call:log", (payload) => {
+      if (++phoneLines > 300) return; // per connection, keeps logs readable
+      const line = String(payload?.line || "").replace(/\s+/g, " ").slice(0, 300);
+      if (line) console.log(`[call] phone ${String(userId).slice(-6)}: ${line}`);
+    });
+
     socket.on("call:signal", async (payload) => {
       try {
         const to = String(payload?.to || "");
         const type = String(payload?.type || "");
         const allowed = new Set(["offer", "answer", "ice", "reject", "end", "busy"]);
-        if (!to || to === userId || !allowed.has(type)) return;
+        if (!to || to === userId || !allowed.has(type)) {
+          callLog(userId, to, type, "dropped: bad signal");
+          return;
+        }
 
         const key = pairKey(userId, to);
         let fromName;
 
         if (type === "offer") {
+          // The friend check below takes a moment; ICE candidates that arrive
+          // meanwhile are held here instead of being dropped (they used to be,
+          // which made calls fail to connect).
+          pendingIce.set(key, []);
+          callLog(userId, to, "offer", `received (${payload?.video === true ? "video" : "voice"})`);
           const me = await User.findById(userId).select("friends name");
           const isFriend = me?.friends?.some((id) => id.toString() === to);
           if (!isFriend) {
+            pendingIce.delete(key);
+            callLog(userId, to, "offer", "STOPPED: not friends");
             // Tell the caller instead of leaving them on "Ringing…".
             emitToUser(userId, "call:signal", { from: to, type: "not_friends" });
             return;
@@ -135,6 +191,8 @@ export const initializeSocket = (server) => {
 
           // Friend not connected: tell the caller right away and leave a missed-call notice.
           if (!onlineUsers.has(to)) {
+            pendingIce.delete(key);
+            callLog(userId, to, "offer", "STOPPED: friend is offline (app closed or in background)");
             emitToUser(userId, "call:signal", { from: to, type: "unavailable" });
             try {
               const n = await Notification.create({
@@ -152,39 +210,33 @@ export const initializeSocket = (server) => {
             return;
           }
           liveCalls.add(key);
+          callLog(userId, to, "offer", "forwarded to friend, ringing");
         } else if (!liveCalls.has(key)) {
+          if (type === "ice" && pendingIce.has(key)) {
+            pendingIce.get(key).push(payload);
+            return;
+          }
+          if (type !== "ice") callLog(userId, to, type, "dropped: no live call between these two");
           return;
         }
 
         if (type === "end" || type === "reject" || type === "busy") {
           liveCalls.delete(key);
+          pendingIce.delete(key);
         }
+        if (type !== "ice" && type !== "offer") callLog(userId, to, type, "forwarded");
 
-        const sdp = payload?.sdp;
-        const candidate = payload?.candidate;
-        emitToUser(to, "call:signal", {
-          from: userId,
-          fromName,
-          type,
-          video: payload?.video === true,
-          sdp:
-            sdp && typeof sdp === "object"
-              ? {
-                  type: String(sdp.type || ""),
-                  sdp: String(sdp.sdp || "").slice(0, 120000),
-                }
-              : undefined,
-          candidate:
-            candidate && typeof candidate === "object"
-              ? {
-                  candidate: String(candidate.candidate || "").slice(0, 4000),
-                  sdpMid: candidate.sdpMid ?? null,
-                  sdpMLineIndex: candidate.sdpMLineIndex ?? null,
-                }
-              : undefined,
-        });
+        relaySignal(userId, to, type, payload, fromName);
+
+        // Now the call is live: send on any ICE candidates held during the friend check.
+        if (type === "offer") {
+          const held = pendingIce.get(key) || [];
+          pendingIce.delete(key);
+          for (const p of held) relaySignal(userId, to, "ice", p);
+          if (held.length) callLog(userId, to, "ice", `sent ${held.length} early network candidates`);
+        }
       } catch (error) {
-        console.error("Call signal failed");
+        console.error(`[call] signal failed: ${error?.message || error}`);
       }
     });
 
@@ -204,6 +256,7 @@ export const initializeSocket = (server) => {
           liveCalls.delete(key);
           const other = ids.find((id) => id !== userId);
           if (other) emitToUser(other, "call:signal", { from: userId, type: "end" });
+          callLog(userId, other, "end", "ended: lost connection for 8s");
         }
       }, 8000);
     });

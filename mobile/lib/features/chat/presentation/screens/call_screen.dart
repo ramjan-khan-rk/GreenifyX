@@ -18,6 +18,7 @@ class _CallScreenState extends State<CallScreen> {
   final call = CallCoordinator.instance;
   Timer? _tick;
   bool _popped = false;
+  bool _showLog = false;
 
   @override
   void initState() {
@@ -132,7 +133,9 @@ class _CallScreenState extends State<CallScreen> {
                   Text(call.video ? "Video call" : "Voice call", style: const TextStyle(color: Colors.white38, fontSize: 13)),
                 ],
                 const Spacer(flex: 3),
-                if (ended)
+                if (ended && _showLog)
+                  SizedBox(height: 68, child: Center(child: FilledButton(onPressed: call.closeEnded, child: Text(tr("Close")))))
+                else if (ended)
                   const SizedBox(height: 68)
                 else if (incoming)
                   Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
@@ -186,6 +189,49 @@ class _CallScreenState extends State<CallScreen> {
                   decoration: BoxDecoration(border: Border.all(color: Colors.white24), color: Colors.black),
                   child: RTCVideoView(call.localRenderer, mirror: true, objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover),
                 ),
+              ),
+            ),
+          // Call details: every step of this call, to see exactly what stopped it.
+          Positioned(
+            top: MediaQuery.paddingOf(context).top + 4,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: TextButton.icon(
+                style: TextButton.styleFrom(foregroundColor: Colors.white60, visualDensity: VisualDensity.compact),
+                onPressed: () => setState(() {
+                  _showLog = !_showLog;
+                  call.holdOpen = _showLog;
+                  if (!_showLog && call.phase == "ended") call.closeEnded();
+                }),
+                icon: Icon(_showLog ? Icons.close_rounded : Icons.info_outline_rounded, size: 16),
+                label: Text(_showLog ? tr("Hide details") : tr("Call details"), style: const TextStyle(fontSize: 12)),
+              ),
+            ),
+          ),
+          if (_showLog)
+            Positioned(
+              top: MediaQuery.paddingOf(context).top + 44,
+              left: 12,
+              right: 12,
+              height: MediaQuery.sizeOf(context).height * 0.42,
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.82), borderRadius: BorderRadius.circular(14)),
+                child: ListView(reverse: true, children: [
+                  for (final line in call.log.reversed)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        line,
+                        style: TextStyle(
+                          color: line.contains("STOPPED") || line.contains("ended") ? AppColors.sun : (line.contains("CONNECTED") ? const Color(0xFF7CF29C) : Colors.white),
+                          fontFamily: "monospace",
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                ]),
               ),
             ),
         ]),
