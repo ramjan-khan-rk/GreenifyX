@@ -1,201 +1,170 @@
 # 🌱 GreenifyX
 
-> **A full-stack eco-social platform that transforms real-world environmental actions into a social and rewarding experience.**
+> **A full-stack eco-social platform that turns real-world environmental actions into a social and rewarding experience.**
 
-**GreenifyX** is an independently developed Flutter & Node.js application where users can share eco-friendly activities, challenge friends, earn **Eco Points**, communicate in real time, and build a community around sustainable living.
+**GreenifyX** is an independently developed Flutter & Node.js platform, piloting in the UAE. People share eco-friendly actions, get them verified, earn **Eco Points**, join challenges and campaigns, talk in real time and redeem rewards. Organisations get their own dashboards and ESG reports. An admin web app runs the whole thing.
+
+Current mobile version: **1.0.2 (build 3)**.
 
 ---
 
-## 🚀 Key Features
+## 🚀 Features
 
-### 👤 Authentication & Profiles
+### 👤 Accounts & onboarding
 
-* Secure user registration & login (JWT, email OTP via Brevo)
-* Personalized profiles with profile images
-* Eco Points and activity statistics
-* Friend-based social network
+* Sign-up with email OTP (Brevo), then password login (JWT)
+* Guided onboarding, invite links and referrals
+* Profiles with photo, emirate, Eco Points, streaks and verified ticks
+* English and **Arabic** (switchable in the app), light and **dark mode**
+* Stays signed in on slow networks; wakes the server at launch with a friendly message
 
-### 🌍 Social Feed
+### 🌍 Feed & social
 
-* Share environmental activities with images
-* Like and comment on posts
-* Activity categories (Tree Plantation, Recycling, Cycling, Water Conservation, etc.)
-* Community-driven engagement
-* Friend verification before Eco Points are awarded
+* Post eco actions with photos or video from a live, searchable eco-activity catalogue
+* Tag friends, save posts, hashtags, mentions and trending topics
+* **For you** feed, follows, **stories** and **reels** with trending sounds
+* Threaded comments with reactions and pins
+* Communities and community group chat
+* Creator analytics
+
+### ✅ Verification & Eco Points
+
+* Friend verification before Eco Points are awarded (not on upload)
+* **AI instant verification** with an AI-verified badge
+* AI moderation and duplicate-photo detection
+* GPS evidence and geofences for campaigns, QR check-ins at checkpoints
+* Field verifiers and points ledger
 * Authenticated leaderboard of verified Eco Points
 
-### 🤝 Friends & Challenges
+### 🏆 Challenges, campaigns & events
 
-* Search and add friends
-* Send & accept friend requests
-* Create eco challenges
-* Set difficulty, target & deadline
-* Track challenge progress and completion
+* Friend challenges with difficulty, target and deadline
+* Weekly battles, streak freezes and reminders
+* Sponsored challenges from partner organisations
+* Campaigns, events and recycling pickups
+* Environmental issue reporting on a map, eco places
 
-### 💬 Real-Time Chat
+### 🌿 Impact
 
-* One-to-one messaging
-* Text & image messages
-* Instant delivery using **Socket.IO**
+* Personal **carbon tracker** and CO₂ impact estimates
+* Shareable impact certificates with a public verify link
+* Snap & Sort recycling guide
 
-### 🛡️ Admin Dashboard (Flutter Web)
+### 🛍 Rewards & marketplace
 
-* Overview: members, weekly actives, verified actions, estimated CO₂ saved
-* 30-day growth and activity trend, top actions, top contributors, live activity
-* Impact page: CO₂ by action type, members by emirate, plain-language equivalents
-* User management: search, filter by emirate and status, suspend / restore with reason
-* Moderation queue: reported posts, hide / restore / keep
-* Challenges overview with live progress
+* Rewards catalogue and redemptions
+* Paid partner rewards with **Stripe Checkout**
+* **Swap & Share** marketplace
+
+### 💬 Real-time
+
+* One-to-one chat with text, images and **voice notes**
+* Voice and video calls (WebRTC, optional TURN relay)
+* **Live streaming** (LiveKit)
+* Notification centre: bundled, grouped, bulk actions, plus push notifications (Firebase)
+* Offline mode and background uploads
+
+### 🤖 Assistants
+
+* AI eco companion and assistant
+* **Hey Greeny** voice assistant (speech-to-text and voice replies)
+
+### 🏢 Organisations
+
+* Organisation accounts with their own codes and dashboards
+* Shareable **ESG reports**
+* Public website for organisations, with enquiries sent to the admin
+
+### 🛡️ Admin dashboard (Flutter Web)
+
+* Overview KPIs, including rewards, pickups and events
+* Analytics: DAU / WAU / MAU, cohorts, funnel, emirates, heat map
+* AI-written insights and impact pages
+* Users (search, filter, suspend / restore), moderation queue, verification queue
+* Campaigns, checkpoints, places, eco activities, sponsored challenges, badges
+* Rewards, pickups, events, points, issues, organisations and enquiries
+* Public pages: organisations site, ESG report, certificate verify, invite join, payment result
 * Responsive: sidebar on desktop, drawer on tablets and phones; deployable as a website
 
-### 🇦🇪 UAE Pilot
+### 🇦🇪 UAE pilot
 
 * Emirate on every profile (all seven emirates) for regional reporting
-* Asia/Dubai time for streaks and dashboard charts, +971 phone defaults
-* In-app post reporting feeds the admin moderation queue
-
-### 🔔 Notification System
-
-* Friend requests
-* Likes & comments
-* Challenge updates
-* New messages
-* Verification events
+* Asia/Dubai time for streaks and charts, +971 phone defaults
 
 ---
 
-## 🛠 Tech Stack
+## 🛠 Tech stack
 
-| Layer               | Technologies                 |
-| ------------------- | ---------------------------- |
-| **Mobile**          | Flutter, Dart, Riverpod, Dio |
-| **Admin web**       | Flutter Web, GoRouter, Dio   |
-| **Backend**         | Node.js, Express.js          |
-| **Database**        | MongoDB, Mongoose            |
-| **Authentication**  | JWT                          |
-| **Real-time**       | Socket.IO                    |
-| **Media Storage**   | Cloudinary                   |
-| **Version Control** | Git & GitHub                 |
+| Layer              | Technologies                                                    |
+| ------------------ | --------------------------------------------------------------- |
+| **Mobile**         | Flutter, Dart, Riverpod, GoRouter, Dio                          |
+| **Admin web**      | Flutter Web, GoRouter, Dio                                      |
+| **Backend**        | Node.js, Express.js                                             |
+| **Database**       | MongoDB, Mongoose                                               |
+| **Auth**           | JWT, email OTP (Brevo)                                          |
+| **Real-time**      | Socket.IO, WebRTC, LiveKit                                      |
+| **Media**          | Cloudinary                                                      |
+| **Payments**       | Stripe Checkout                                                 |
+| **Push**           | Firebase Cloud Messaging                                        |
+| **AI (optional)**  | Claude API for the assistant, Snap & Sort and admin reports     |
+| **Maps**           | flutter_map, geolocator                                         |
 
 ---
 
-## 🏗 System Architecture
+## 🏗 System architecture
 
 ```text
-Flutter Mobile App      Flutter Web Admin
+Flutter Mobile App      Flutter Web Admin + public site
         │                      │
         └──── REST APIs ───────┘
                    ▼
-Node.js + Express
-   │      │
-   │      ├────────► MongoDB
-   │      ├────────► Cloudinary
-   │      └────────► Socket.IO
-   │
-   ▼
-Real-Time Updates
+           Node.js + Express
+   ┌──────────┬──────┴─────┬───────────┬──────────┐
+   ▼          ▼            ▼           ▼          ▼
+MongoDB   Cloudinary   Socket.IO    Stripe    LiveKit / FCM / Claude
 ```
 
-The mobile application communicates with the backend through REST APIs, while Socket.IO powers instant messaging and live notifications.
+The apps talk to the backend over REST. Socket.IO handles chat, calls signalling and live notifications.
 
 ---
 
-## 📂 Project Structure
+## 📂 Project structure
 
 ```text
 GreenifyX
-│
-├── admin/              Flutter Web admin dashboard
-│   └── lib/
-│       ├── api/
-│       ├── core/
-│       ├── pages/
-│       └── widgets/
-│
-├── mobile/
-│   └── lib/
-│       ├── core/
-│       └── features/
-│           ├── auth/
-│           ├── home/
-│           ├── profile/
-│           ├── friends/
-│           ├── post/
-│           ├── challenge/
-│           ├── chat/
-│           ├── comment/
-│           ├── feed/
-│           ├── navigation/
-│           └── splash/
-│
+├── admin/      Flutter Web admin dashboard and public pages (lib/api, core, pages, widgets)
+├── mobile/     Flutter app, feature-first (lib/core, lib/features/*)
 ├── backend/
-│   ├── config/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   ├── socket/
-│   └── utils/
-│
-└── README.md
+│   ├── config/  controllers/  middleware/  models/  routes/  socket/  utils/
+│   ├── scripts/ (create-admin, make-admin, demo seeder)
+│   ├── tests/   (node:test)
+│   └── docs/    (Brevo and Resend email setup)
+└── docs/       IOS_BUILD.md
 ```
 
-The Flutter application follows a **feature-first architecture** with clear separation of **application**, **data**, **domain**, and **presentation** layers.
-
 ---
 
-## 🌱 Eco Points
+## 📡 REST API modules
 
-GreenifyX rewards genuine environmental actions through **Eco Points**.
-
-Examples include:
-
-* 🌳 Tree Plantation
-* ♻️ Recycling
-* 🚲 Cycling
-* 🚶 Walking
-* 💧 Water Conservation
-
-Each activity contributes to a user's overall environmental impact within the platform.
-
----
-
-## 📡 REST API Modules
-
-The backend currently provides APIs for:
+All under `/api`:
 
 ```text
-/auth
-/users
-/friends
-/posts
-/comments
-/challenges
-/messages
-/uploads
-/notifications
-/admin          (admin role only: stats, users, posts, challenges)
+/auth  /users  /friends  /posts  /comments  /challenges  /messages  /upload
+/notifications  /campaigns  /verifier  /env-reports  /map  /assistant  /calls
+/orgs  /rewards  /pickups  /events  /activities  /public  /admin (admin only)
 ```
 
-Protected endpoints use JWT authentication middleware.
+Growth, lifestyle and social endpoints (onboarding, invites, streaks, trending, badges, sponsored, live, ESG, voice, stories, reels, follows, battles, communities, marketplace, carbon, certificates, check-ins) are mounted directly on `/api`. Protected endpoints use JWT middleware.
 
 ---
 
-## ⚙️ Getting Started
+## ⚙️ Getting started
 
-### Clone the repository
+### Clone
 
 ```bash
 git clone https://github.com/ramjan-khan-rk/GreenifyX.git
 cd GreenifyX
-```
-
-### Mobile App
-
-```bash
-cd mobile
-flutter pub get
-flutter run
 ```
 
 ### Backend
@@ -203,41 +172,11 @@ flutter run
 ```bash
 cd backend
 npm install
-npm run dev
+npm run dev     # or: npm start
+npm test        # backend unit tests
 ```
 
-### Admin dashboard
-
-```bash
-cd admin
-flutter pub get
-flutter run -d chrome
-# against a local API:
-flutter run -d chrome --dart-define=API_BASE=http://localhost:5000/api
-```
-
-Build it as a website with `flutter build web --dart-define=API_BASE=https://your-api/api`, then host the `admin/build/web` folder on any static host and add that address to `CORS_ORIGIN`.
-
-Create your admin account (you'll be asked for a password; it's stored only as a hash):
-
-```bash
-cd backend
-npm run create-admin -- --email you@company.com --name "Your Name"
-```
-
-Run it again with the same email to reset that admin's password.
-
-### Demo data
-
-```bash
-cd backend
-npm run seed:demo             # 24 members across all 7 emirates, 96 posts, challenges, comments
-npm run seed:demo -- --clear  # removes only what the seeder created
-```
-
-The seeder prints the demo resident and field-verifier logins. It never creates an admin account. Every seeded record is flagged `isDemo`, so clearing never touches real accounts.
-
-Create a `.env` file inside the backend directory with:
+Copy `backend/.env.example` to `backend/.env` and fill values locally:
 
 ```env
 PORT=5000
@@ -252,74 +191,101 @@ BREVO_API_KEY=
 EMAIL_FROM=
 APP_NAME=GreenifyX
 ALLOW_DEV_OTP=false
+
+# Optional
+RESEND_API_KEY=
+ANTHROPIC_API_KEY=
+ANTHROPIC_MODEL=claude-haiku-5-5
+TURN_URLS=
+TURN_USERNAME=
+TURN_CREDENTIAL=
+FIREBASE_SERVICE_ACCOUNT=
+STRIPE_SECRET_KEY=
+PUBLIC_SITE_URL=
+LIVEKIT_URL=
+LIVEKIT_API_KEY=
+LIVEKIT_API_SECRET=
 ```
 
-Copy `backend/.env.example` to `backend/.env` and fill values locally. Production `JWT_SECRET` must be at least 32 characters; do not rotate an existing production secret from this repo. `ALLOW_DEV_OTP=true` is non-production only and may include `devOtp` in the send-otp JSON body; it is ignored when `NODE_ENV=production`. Registration OTP is sent with **Brevo** when `BREVO_API_KEY` is set — see `backend/docs/brevo-setup.md`. Use a from-address you verified in Brevo (`EMAIL_FROM`). Do not commit secrets. Live Brevo sends are not run from this repo; leave keys unset until you are ready to send from your own environment.
+* Production `JWT_SECRET` must be at least 32 characters.
+* `ALLOW_DEV_OTP=true` is for non-production only; it is ignored when `NODE_ENV=production`.
+* Email OTP uses **Brevo** when `BREVO_API_KEY` is set (see `backend/docs/brevo-setup.md`), with Resend as a fallback.
+* Without `ANTHROPIC_API_KEY`, the assistant, Snap & Sort and admin reports run from live GreenifyX data and templates.
+* `FIREBASE_SERVICE_ACCOUNT` is the service-account JSON on one line, set only on the host.
+* Use `sk_test_...` Stripe keys while testing.
 
-> **Note:** Never commit your `.env` file. It is excluded through `.gitignore`.
+> **Never commit your `.env` file.** It is excluded through `.gitignore`.
 
-**JWT rotation (ops, not automated):** set a new `JWT_SECRET` on the host, restart the API, and expect existing sessions to fail until users log in again. This process does not change any current production secret.
+**JWT rotation (ops, not automated):** set a new `JWT_SECRET` on the host, restart the API, and expect existing sessions to end until users log in again.
+
+### Mobile app
+
+```bash
+cd mobile
+flutter pub get
+flutter run
+```
+
+iOS build steps are in `docs/IOS_BUILD.md`.
+
+### Admin dashboard
+
+```bash
+cd admin
+flutter pub get
+flutter run -d chrome
+# against a local API:
+flutter run -d chrome --dart-define=API_BASE=http://localhost:5000/api
+```
+
+Build it as a website with `flutter build web --dart-define=API_BASE=https://your-api/api`, host the `admin/build/web` folder on any static host, and add that address to `CORS_ORIGIN`.
+
+Create your admin account (you'll be asked for a password; it's stored only as a hash):
+
+```bash
+cd backend
+npm run create-admin -- --email you@company.com --name "Your Name"
+```
+
+Run it again with the same email to reset that admin's password.
+
+### Demo data
+
+```bash
+cd backend
+npm run seed:demo             # members across all 7 emirates, posts, challenges, comments
+npm run seed:demo -- --clear  # removes only what the seeder created
+```
+
+The seeder prints the demo resident and field-verifier logins. It never creates an admin account. Every seeded record is flagged `isDemo`, so clearing never touches real accounts.
 
 ---
 
-## 🧪 Tested Functionality
+## 🚧 Status
 
-* User authentication
-* Friend requests
-* Social feed
-* Likes & comments
-* Eco challenges
-* Real-time messaging
-* Notifications
-* Cloud media uploads
-* REST API communication
+### ✅ Done
 
----
-
-## 🚧 Development Status
-
-### ✅ Implemented
-
-* JWT Authentication
-* User Profiles
-* Friends System
-* Posts & Comments
-* Likes
-* Challenge System
-* Real-Time Chat
-* Notification inbox (Updates)
-* Socket.IO Integration
-* Cloudinary Uploads
-* Leaderboard (authenticated, verified Eco Points)
-* GoRouter session guards
-* Friend verify → Eco Points (not on upload)
-* Friends reject / unfriend / block
-* Friends-only chat and comments
-* Admin dashboard (Flutter Web): overview, impact, users, moderation, challenges
-* Admin role, account suspension, post reporting and moderation
-* Emirate on profiles and CO₂ impact estimates
-* Demo-data seeder for presentations
+Everything listed under **Features** above is implemented on `main`, and the backend unit tests pass.
 
 ### 🔜 Planned
 
-* Organisation accounts (companies, schools) with their own dashboards
-* Monthly ESG / impact PDF reports
 * UAE PASS sign-in
-* Rewards marketplace with partner vouchers
-* GPS-based eco verification
-* Nearby user verification
-* Arabic / RTL (English-only for this UAE pilot)
-* Production optimization
+* Monthly ESG / impact reports as PDF
+* Nearby-user verification
+* Production optimisation
 
-### UAE pilot notes
+### Pilot notes
 
-UI copy is **English only**. Arabic and RTL are not implemented; adding them later means localizing strings and mirroring layouts, not flipping a toggle. Phone helpers default to **+971**. Streaks use the **Asia/Dubai** calendar day. Eco Points are **community-verified** (a friend confirms a post), not GPS or government MRV. CO₂ figures in the admin dashboard are indicative per-action estimates, not certified measurement. Challenge progress remains self-reported. Do not treat this README as a live ops report — Brevo (`BREVO_API_KEY`), JWT length, Atlas indexes, and Render must still be set on the host.
+* Eco Points are community- and AI-verified, not government MRV.
+* CO₂ figures are indicative per-action estimates, not certified measurement.
+* Challenge progress is self-reported.
+* This README is not a live ops report. Brevo, JWT length, Atlas indexes, Stripe, Firebase and LiveKit must still be set on the host.
 
 ---
 
 ## 🌍 Vision
 
-GreenifyX aims to make sustainability **visible, social, verifiable, and rewarding** by encouraging measurable environmental actions instead of passive awareness.
+GreenifyX aims to make sustainability **visible, social, verifiable and rewarding** by encouraging measurable environmental actions instead of passive awareness.
 
 ---
 
