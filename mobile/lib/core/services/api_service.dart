@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../config/app_config.dart';
 import 'offline_cache.dart';
+import 'server_wake.dart';
 import 'storage_service.dart';
 
 class ApiService {
@@ -9,7 +10,7 @@ class ApiService {
     BaseOptions(
       baseUrl: AppConfig.apiBaseUrl,
       connectTimeout: const Duration(seconds: 100),
-      receiveTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 30),
       headers: {
         "Content-Type": "application/json",
       },
@@ -32,6 +33,8 @@ class ApiService {
         },
       ),
     );
+    // Retry first while the server wakes; only then fall back to the saved copy.
+    dio.interceptors.add(WakeRetry(dio));
     dio.interceptors.add(OfflineCache.instance);
   }
 }

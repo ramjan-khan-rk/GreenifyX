@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 
 import '../../data/repository/auth_repository.dart';
 import '../../domain/models/user_model.dart';
@@ -140,6 +141,18 @@ class AuthNotifier extends Notifier<AuthState> {
       await SocketService.instance.connect(user.id);
       state = AuthState(user: user);
       return user;
+    } on DioException catch (e) {
+      // Only a rejected token means "log out". A slow or missing network
+      // must never sign someone out; the splash screen offers a retry instead.
+      final code = e.response?.statusCode ?? 0;
+      if (code == 401 || code == 403 || code == 404) {
+        await StorageService.clear();
+        SocketService.instance.disconnect();
+        SessionController.instance.setHasToken(false);
+        state = AuthState();
+        return null;
+      }
+      rethrow;
     } catch (_) {
       await StorageService.clear();
       SocketService.instance.disconnect();
