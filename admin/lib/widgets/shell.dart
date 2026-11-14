@@ -12,26 +12,43 @@ class NavItem {
   final IconData icon;
 }
 
+/// Partner logins only see their own portal.
+const partnerNavItems = [
+  NavItem('/partner', 'Partner portal', Icons.handshake_rounded),
+];
+
+/// Third-party auditors only see the audit trail.
+const auditorNavItems = [
+  NavItem('/audit', 'Audit trail', Icons.fact_check_rounded),
+];
+
 const navItems = [
   NavItem('/', 'Overview', Icons.space_dashboard_rounded),
   NavItem('/analytics', 'Analytics', Icons.insights_rounded),
   NavItem('/campaigns', 'Campaigns', Icons.forest_rounded),
+  NavItem('/missions', 'Missions and leagues', Icons.flag_rounded),
   NavItem('/verification', 'Verification', Icons.fact_check_rounded),
   NavItem('/issues', 'Report & Restore', Icons.report_gmailerrorred_rounded),
   NavItem('/places', 'Eco places', Icons.place_rounded),
   NavItem('/checkpoints', 'QR check-ins', Icons.qr_code_2_rounded),
   NavItem('/impact', 'Impact', Icons.eco_rounded),
+  NavItem('/home-health', 'Home and health', Icons.cottage_rounded),
+  NavItem('/lessons', 'Eco Academy', Icons.school_rounded),
   NavItem('/insights', 'AI insights', Icons.auto_awesome_rounded),
   NavItem('/activities', 'Eco activities', Icons.eco_rounded),
   NavItem('/points', 'Eco Points', Icons.account_balance_wallet_rounded),
+  NavItem('/audit', 'Audit trail', Icons.fact_check_rounded),
   NavItem('/rewards', 'Rewards', Icons.redeem_rounded),
   NavItem('/sponsored', 'Sponsored challenges', Icons.campaign_rounded),
   NavItem('/badges', 'Verified badges', Icons.verified_rounded),
   NavItem('/pickups', 'Recycling pickups', Icons.local_shipping_rounded),
+  NavItem('/stations', 'Recycling stations', Icons.recycling_rounded),
   NavItem('/events', 'Events', Icons.event_rounded),
   NavItem('/forest', 'My Forest', Icons.park_rounded),
   NavItem('/deals', 'Brand deals', Icons.handshake_rounded),
   NavItem('/orgs', 'Organisations', Icons.business_rounded),
+  NavItem('/partners', 'Partner logins', Icons.badge_rounded),
+  NavItem('/partner', 'Partner portal view', Icons.handshake_rounded),
   NavItem('/enquiries', 'Website enquiries', Icons.inbox_rounded),
   NavItem('/users', 'Users', Icons.people_alt_rounded),
   NavItem('/moderation', 'Moderation', Icons.shield_rounded),
@@ -133,7 +150,7 @@ class _Sidebar extends StatelessWidget {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  for (final item in navItems)
+                  for (final item in Session.instance.isPartner ? partnerNavItems : Session.instance.isAuditor ? auditorNavItems : navItems)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 4),
                       child: _NavTile(

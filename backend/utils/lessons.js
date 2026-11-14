@@ -220,21 +220,48 @@ export const LESSON_POINTS = 5;
 export const PASS_MARK = 2;
 
 /** Today's lesson rotates through the library by UAE day. */
-export const lessonForDay = (dayStamp) => {
+/** Today's lesson rotates through the library (the built-in one, or lessons from the database). */
+export const lessonForDay = (dayStamp, list = LESSONS) => {
   const n = Math.round(Date.parse(`${dayStamp}T00:00:00Z`) / 864e5);
-  return LESSONS[((n % LESSONS.length) + LESSONS.length) % LESSONS.length];
+  return list[((n % list.length) + list.length) % list.length];
 };
 
-export const lessonById = (id) => LESSONS.find((l) => l.id === id) || null;
+export const lessonById = (id, list = LESSONS) => list.find((l) => l.id === id) || null;
 
-/** The lesson without answers, for the app. */
+/** A database lesson in the same shape as the built-in ones. */
+export const fromDoc = (d) => ({
+  id: d.lessonId,
+  emoji: d.emoji,
+  title: d.title,
+  titleAr: d.titleAr || "",
+  cards: d.cards || [],
+  cardsAr: d.cardsAr || [],
+  quiz: (d.quiz || []).map((q) => ({ q: q.q, qAr: q.qAr || "", options: q.options, optionsAr: q.optionsAr || [], answer: q.answer, why: q.why, whyAr: q.whyAr || "" })),
+});
+
+/** The lesson without answers, for the app (Arabic included when an admin wrote it). */
 export const publicLesson = (l) => ({
   id: l.id,
   emoji: l.emoji,
   title: l.title,
+  ...(l.titleAr ? { titleAr: l.titleAr } : {}),
   cards: l.cards,
-  quiz: l.quiz.map((x) => ({ q: x.q, options: x.options })),
+  ...(l.cardsAr?.length ? { cardsAr: l.cardsAr } : {}),
+  quiz: l.quiz.map((x) => ({ q: x.q, options: x.options, ...(x.qAr ? { qAr: x.qAr } : {}), ...(x.optionsAr?.length ? { optionsAr: x.optionsAr } : {}) })),
 });
+
+/** Check an admin-written lesson; returns an error message or "". */
+export const lessonProblem = (l) => {
+  if (!l.title?.trim()) return "Add a title";
+  if (!Array.isArray(l.cards) || l.cards.filter((c) => String(c).trim()).length < 1) return "Add at least one card";
+  if (!Array.isArray(l.quiz) || l.quiz.length < 1) return "Add at least one question";
+  for (const [i, q] of l.quiz.entries()) {
+    if (!String(q.q || "").trim()) return `Question ${i + 1} needs text`;
+    if (!Array.isArray(q.options) || q.options.length !== 3 || q.options.some((o) => !String(o).trim())) return `Question ${i + 1} needs exactly 3 answers`;
+    if (![0, 1, 2].includes(Number(q.answer))) return `Question ${i + 1} needs the right answer marked`;
+  }
+  return "";
+};
 
 /** Mark answers; returns per-question results and the score. */
 export const markQuiz = (lesson, answers = []) => {

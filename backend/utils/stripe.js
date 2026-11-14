@@ -19,12 +19,13 @@ export const formEncode = (obj, prefix = "", out = new URLSearchParams()) => {
   return out;
 };
 
-const call = async (method, path, body) => {
+const call = async (method, path, body, extraHeaders = {}) => {
   const res = await fetch(`${API}${path}`, {
     method,
     headers: {
       Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
       "Content-Type": "application/x-www-form-urlencoded",
+      ...extraHeaders,
     },
     body: body ? formEncode(body) : undefined,
   });
@@ -46,3 +47,19 @@ export const createCheckoutSession = ({ title, amountAed, successUrl, cancelUrl,
   });
 
 export const getCheckoutSession = (id) => call("GET", `/checkout/sessions/${encodeURIComponent(id)}`);
+
+// ---------- Stripe Connect: paying creators for brand deals ----------
+
+/** An Express connected account for a creator (they add bank details on Stripe's own pages). */
+export const createConnectAccount = ({ email, country = process.env.STRIPE_CONNECT_COUNTRY || "AE" }) =>
+  call("POST", "/accounts", { type: "express", country, email, capabilities: { transfers: { requested: true } } });
+
+/** A one-time Stripe page where the creator adds their bank details. */
+export const createAccountLink = ({ account, refreshUrl, returnUrl }) =>
+  call("POST", "/account_links", { account, refresh_url: refreshUrl, return_url: returnUrl, type: "account_onboarding" });
+
+export const getAccount = (id) => call("GET", `/accounts/${encodeURIComponent(id)}`);
+
+/** Send the creator's share. The idempotency key makes a double click pay only once. */
+export const createTransfer = ({ amountAed, destination, metadata, idempotencyKey }) =>
+  call("POST", "/transfers", { amount: toFils(amountAed), currency: "aed", destination, metadata }, idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {});

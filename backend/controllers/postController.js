@@ -15,6 +15,7 @@ import { extractHashtags, extractMentionTokens, resolveMentions } from "../utils
 import { reviewPost, REASON_TEXT, AUTO_VERIFY_CONFIDENCE } from "../utils/moderation.js";
 import { knownPeople } from "./commentController.js";
 import { chainCounts, chainFields, resolveChain } from "../utils/chains.js";
+import { rewardMission } from "./missionController.js";
 
 const ecoPointsMap = {
   "Tree Plantation": 50,
@@ -105,6 +106,7 @@ export const createPost = async (req, res) => {
       mediaHash,
       duplicateOf: duplicate?._id,
       sponsored: /^[a-f\d]{24}$/i.test(String(req.body.sponsored || "")) ? req.body.sponsored : undefined,
+      mission: /^[a-f\d]{24}$/i.test(String(req.body.mission || "")) ? req.body.mission : undefined,
       visibility: req.body.visibility === "friends" ? "friends" : "public",
       community: await (async () => {
         const id = String(req.body.community || "");
@@ -206,6 +208,7 @@ export const createPost = async (req, res) => {
           if (result.ok) {
             fresh.verifiedBy = "ai";
             await fresh.save();
+            await rewardMission(fresh);
             if (result.award) {
               await creditPoints({ userId: fresh.user, amount: result.points, type: "post_verified", reason: `${fresh.activity} verified by AI`, post: fresh._id });
             }
@@ -434,6 +437,7 @@ export const verifyPost = async (req, res) => {
     }
 
     await post.save();
+    await rewardMission(post);
 
     if (result.award && author) {
       await creditPoints({

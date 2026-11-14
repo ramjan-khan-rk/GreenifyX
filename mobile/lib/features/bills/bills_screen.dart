@@ -68,6 +68,28 @@ class _BillsScreenState extends State<BillsScreen> {
     }
   }
 
+  Future<void> _delete(Json b) async {
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(tr("Delete this bill?")),
+        content: Text("${b["provider"]} · ${b["month"]}"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(tr("Cancel"))),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(tr("Delete"))),
+        ],
+      ),
+    );
+    if (yes != true) return;
+    try {
+      await ApiService.dio.delete("/bills/${b["_id"]}");
+      _toast(tr("Bill deleted"));
+      _load();
+    } catch (e) {
+      _toast(friendlyError(e));
+    }
+  }
+
   Future<void> _openForm(Json? bill, String? scanId) async {
     final saved = await showModalBottomSheet<int>(
       context: context,
@@ -127,7 +149,7 @@ class _BillsScreenState extends State<BillsScreen> {
                   const SizedBox(height: 8),
                   _Bars(bills: bills, field: "waterLitres", unit: "L", color: const Color(0xFF00B4DB)),
                   const SizedBox(height: 18),
-                  for (final b in bills) _BillTile(b: b),
+                  for (final b in bills) _BillTile(b: b, onDelete: b["source"] == "manual" ? () => _delete(b) : null),
                 ] else
                   Padding(
                     padding: const EdgeInsets.only(top: 30),
@@ -178,7 +200,9 @@ class _Bars extends StatelessWidget {
 
 class _BillTile extends StatelessWidget {
   final Json b;
-  const _BillTile({required this.b});
+  /// Only typed-in bills can be deleted (photo bills earned points).
+  final VoidCallback? onDelete;
+  const _BillTile({required this.b, this.onDelete});
 
   Widget _change(num? pct) {
     if (pct == null) return const SizedBox.shrink();
@@ -196,7 +220,9 @@ class _BillTile extends StatelessWidget {
             Row(children: [Text("💧 ${b["waterLitres"]} L  "), _change(b["waterChange"] as num?)]),
             Text("≈ ${b["co2Kg"]} kg CO₂", style: TextStyle(fontSize: 12, color: AppColors.subtitle)),
           ]),
-          trailing: (b["points"] ?? 0) > 0 ? Text("+${b["points"]}", style: const TextStyle(color: AppColors.eco, fontWeight: FontWeight.w900, fontSize: 16)) : null,
+          trailing: (b["points"] ?? 0) > 0
+              ? Text("+${b["points"]}", style: const TextStyle(color: AppColors.eco, fontWeight: FontWeight.w900, fontSize: 16))
+              : (onDelete != null ? IconButton(tooltip: tr("Delete"), icon: const Icon(Icons.delete_outline_rounded), onPressed: onDelete) : null),
         ),
       );
 }

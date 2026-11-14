@@ -9,6 +9,13 @@ export const startScheduler = () => {
         const n = await sendStreakReminders();
         if (n) console.log(`Streak reminders sent: ${n}`);
       }
+      // Partner reports on the 1st of the month, from 09:00 UAE time.
+      const uaeNow = new Date(Date.now() + 4 * 3600e3);
+      if (uaeNow.getUTCDate() === 1 && uaeHour >= 9) {
+        const { sendMonthlyPartnerReports } = await import("../controllers/partnerController.js");
+        const sent = await sendMonthlyPartnerReports();
+        if (sent) console.log(`Partner reports emailed: ${sent}`);
+      }
     } catch (e) {
       console.error("Scheduler error:", e.message);
     }

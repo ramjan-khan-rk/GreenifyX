@@ -5,6 +5,7 @@ import Notification from "../models/Notification.js";
 import { getJwtSecret } from "../utils/jwtConfig.js";
 import { corsOriginDelegate } from "../utils/corsConfig.js";
 import { describeIce, parseIceConfig } from "../utils/iceServers.js";
+import { CALL_RING_SECONDS, newCallId, newDeclineToken, ringDevices } from "../utils/callPush.js";
 
 let io;
 
@@ -15,6 +16,63 @@ const pairKey = (a, b) => [String(a), String(b)].sort().join(":");
 
 // ICE candidates that arrive while an offer is still being checked.
 const pendingIce = new Map();
+
+// Calls ringing on a phone whose app was closed: callee id -> call. Held until the app opens.
+const heldCalls = new Map();
+
+const holdCall = (call) => {
+  const old = heldCalls.get(call.to);
+  if (old) clearTimeout(old.timer);
+  call.timer = setTimeout(() => {
+    if (heldCalls.get(call.to) !== call) return;
+    releaseHeld(call.to);
+    callLog(call.from, call.to, "offer", "no answer: the friend's phone rang but the call wasn't picked up");
+    missedCall(call.from, call.to, call.fromName, call.video).catch(() => {});
+  }, CALL_RING_SECONDS * 1000);
+  heldCalls.set(call.to, call);
+  liveCalls.add(call.key);
+};
+
+const releaseHeld = (calleeId, { keepLive = false } = {}) => {
+  const call = heldCalls.get(calleeId);
+  if (!call) return null;
+  clearTimeout(call.timer);
+  heldCalls.delete(calleeId);
+  if (!keepLive) liveCalls.delete(call.key);
+  return call;
+};
+
+const missedCall = async (from, to, fromName, video) => {
+  try {
+    const n = await Notification.create({
+      receiver: to,
+      sender: from,
+      type: "call",
+      title: "Missed call",
+      message: `${fromName || "A friend"} tried to ${video ? "video " : ""}call you.`,
+      referenceId: from,
+    });
+    emitToUser(to, "newNotification", n);
+  } catch {
+    /* best-effort */
+  }
+};
+
+/**
+ * Decline from the lock screen (the app may not be running): checked with the
+ * one-time token sent in the ring push. Returns true when a ringing call was declined.
+ */
+export const declineHeldCall = (callId, token) => {
+  for (const [calleeId, call] of heldCalls) {
+    if (call.callId !== callId) continue;
+    if (!token || token !== call.declineToken) return false;
+    releaseHeld(calleeId);
+    emitToUser(call.from, "call:signal", { from: calleeId, type: "reject" });
+    callLog(calleeId, call.from, "reject", "declined from the lock screen");
+    return true;
+  }
+  return false;
+};
 
 /** One line per call step in the server log (Render → Logs), e.g. "[call] 65ab… → 65cd… offer: STOPPED: not friends". */
 const callLog = (from, to, type, what) => {
@@ -30,6 +88,7 @@ const relaySignal = (from, to, type, payload, fromName) => {
     from,
     fromName,
     type,
+    callId: payload?.callId ? String(payload.callId).slice(0, 64) : undefined,
     video: payload?.video === true,
     sdp:
       sdp && typeof sdp === "object"
@@ -151,6 +210,16 @@ export const initializeSocket = (server) => {
       onlineUsers.set(socket.userId, socket.id);
     });
 
+    // The app is listening for calls: hand over a call that rang while it was closed.
+    socket.on("call:ready", () => {
+      const held = heldCalls.get(userId);
+      if (!held) return;
+      releaseHeld(userId, { keepLive: true });
+      relaySignal(held.from, userId, "offer", { sdp: held.sdp, video: held.video, callId: held.callId }, held.fromName);
+      for (const p of held.ice) relaySignal(held.from, userId, "ice", p);
+      callLog(held.from, userId, "offer", `delivered after the app opened (${held.ice.length} network candidates)`);
+    });
+
     // The phone's own call steps, so Render → Logs shows exactly where a call stopped.
     let phoneLines = 0;
     socket.on("call:log", (payload) => {
@@ -189,28 +258,49 @@ export const initializeSocket = (server) => {
           }
           fromName = me?.name || "Friend";
 
-          // Friend not connected: tell the caller right away and leave a missed-call notice.
+          // Friend's app is closed: ring their phone with a push and hold the call
+          // until the app opens. Only if no phone can be rung, say they're unavailable.
           if (!onlineUsers.has(to)) {
+            const call = {
+              callId: newCallId(),
+              declineToken: newDeclineToken(),
+              from: userId,
+              to,
+              key,
+              fromName,
+              video: payload?.video === true,
+              sdp: payload?.sdp,
+              ice: pendingIce.get(key) || [],
+            };
             pendingIce.delete(key);
-            callLog(userId, to, "offer", "STOPPED: friend is offline (app closed or in background)");
-            emitToUser(userId, "call:signal", { from: to, type: "unavailable" });
-            try {
-              const n = await Notification.create({
-                receiver: to,
-                sender: userId,
-                type: "call",
-                title: "Missed call",
-                message: `${fromName} tried to ${payload?.video === true ? "video " : ""}call you.`,
-                referenceId: userId,
-              });
-              emitToUser(to, "newNotification", n);
-            } catch {
-              /* best-effort */
+            const callee = await User.findById(to).select("pushTokens");
+            const rung = await ringDevices(callee, "incoming_call", call);
+            if (!rung) {
+              callLog(userId, to, "offer", "STOPPED: friend is offline and no phone could be rung (no push token or push not set up)");
+              emitToUser(userId, "call:signal", { from: to, type: "unavailable" });
+              await missedCall(userId, to, fromName, call.video);
+              return;
             }
+            holdCall(call);
+            callLog(userId, to, "offer", `friend's app is closed: rang ${rung} device(s), holding the call for ${CALL_RING_SECONDS}s`);
+            emitToUser(userId, "call:signal", { from: to, type: "ringing_push" });
             return;
           }
           liveCalls.add(key);
           callLog(userId, to, "offer", "forwarded to friend, ringing");
+        } else if (heldCalls.get(to)?.from === userId) {
+          // The friend's phone is still waking up: keep the caller's network details,
+          // or cancel the ring if the caller hung up.
+          const held = heldCalls.get(to);
+          if (type === "ice") held.ice.push(payload);
+          if (type === "end") {
+            releaseHeld(to);
+            callLog(userId, to, "end", "caller hung up before the friend answered");
+            const callee = await User.findById(to).select("pushTokens");
+            await ringDevices(callee, "call_cancel", held);
+            await missedCall(userId, to, held.fromName, held.video);
+          }
+          return;
         } else if (!liveCalls.has(key)) {
           if (type === "ice" && pendingIce.has(key)) {
             pendingIce.get(key).push(payload);

@@ -21,6 +21,8 @@ const organizationSchema = new mongoose.Schema(
     logo: { type: String, default: "" },
     // Trade licence / registration number supplied by the organisation, checked by an admin.
     registrationRef: { type: String, default: "", trim: true, maxlength: 80 },
+    // Month (YYYY-MM) the partner report was last emailed, so it goes once per month.
+    lastReportMonth: { type: String, default: "" },
     contactEmail: { type: String, default: "", trim: true, lowercase: true, maxlength: 120 },
 
     // pending -> verified (trusted badge, can sponsor) | rejected | suspended

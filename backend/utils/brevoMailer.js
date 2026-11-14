@@ -12,7 +12,7 @@ export const resetBrevoSender = () => {
   sendImpl = sendViaBrevo;
 };
 
-async function sendViaBrevo({ from, to, subject, text, html }) {
+async function sendViaBrevo({ from, to, subject, text, html, attachments }) {
   const apiKey = String(process.env.BREVO_API_KEY || "").trim();
   if (!apiKey) {
     return { ok: false, reason: "not_configured" };
@@ -37,6 +37,8 @@ async function sendViaBrevo({ from, to, subject, text, html }) {
       subject,
       textContent: text,
       htmlContent: html,
+      // Optional files: [{ name, content: base64 }]
+      ...(attachments?.length ? { attachment: attachments } : {}),
     }),
   });
 
@@ -73,3 +75,6 @@ export const sendOtpEmail = async ({ to, otp }) => {
     return { delivered: false, reason: "provider" };
   }
 };
+
+/** Send any email (e.g. the monthly partner report with a PDF attached). */
+export const sendEmail = (opts) => sendImpl({ from: process.env.EMAIL_FROM, ...opts });

@@ -6,6 +6,7 @@ import '../../core/i18n/app_locale.dart';
 import '../../core/services/api_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/friendly_error.dart';
+import '../stations/stations_screen.dart';
 
 /// Scan a GreenifyX QR at a recycling bin, refill station or event to check in.
 class ScanScreen extends StatefulWidget {
@@ -42,6 +43,14 @@ class _ScanScreenState extends State<ScanScreen> {
     if (raw == null) return;
     setState(() => _busy = true);
     await _controller.stop();
+    // Recycling station codes (GXS-…) log a drop-off instead of a check-in.
+    final upper = raw.trim().toUpperCase();
+    if (RegExp(r"^GXS-[A-Z2-9]{5}$").hasMatch(upper)) {
+      if (!mounted) return;
+      await showDropoffSheet(context, upper);
+      if (mounted) Navigator.pop(context, true);
+      return;
+    }
     String title;
     String body;
     bool ok;

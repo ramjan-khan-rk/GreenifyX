@@ -8,6 +8,7 @@ import '../../core/services/session_user.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/friendly_error.dart';
 import '../../core/utils/media_url.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../post/domain/eco_activity.dart';
 import '../post/presentation/screens/create_post_screen.dart';
 
@@ -40,13 +41,41 @@ class _DealsScreenState extends State<DealsScreen> {
 
   void _toast(String s) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(s)));
 
+  Json? _payout;
+
   Future<void> _load() async {
     try {
       final r = await ApiService.dio.get("/deals");
       if (mounted) setState(() => _d = Json.from(r.data as Map));
+      final p = await ApiService.dio.get("/deals/payouts");
+      if (mounted) setState(() => _payout = Json.from(p.data as Map));
     } catch (e) {
       if (mounted) _toast(friendlyError(e));
     }
+  }
+
+  /// Opens Stripe's own page to add bank details; GreenifyX never sees them.
+  Future<void> _setupPayouts() async {
+    try {
+      final r = await ApiService.dio.post("/deals/payouts/setup");
+      await launchUrl(Uri.parse(r.data["url"].toString()), mode: LaunchMode.externalApplication);
+    } catch (e) {
+      _toast(friendlyError(e));
+    }
+  }
+
+  Widget _payoutCard() {
+    final p = _payout;
+    if (p == null || p["available"] != true) return const SizedBox.shrink();
+    final ready = p["ready"] == true;
+    return Card(
+      child: ListTile(
+        leading: Icon(ready ? Icons.account_balance_rounded : Icons.account_balance_outlined, color: ready ? AppColors.eco : AppColors.ink),
+        title: Text(ready ? tr("Payouts are set up") : tr("Set up payouts"), style: const TextStyle(fontWeight: FontWeight.w800)),
+        subtitle: Text(ready ? tr("Brand payments go straight to your bank through Stripe.") : tr("Add your bank details on Stripe's secure page to get paid automatically.")),
+        trailing: ready ? null : FilledButton(onPressed: _setupPayouts, child: Text(p["started"] == true ? tr("Finish") : tr("Start"))),
+      ),
+    );
   }
 
   Future<void> _apply(Json deal) async {
@@ -158,6 +187,7 @@ class _DealsScreenState extends State<DealsScreen> {
                   ]),
                 ),
                 const SizedBox(height: 14),
+                _payoutCard(),
                 if (deals.isEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 30),

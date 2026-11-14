@@ -296,7 +296,7 @@ export const registerPushToken = async (req, res) => {
   try {
     const token = String(req.body.token || "").trim();
     if (token.length < 20 || token.length > 4096) return res.status(400).json({ success: false, message: "Invalid token" });
-    const platform = ["android", "ios", "web"].includes(req.body.platform) ? req.body.platform : "android";
+    const platform = ["android", "ios", "web", "ios_voip"].includes(req.body.platform) ? req.body.platform : "android";
     // A device belongs to one account at a time.
     await User.updateMany({ "pushTokens.token": token, _id: { $ne: req.user._id } }, { $pull: { pushTokens: { token } } });
     const u = await User.findById(req.user._id);

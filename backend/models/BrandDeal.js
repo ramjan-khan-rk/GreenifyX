@@ -22,6 +22,9 @@ const brandDealSchema = new mongoose.Schema(
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
         pitch: { type: String, default: "", maxlength: 500 },
         status: { type: String, enum: APPLICATION_STATUSES, default: "applied" },
+        // How the creator was paid: "stripe" (automatic transfer) or "manual" (bank transfer).
+        paidVia: { type: String, default: "" },
+        transferId: { type: String, default: "" },
         post: { type: mongoose.Schema.Types.ObjectId, ref: "Post" },
         appliedAt: { type: Date, default: Date.now },
         updatedAt: { type: Date, default: Date.now },

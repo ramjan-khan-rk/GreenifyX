@@ -5,6 +5,9 @@ import Household from "../models/Household.js";
 import LessonProgress from "../models/LessonProgress.js";
 import BrandDeal from "../models/BrandDeal.js";
 import ForestTree from "../models/ForestTree.js";
+import BillScan from "../models/BillScan.js";
+import User from "../models/User.js";
+import { Dropoff } from "../models/RecyclingStation.js";
 
 /**
  * Cloudinary public id from a delivery URL, e.g.
@@ -54,5 +57,14 @@ export const removeFeatureData = async (userId) => {
     { $set: { "applications.$[a].pitch": "" } },
     { arrayFilters: [{ "a.user": userId }] }
   );
+  // Added with UAE PASS, missions, recycling stations and the passport.
+  await Promise.all([
+    BillScan.deleteMany({ user: userId }),
+    Dropoff.deleteMany({ user: userId }),
+    User.updateOne(
+      { _id: userId },
+      { $unset: { homeZone: 1, homeLocation: 1, passportCode: 1, uaePass: 1, partnerOrg: 1 }, $set: { passportPublic: false, isVerifiedResident: false } }
+    ),
+  ]);
   return { bills: bills.length };
 };

@@ -118,7 +118,7 @@ class _DealsPageState extends State<DealsPage> {
                                 if (a['post'] != null) SelectableText('Post: ${a['post']}', style: const TextStyle(color: Brand.sky, fontSize: 12)),
                               ]),
                             ),
-                            StatusPill(s, color: {'accepted': Brand.sky, 'delivered': Brand.sun, 'paid': Brand.eco, 'rejected': Brand.danger}[s] ?? Brand.muted),
+                            StatusPill(s == 'paid' && a['paidVia'] == 'stripe' ? 'paid via Stripe' : s, color: {'accepted': Brand.sky, 'delivered': Brand.sun, 'paid': Brand.eco, 'rejected': Brand.danger}[s] ?? Brand.muted),
                             const SizedBox(width: 6),
                             if (s == 'applied' || s == 'rejected') TextButton(onPressed: () => _move(d, a, 'accepted'), child: const Text('Accept')),
                             if (s == 'applied' || s == 'accepted') TextButton(onPressed: () => _move(d, a, 'rejected'), child: const Text('Reject')),

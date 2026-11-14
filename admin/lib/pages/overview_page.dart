@@ -165,6 +165,7 @@ class _Overview extends StatelessWidget {
         ResponsiveGrid(children: [
           KpiCard(label: 'Eco Points issued', value: Fmt.compact(k['ecoPointsIssued'] as num?), icon: Icons.stars_rounded, color: Brand.sun),
           KpiCard(label: 'Active challenges', value: Fmt.number(k['challengesActive'] as num?), icon: Icons.flag_rounded, color: Brand.sky),
+          KpiCard(label: 'UAE PASS verified residents', value: Fmt.number(k['verifiedResidents'] as num?), icon: Icons.verified_user_rounded, color: Brand.eco),
           KpiCard(label: 'Challenges completed', value: Fmt.number(k['challengesCompleted'] as num?), icon: Icons.emoji_events_rounded, color: Brand.eco),
           KpiCard(label: 'Comments', value: Fmt.compact(k['totalComments'] as num?), icon: Icons.forum_rounded, color: Brand.coral),
         ]),

@@ -21,6 +21,8 @@ import '../../core/services/translation_service.dart';
 import '../../core/services/push_service.dart';
 import '../voice/greeny.dart';
 import '../growth/growth_screens.dart';
+import '../auth/data/uae_pass_auth.dart';
+import '../../core/services/api_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -194,6 +196,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _Card(children: [
             _Row(icon: Icons.person_outline_rounded, title: tr("Edit profile"), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen()))),
             _Row(icon: Icons.lock_outline_rounded, title: tr("Change password"), onTap: _changePassword),
+            const _UaePassRow(),
           ]),
           const _Label("Greeny voice assistant"),
           _Card(children: [
@@ -334,6 +337,66 @@ class _Row extends StatelessWidget {
       title: Text(tr(title), style: TextStyle(color: c, fontWeight: FontWeight.w600)),
       trailing: danger ? null : const Icon(Icons.chevron_right_rounded),
       onTap: onTap,
+    );
+  }
+}
+
+/// Link UAE PASS to this account; shows "Verified resident" once linked.
+class _UaePassRow extends StatefulWidget {
+  const _UaePassRow();
+  @override
+  State<_UaePassRow> createState() => _UaePassRowState();
+}
+
+class _UaePassRowState extends State<_UaePassRow> {
+  bool? _enabled;
+  bool _verified = false;
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final on = await UaePassAuth.enabled();
+    var verified = false;
+    try {
+      final r = await ApiService.dio.get("/users/me");
+      verified = r.data["user"]?["isVerifiedResident"] == true;
+    } catch (_) {}
+    if (!mounted) return;
+    setState(() {
+      _enabled = on;
+      _verified = verified;
+    });
+  }
+
+  Future<void> _link() async {
+    setState(() => _busy = true);
+    try {
+      final ok = await UaePassAuth.link();
+      if (ok) await _load();
+      if (mounted && ok) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr(_verified ? "UAE PASS linked. You're a verified resident." : "UAE PASS linked."))));
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_enabled != true) return const SizedBox.shrink();
+    return ListTile(
+      leading: Icon(_verified ? Icons.verified_user_rounded : Icons.fingerprint_rounded, color: _verified ? AppColors.eco : AppColors.ink),
+      title: Text(_verified ? tr("Verified resident (UAE PASS)") : tr("Link UAE PASS"), style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w600)),
+      subtitle: _verified ? null : Text(tr("Confirms you're a UAE resident for official campaigns")),
+      trailing: _verified ? null : (_busy ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.chevron_right_rounded)),
+      onTap: _verified || _busy ? null : _link,
     );
   }
 }

@@ -335,4 +335,16 @@ class AdminApi {
   Future<Json> getJson(String path, {Map<String, dynamic>? query}) => _send(() => _dio.get(path, queryParameters: query));
   Future<Json> postJson(String path, [Object? body]) => _send(() => _dio.post(path, data: body));
   Future<Json> patchJson(String path, [Object? body]) => _send(() => _dio.patch(path, data: body));
+  Future<Json> deleteJson(String path) => _send(() => _dio.delete(path));
+
+  /// Download a file (e.g. a PDF or Excel report) as bytes.
+  Future<List<int>> getBytes(String path, {Map<String, dynamic>? query}) async {
+    try {
+      final res = await _dio.get<List<int>>(path, queryParameters: query, options: Options(responseType: ResponseType.bytes, receiveTimeout: const Duration(minutes: 2)));
+      return res.data ?? const [];
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) onUnauthorized?.call();
+      throw ApiError('Download failed (${e.response?.statusCode ?? 'network'})', status: e.response?.statusCode);
+    }
+  }
 }

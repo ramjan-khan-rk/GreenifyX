@@ -28,6 +28,7 @@ const adminUserView = (u) => ({
   profileImage: u.profileImage || "",
   emirate: u.emirate || "",
   role: u.role || "user",
+  isVerifiedResident: u.isVerifiedResident === true,
   isSuspended: u.isSuspended === true,
   suspendedReason: u.suspendedReason || "",
   ecoPoints: resolveEcoPoints(u),
@@ -191,6 +192,7 @@ export const getStats = async (req, res) => {
         newUsers7d: newUsersWeek,
         newUsersPrev7d: newUsersPrevWeek,
         suspendedUsers,
+        verifiedResidents: await User.countDocuments({ isVerifiedResident: true }),
         totalPosts,
         verifiedPosts,
         verificationRate: totalPosts ? Math.round((verifiedPosts / totalPosts) * 100) : 0,
@@ -280,6 +282,7 @@ export const listUsers = async (req, res) => {
     if (status === "active") filter.isSuspended = { $ne: true };
     if (status === "admins") filter.role = "admin";
     if (status === "verifiers") filter.role = "verifier";
+    if (status === "residents") filter.isVerifiedResident = true;
     const emirate = normalizeEmirate(req.query.emirate);
     if (emirate) filter.emirate = emirate;
 

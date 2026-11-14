@@ -139,7 +139,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       // verifier = authorised field verifier for campaigns
-      enum: ["user", "verifier", "admin"],
+      enum: ["user", "verifier", "admin", "partner", "auditor"],
       default: "user",
     },
 
@@ -182,6 +182,28 @@ const userSchema = new mongoose.Schema(
 
     // Referrals
     referralCode: { type: String, unique: true, sparse: true, uppercase: true, trim: true },
+
+    // UAE PASS link. The Emirates ID number is never stored, only the account type.
+    uaePass: {
+      uuid: { type: String, index: { unique: true, sparse: true } },
+      userType: { type: String, default: "" }, // SOP1 visitor, SOP2/SOP3 verified resident
+      linkedAt: Date,
+    },
+    isVerifiedResident: { type: Boolean, default: false, index: true },
+
+    // Neighbourhood for leagues and missions; home point rounded to ~1 km.
+    homeZone: { type: mongoose.Schema.Types.ObjectId, ref: "Zone", index: true },
+    homeLocation: { lat: Number, lng: Number },
+
+    // Brand deal payouts through Stripe Connect (bank details stay with Stripe).
+    stripeAccountId: { type: String, default: "" },
+
+    // Impact passport: code for the QR and whether the owner shares it.
+    passportCode: { type: String, unique: true, sparse: true },
+    passportPublic: { type: Boolean, default: false },
+
+    // Partner portal login: the one organisation this account can see.
+    partnerOrg: { type: mongoose.Schema.Types.ObjectId, ref: "Organization" },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     referralRewardedAt: { type: Date },
 

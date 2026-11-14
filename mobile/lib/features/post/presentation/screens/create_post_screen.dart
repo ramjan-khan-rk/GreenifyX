@@ -31,7 +31,9 @@ class CreatePostScreen extends StatefulWidget {
   /// "Do it too": the post that inspired this one, and its action to preselect.
   final String? chainParent;
   final String? presetActivity;
-  const CreatePostScreen({super.key, this.communityId, this.chainParent, this.presetActivity});
+  /// Targeted mission this post is for (bonus once verified).
+  final String? missionId;
+  const CreatePostScreen({super.key, this.communityId, this.chainParent, this.presetActivity, this.missionId});
 
   @override
   State<CreatePostScreen> createState() => _CreatePostScreenState();
@@ -245,6 +247,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       "visibility": everyone ? "public" : "friends",
       "community": ?widget.communityId,
       "chainParent": ?widget.chainParent,
+      "mission": ?widget.missionId,
       "muteOriginal": video && muteOriginal ? "true" : "false",
     };
     await musicPreview.stop();

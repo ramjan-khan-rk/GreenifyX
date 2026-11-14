@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_status.dart';
 import '../../application/providers/auth_provider.dart';
+import '../../data/uae_pass_auth.dart';
 import 'package:greenifyx/core/i18n/app_locale.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -51,6 +52,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } else {
       context.go(AppRoutes.home);
     }
+  }
+
+  Future<void> _loginWithUaePass() async {
+    final result = await ref.read(authProvider.notifier).loginWithUaePass();
+    if (!mounted || result == null) return;
+    context.go(result.isNewUser || !result.user.isProfileCompleted ? AppRoutes.completeProfile : AppRoutes.home);
   }
 
   @override
@@ -136,6 +143,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         )
                       : Text(tr("Log in")),
                 ),
+              ),
+              FutureBuilder<bool>(
+                future: UaePassAuth.enabled(),
+                builder: (context, snap) {
+                  if (snap.data != true) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: OutlinedButton.icon(
+                        onPressed: authState.isLoading ? null : _loginWithUaePass,
+                        icon: const Icon(Icons.fingerprint_rounded),
+                        label: Text(tr("Sign in with UAE PASS")),
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
               TextButton(

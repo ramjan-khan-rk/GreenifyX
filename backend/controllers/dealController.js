@@ -5,6 +5,40 @@ import Notification from "../models/Notification.js";
 import { emitToUser } from "../socket/socket.js";
 import { canMove, creatorPayout, eligibility } from "../utils/deals.js";
 import { sendServerError } from "../utils/httpError.js";
+import User from "../models/User.js";
+import { createAccountLink, createConnectAccount, getAccount, paymentsEnabled } from "../utils/stripe.js";
+
+const site = () => (process.env.PUBLIC_SITE_URL || "https://greenifyx-admin.netlify.app").replace(/\/+$/, "");
+
+// GET /api/deals/payouts — is automatic payout available, and has this creator set it up?
+export const payoutStatus = async (req, res) => {
+  try {
+    if (!paymentsEnabled()) return res.json({ success: true, available: false, ready: false });
+    const me = await User.findById(req.user._id).select("stripeAccountId").lean();
+    if (!me?.stripeAccountId) return res.json({ success: true, available: true, ready: false });
+    const acct = await getAccount(me.stripeAccountId).catch(() => null);
+    res.json({ success: true, available: true, ready: Boolean(acct?.payouts_enabled), started: true });
+  } catch (error) {
+    return sendServerError(res, "Unable to check payouts");
+  }
+};
+
+// POST /api/deals/payouts/setup — opens Stripe's own page to add bank details (GreenifyX never sees them).
+export const payoutSetup = async (req, res) => {
+  try {
+    if (!paymentsEnabled()) return res.status(503).json({ success: false, message: "Automatic payouts aren't switched on yet" });
+    const me = await User.findById(req.user._id).select("stripeAccountId email");
+    if (!me.stripeAccountId) {
+      const acct = await createConnectAccount({ email: me.email || undefined });
+      me.stripeAccountId = acct.id;
+      await me.save();
+    }
+    const link = await createAccountLink({ account: me.stripeAccountId, refreshUrl: `${site()}/#/payouts/retry`, returnUrl: `${site()}/#/payouts/done` });
+    res.json({ success: true, url: link.url });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: `Stripe: ${error.message}` });
+  }
+};
 
 const notify = async (userId, title, message, dealId) => {
   try {
@@ -158,13 +192,38 @@ export const adminMoveApplication = async (req, res) => {
       const taken = deal.applications.filter((a) => a !== app && ["accepted", "delivered", "paid"].includes(a.status)).length;
       if (taken >= deal.slots) return res.status(400).json({ success: false, message: "All spots are taken" });
     }
+    // Paying: send the creator's share automatically through Stripe Connect when they've set it up;
+    // otherwise it's recorded as a manual bank transfer, as before.
+    let paidVia = "";
+    if (to === "paid") {
+      const creator = await User.findById(app.user).select("stripeAccountId").lean();
+      if (paymentsEnabled() && creator?.stripeAccountId && req.body?.manual !== true) {
+        try {
+          const acct = await getAccount(creator.stripeAccountId);
+          if (!acct.payouts_enabled) return res.status(400).json({ success: false, message: "The creator hasn't finished payout setup with Stripe yet. Pay manually or ask them to finish." });
+          const t = await createTransfer({
+            amountAed: creatorPayout(deal.payoutAed, deal.platformFeePct),
+            destination: creator.stripeAccountId,
+            metadata: { deal: String(deal._id), user: String(app.user) },
+            idempotencyKey: `deal-${deal._id}-${app.user}`,
+          });
+          app.transferId = t.id;
+          paidVia = "stripe";
+        } catch (e) {
+          return res.status(400).json({ success: false, message: `Stripe couldn't send the payment: ${e.message}` });
+        }
+      } else {
+        paidVia = "manual";
+      }
+      app.paidVia = paidVia;
+    }
     app.status = to;
     app.updatedAt = new Date();
     await deal.save();
     const msg = {
       accepted: ["You're in! 🤝", `${deal.brand} accepted you for "${deal.title}". Post your action, then link it in Brand deals.`],
       rejected: ["Brand deal update", `${deal.brand} went with other creators for "${deal.title}" this time.`],
-      paid: ["You've been paid 💸", `${deal.brand} paid AED ${creatorPayout(deal.payoutAed, deal.platformFeePct)} for "${deal.title}".`],
+      paid: ["You've been paid 💸", `${deal.brand} paid AED ${creatorPayout(deal.payoutAed, deal.platformFeePct)} for "${deal.title}"${paidVia === "stripe" ? ". It's on its way to your bank through Stripe." : "."}`],
     }[to];
     if (msg) await notify(app.user, msg[0], msg[1], deal._id);
     res.json({ success: true });

@@ -25,10 +25,15 @@ import '../pages/checkpoints_page.dart';
 import '../pages/growth_pages.dart';
 import '../pages/forest_page.dart';
 import '../pages/deals_page.dart';
+import '../pages/partner_pages.dart';
+import '../pages/stations_page.dart';
+import '../pages/missions_page.dart';
+import '../pages/audit_pages.dart';
+import '../pages/home_pages.dart';
 import '../widgets/shell.dart';
 import 'session.dart';
 
-const publicPaths = {'/for-organisations', '/pay/success', '/pay/cancelled'};
+const publicPaths = {'/for-organisations', '/pay/success', '/pay/cancelled', '/payouts/done', '/payouts/retry'};
 
 NoTransitionPage<void> _page(GoRouterState state, Widget child) =>
     NoTransitionPage<void>(key: state.pageKey, child: child);
@@ -40,15 +45,20 @@ final GoRouter adminRouter = GoRouter(
     final session = Session.instance;
     if (session.restoring) return null;
     // Public pages: open to everyone, signed in or not.
-    if (publicPaths.contains(state.matchedLocation) || state.matchedLocation.startsWith('/verify/') || state.matchedLocation.startsWith('/esg/') || state.matchedLocation.startsWith('/join/')) return null;
+    if (publicPaths.contains(state.matchedLocation) || state.matchedLocation.startsWith('/verify/') || state.matchedLocation.startsWith('/esg/') || state.matchedLocation.startsWith('/join/') || state.matchedLocation.startsWith('/passport/')) return null;
     final atLogin = state.matchedLocation == '/login';
     if (!session.signedIn) return atLogin ? null : '/login';
+    if (session.isPartner) return state.matchedLocation == '/partner' ? null : '/partner';
+    if (session.isAuditor) return state.matchedLocation == '/audit' ? null : '/audit';
     if (atLogin) return '/';
     return null;
   },
   routes: [
     GoRoute(path: '/login', pageBuilder: (context, state) => _page(state, const LoginPage())),
     GoRoute(path: '/for-organisations', pageBuilder: (context, state) => _page(state, const PublicSitePage())),
+    GoRoute(path: '/payouts/done', pageBuilder: (context, state) => _page(state, const PayoutResultPage(done: true))),
+    GoRoute(path: '/payouts/retry', pageBuilder: (context, state) => _page(state, const PayoutResultPage(done: false))),
+    GoRoute(path: '/passport/:code', pageBuilder: (context, state) => _page(state, PassportVerifyPage(code: state.pathParameters['code'] ?? ''))),
     GoRoute(path: '/esg/:token', pageBuilder: (context, state) => _page(state, EsgReportPage(token: state.pathParameters['token'] ?? ''))),
     GoRoute(path: '/verify/:code', pageBuilder: (context, state) => _page(state, VerifyCertificatePage(code: state.pathParameters['code'] ?? ''))),
     GoRoute(path: '/join/:code', pageBuilder: (context, state) => _page(state, JoinInvitePage(code: state.pathParameters['code'] ?? ''))),
@@ -72,6 +82,13 @@ final GoRouter adminRouter = GoRouter(
         GoRoute(path: '/events', pageBuilder: (context, state) => _page(state, const EventsPage())),
         GoRoute(path: '/forest', pageBuilder: (context, state) => _page(state, const ForestPage())),
         GoRoute(path: '/deals', pageBuilder: (context, state) => _page(state, const DealsPage())),
+        GoRoute(path: '/partner', pageBuilder: (context, state) => _page(state, const PartnerPortalPage())),
+        GoRoute(path: '/partners', pageBuilder: (context, state) => _page(state, const PartnerLoginsPage())),
+        GoRoute(path: '/stations', pageBuilder: (context, state) => _page(state, const StationsPage())),
+        GoRoute(path: '/missions', pageBuilder: (context, state) => _page(state, const MissionsPage())),
+        GoRoute(path: '/audit', pageBuilder: (context, state) => _page(state, const AuditPage())),
+        GoRoute(path: '/home-health', pageBuilder: (context, state) => _page(state, const HomeHealthPage())),
+        GoRoute(path: '/lessons', pageBuilder: (context, state) => _page(state, const LessonsPage())),
         GoRoute(path: '/analytics', pageBuilder: (context, state) => _page(state, const AnalyticsPage())),
         GoRoute(path: '/insights', pageBuilder: (context, state) => _page(state, const InsightsPage())),
         GoRoute(path: '/impact', pageBuilder: (context, state) => _page(state, const ImpactPage())),

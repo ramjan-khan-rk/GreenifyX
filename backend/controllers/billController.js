@@ -1,4 +1,5 @@
 import UtilityBill from "../models/UtilityBill.js";
+import BillScan from "../models/BillScan.js";
 import { aiEnabled, callClaude, parseJsonReply, textOf } from "../utils/ai.js";
 import { uploadBufferToCloudinary } from "../utils/cloudinaryUpload.js";
 import { creditPoints } from "../utils/ledger.js";
@@ -7,16 +8,14 @@ import { sendServerError } from "../utils/httpError.js";
 import { billPoints, co2ForKwh, normalizeBill, percentChange, previousMonth } from "../utils/bills.js";
 
 /**
- * Scans hold the photo and the AI reading for a short time, so a member can
- * only earn points for numbers that really came from a photo.
+ * Scans hold the photo and the AI reading for 30 minutes, in the database so a
+ * server restart doesn't lose them. A member can only earn points for numbers
+ * that really came from a photo.
  */
-const scans = new Map();
-const SCAN_TTL_MS = 30 * 60 * 1000;
-const keepScan = (userId, data) => {
-  const id = `${userId}:${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-  scans.set(id, { ...data, at: Date.now() });
-  for (const [k, v] of scans) if (Date.now() - v.at > SCAN_TTL_MS) scans.delete(k);
-  return id;
+const keepScan = async (userId, data) => {
+  const key = `${userId}:${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  await BillScan.create({ key, user: userId, ...data });
+  return key;
 };
 
 // POST /api/bills/scan  (multipart: photo)
@@ -59,7 +58,7 @@ export const scanBill = async (req, res) => {
 
     const bill = normalizeBill(parsed);
     const photoUrl = await uploadBufferToCloudinary(file.buffer, "GreenifyX/bills").catch(() => "");
-    const scanId = keepScan(req.user._id, { bill, photoUrl });
+    const scanId = await keepScan(req.user._id, { bill, photoUrl });
     res.json({ success: true, aiAvailable: true, scanId, bill });
   } catch (error) {
     return sendServerError(res, "Unable to read the bill");
@@ -74,14 +73,13 @@ export const saveBill = async (req, res) => {
     if (!bill.electricityKwh && !bill.waterLitres) return res.status(400).json({ success: false, message: "Add electricity or water use" });
 
     // Points only when the saved numbers match what was read from the photo.
-    const scan = req.body?.scanId && String(req.body.scanId).startsWith(`${req.user._id}:`) ? scans.get(req.body.scanId) : null;
+    const scan = req.body?.scanId ? await BillScan.findOneAndDelete({ key: String(req.body.scanId), user: req.user._id }).lean() : null;
     const fromPhoto =
       scan &&
       scan.bill.month === bill.month &&
       scan.bill.provider === bill.provider &&
       scan.bill.electricityKwh === bill.electricityKwh &&
       scan.bill.waterLitres === bill.waterLitres;
-    if (scan) scans.delete(req.body.scanId);
 
     const exists = await UtilityBill.findOne({ user: req.user._id, provider: bill.provider, month: bill.month });
     if (exists) return res.status(409).json({ success: false, message: "You already added this month's bill" });

@@ -9,6 +9,7 @@ import '../../domain/models/login_response.dart';
 import '../../../../core/services/socket_service.dart';
 import '../../../../core/session/session_controller.dart';
 import '../../../../core/utils/friendly_error.dart';
+import '../../data/uae_pass_auth.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
@@ -115,6 +116,24 @@ class AuthNotifier extends Notifier<AuthState> {
       return result;
     } catch (e) {
       state = AuthState(error: _errorMessage(e));
+      return null;
+    }
+  }
+
+  /// Sign in with UAE PASS: opens the official UAE PASS page, then swaps the
+  /// one-time code the server sends back for a GreenifyX session.
+  Future<LoginResponse?> loginWithUaePass() async {
+    try {
+      state = state.copyWith(isLoading: true, error: null);
+      final result = await UaePassAuth.signIn();
+      if (result == null) {
+        state = state.copyWith(isLoading: false);
+        return null;
+      }
+      await _persistSession(result);
+      return result;
+    } catch (e) {
+      state = AuthState(error: e is UaePassException ? e.message : _errorMessage(e));
       return null;
     }
   }

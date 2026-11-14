@@ -32,6 +32,8 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // Declines calls from the lock screen even when the app isn't running.
+        manifestPlaceholders["applicationName"] = "com.ramjankhan.greenifyx.MainApplication"
     }
 
     signingConfigs {

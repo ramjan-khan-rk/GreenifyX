@@ -12,9 +12,15 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'core/widgets/app_banners.dart';
 import 'core/services/api_service.dart';
+import 'core/services/push_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Friends' calls ring even when the app is closed (handled in the background).
+  try {
+    FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
+  } catch (_) {}
 
   await ApiService.initialize();
   await AppLocale.load();

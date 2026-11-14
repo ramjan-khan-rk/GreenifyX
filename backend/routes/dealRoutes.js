@@ -9,11 +9,15 @@ import {
   applyToDeal,
   deliverDeal,
   listDeals,
+  payoutSetup,
+  payoutStatus,
 } from "../controllers/dealController.js";
 
 /** Brand deals for eco creators. */
 const router = express.Router();
 router.get("/deals", protect, listDeals);
+router.get("/deals/payouts", protect, payoutStatus);
+router.post("/deals/payouts/setup", protect, payoutSetup);
 router.post("/deals/:id/apply", protect, applyToDeal);
 router.post("/deals/:id/deliver", protect, deliverDeal);
 

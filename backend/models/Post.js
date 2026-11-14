@@ -108,6 +108,9 @@ const postSchema = new mongoose.Schema(
     chainOf: { type: mongoose.Schema.Types.ObjectId, ref: "Post", index: true },
     chainParent: { type: mongoose.Schema.Types.ObjectId, ref: "Post" },
 
+    // Targeted mission this post was made for (bonus paid once verified).
+    mission: { type: mongoose.Schema.Types.ObjectId, ref: "Mission" },
+
     // Sponsored challenge this post counts towards.
     sponsored: { type: mongoose.Schema.Types.ObjectId, ref: "SponsoredChallenge" },
 

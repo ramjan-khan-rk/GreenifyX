@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
 <style>
-/* Layout: one readable column (~860px) with a brand-ink cover band, sticky section index, and status-coded tables. */
+/* Layout: one readable column (~880px) with a brand-ink cover band, sticky section index, and status-coded tables. */
 :root {
   --bg: #FFF9F4;
   --surface: #FFFFFF;
@@ -118,16 +118,16 @@ footer { border-top: 1px solid var(--line); margin-top: 48px; padding-top: 18px;
   <div class="wrap">
     <div class="eyebrow">Partnership briefing · UAE pilot · 14 November 2026</div>
     <h1>GreenifyX turns real environmental action into verified, rewarded community impact</h1>
-    <p class="lede">A mobile app for residents and a web dashboard for partners. People post real eco actions, the community and AI verify them, and every verified action becomes Eco Points, CO₂ estimates and reports that municipalities, communities and companies can use.</p>
+    <p class="lede">A mobile app for residents and a web dashboard for partners. People post real eco actions, the community, AI and field checks verify them, and every verified action becomes Eco Points, CO₂ estimates and auditable reports that municipalities, communities and companies can use.</p>
     <div class="facts">
-      <div class="fact"><b>43</b><span>feature areas in the mobile app</span></div>
-      <div class="fact"><b>24</b><span>admin dashboard pages</span></div>
-      <div class="fact"><b>227</b><span>server endpoints</span></div>
+      <div class="fact"><b>46</b><span>feature areas in the mobile app</span></div>
+      <div class="fact"><b>30</b><span>admin and partner pages</span></div>
+      <div class="fact"><b>272</b><span>server endpoints</span></div>
       <div class="fact"><b>7 / 7</b><span>emirates in reporting</span></div>
       <div class="fact"><b>EN · AR</b><span>English and Arabic, light and dark</span></div>
-      <div class="fact"><b>145</b><span>automated tests, all passing</span></div>
+      <div class="fact"><b>176</b><span>automated tests, all passing</span></div>
     </div>
-    <div class="meta">Version 1.0.2 (build 3) · Flutter mobile and web admin · Node.js API · Developer: Ramjan Khan</div>
+    <div class="meta">Flutter mobile and web admin · Node.js API · UAE PASS ready · Developer: Ramjan Khan</div>
   </div>
 </header>
 
@@ -137,10 +137,9 @@ footer { border-top: 1px solid var(--line); margin-top: 48px; padding-top: 18px;
     <a href="#how">How it works</a>
     <a href="#partners">For partners</a>
     <a href="#features">All features</a>
-    <a href="#admin">Admin dashboard</a>
+    <a href="#admin">Dashboards</a>
     <a href="#health">Health check</a>
-    <a href="#broken">Needs fixing</a>
-    <a href="#incomplete">Not finished</a>
+    <a href="#gaps">Still to do</a>
     <a href="#next">Next 5 features</a>
     <a href="#deck">Presentation outline</a>
     <a href="#checklist">Before a demo</a>
@@ -154,29 +153,29 @@ footer { border-top: 1px solid var(--line); margin-top: 48px; padding-top: 18px;
   <h2>Summary</h2>
   <p class="sub">What to say in the first minute.</p>
   <p><strong>The problem.</strong> Most sustainability apps raise awareness but can't show that anything actually happened. Partners can't tell a real tree planting from a stock photo, and residents lose interest when nothing they do is recognised.</p>
-  <p><strong>What GreenifyX does.</strong> It makes environmental action visible, verified and rewarding. A resident posts an action such as planting a Ghaf, recycling or a beach clean-up. Friends, an AI check, GPS geofences and field verifiers confirm it. Only verified actions earn Eco Points, which people redeem for partner rewards, donate to real tree planting, or use to climb neighbourhood and emirate leaderboards.</p>
-  <p><strong>What partners get.</strong> A web dashboard with live participation, estimated CO₂ impact by action and by emirate, campaign tools with GPS-verified attendance, citizen issue reports on a map, recycling pickups, events, and ESG reports for organisations.</p>
-  <p><strong>Where it stands.</strong> The platform is built and running as a UAE pilot. A full technical check on 14 November 2026 found no broken connections between the apps and the server, and all 145 automated tests pass. Ten features added this week still need testing on real phones, and a few items listed below should be finished before onboarding a government partner.</p>
-  <div class="note warn">CO₂ figures in GreenifyX are indicative per-action estimates, not certified measurement (MRV). Say this plainly to government audiences; it builds trust. The impact passport proposed in “Next 5 features” is the path to auditable figures.</div>
+  <p><strong>What GreenifyX does.</strong> It makes environmental action visible, verified and rewarding. A resident posts an action such as planting a Ghaf, recycling at a station or a beach clean-up. Friends, an AI check, GPS geofences, station QR codes and field verifiers confirm it. Only verified actions earn Eco Points, which people redeem for partner rewards, donate to real tree planting, or use to climb neighbourhood and emirate leagues.</p>
+  <p><strong>What partners get.</strong> Their own partner portal with live campaigns, members and impact, monthly PDF and Excel reports, targeted missions for a neighbourhood, recycling station volumes, and an audit trail that traces every number back to the actions and verifiers behind it. Residents can sign in with <strong>UAE PASS</strong>, so authorities can count verified residents.</p>
+  <p><strong>Where it stands.</strong> The platform is built and running as a UAE pilot. A full check on 14 November 2026 found all 280 app and dashboard calls connected to the server, and all 176 automated tests pass. Several features added this week still need testing on real phones before launch.</p>
+  <div class="note warn">CO₂ figures are indicative per-action estimates, not certified measurement (MRV). Say this plainly to government audiences. The impact passport and audit trail show exactly how each figure was verified, which is what builds trust.</div>
 </section>
 
 <section id="how">
   <h2>How it works</h2>
   <p class="sub">One loop, from a resident's action to a partner's report.</p>
   <div class="flow">
-    <div class="step"><b>1 · Act</b><span>Resident does something real and posts it with a photo or video.</span></div>
-    <div class="step"><b>2 · Verify</b><span>A friend confirms, AI checks the photo, or GPS and a field verifier confirm attendance.</span></div>
-    <div class="step"><b>3 · Reward</b><span>Verified actions earn Eco Points, badges and streaks.</span></div>
+    <div class="step"><b>1 · Act</b><span>Resident does something real and posts it, or scans a recycling station.</span></div>
+    <div class="step"><b>2 · Verify</b><span>A friend, the AI check, GPS, a station QR or a field verifier confirms it.</span></div>
+    <div class="step"><b>3 · Reward</b><span>Verified actions earn Eco Points, mission bonuses and league standing.</span></div>
     <div class="step"><b>4 · Redeem</b><span>Points buy partner rewards or fund a real tree in My Forest.</span></div>
-    <div class="step"><b>5 · Report</b><span>Partners see participation, CO₂ estimates and emirate breakdowns.</span></div>
+    <div class="step"><b>5 · Report</b><span>Partners see live numbers, download reports and audit any figure.</span></div>
   </div>
   <h3>Why the numbers can be trusted</h3>
   <ul>
-    <li><strong>Points only after verification.</strong> Posting alone earns nothing until a friend, the AI check or an admin verifies it.</li>
-    <li><strong>Anti-cheat.</strong> The same photo can't be posted twice, AI flags off-topic or reused images, and campaign reports detect fake GPS.</li>
-    <li><strong>Geofenced campaigns.</strong> Participation counts only inside the campaign area and time window, with field verifiers approving reports.</li>
-    <li><strong>Points ledger.</strong> Every point has an auditable record that can be reversed, and nothing is changed silently.</li>
-    <li><strong>Moderation.</strong> Members can report posts, and admins can hide content and suspend accounts with a stated reason.</li>
+    <li><strong>Points only after verification.</strong> Posting alone earns nothing until it's verified.</li>
+    <li><strong>Anti-cheat.</strong> The same photo can't be posted twice, AI flags off-topic images, campaign reports detect fake GPS, and station drop-offs only earn points at the station.</li>
+    <li><strong>UAE PASS.</strong> Residents who sign in with the national digital identity are marked as verified residents. Their Emirates ID number is never stored.</li>
+    <li><strong>Points ledger and audit trail.</strong> Every point has a record. Auditors can sample actions at random, recheck them, and reverse points that fail.</li>
+    <li><strong>Moderation.</strong> Members report posts, and admins hide content and suspend accounts with a stated reason.</li>
   </ul>
 </section>
 
@@ -187,39 +186,37 @@ footer { border-top: 1px solid var(--line); margin-top: 48px; padding-top: 18px;
     <div class="card">
       <h4>Municipalities and environment authorities</h4>
       <ul>
-        <li>Campaigns with GPS-verified attendance, output targets and field verifiers</li>
-        <li>Report &amp; Restore: residents report litter or damage on a map, and admins track each report to resolution</li>
-        <li>Recycling pickups, eco places map and QR check-ins at sites</li>
-        <li>Impact dashboard by action type and by emirate, plus 30-day trends</li>
-        <li>Electricity and water saving tracked through utility bills (new)</li>
+        <li>Partner portal: own campaigns, members and impact, with monthly PDF and Excel reports by email</li>
+        <li>Targeted missions to one neighbourhood, with an alert to everyone who lives there</li>
+        <li>Recycling stations with QR codes, kilograms per station and emirate, and "full" reports from residents</li>
+        <li>Report &amp; Restore issues on a map, campaigns with GPS-verified attendance</li>
+        <li>Audit trail and a read-only auditor login</li>
       </ul>
     </div>
     <div class="card">
       <h4>Communities, schools and NGOs</h4>
       <ul>
-        <li>Teams for schools and organisations, with their own dashboards</li>
-        <li>Communities with group chat, community challenges and events</li>
-        <li>Eco Academy: a daily 60-second lesson and quiz in English and Arabic (new)</li>
-        <li>Household mode for families and flatmates (new)</li>
-        <li>Impact certificates anyone can verify with a QR code</li>
+        <li>Teams and communities with chat, challenges and events</li>
+        <li>Impact passport: verified volunteer hours with a QR a school or employer can check</li>
+        <li>Eco Academy: daily lessons in English and Arabic, editable from the dashboard</li>
+        <li>Household mode and neighbourhood leagues</li>
       </ul>
     </div>
     <div class="card">
       <h4>Companies and brands</h4>
       <ul>
-        <li>Sponsored challenges and partner rewards, including paid rewards through Stripe</li>
-        <li>ESG reports per organisation, shareable by link</li>
-        <li>Brand deals: pay eco creators for real, verified actions (new)</li>
-        <li>My Forest: fund real native trees planted by partners (new)</li>
+        <li>Sponsored challenges, partner rewards and ESG reports</li>
+        <li>Brand deals: pay eco creators for verified actions, with automatic payouts through Stripe</li>
+        <li>My Forest: fund real native trees planted by partners</li>
       </ul>
     </div>
     <div class="card">
       <h4>Residents</h4>
       <ul>
-        <li>A social app they enjoy: feed, reels, stories, chat and calls</li>
-        <li>Rewards for real action, from vouchers to trees in their name</li>
-        <li>Green Wrapped: their year in review to share (new)</li>
-        <li>Arabic and English throughout, with auto-translate for posts (new)</li>
+        <li>A social app they enjoy: feed, reels, stories, chat and calls that ring like a normal phone call</li>
+        <li>Rewards for real action, missions near home and a weekly league</li>
+        <li>Green Wrapped, Health sync, utility bill savings</li>
+        <li>Arabic and English, with auto-translate for posts</li>
       </ul>
     </div>
   </div>
@@ -232,232 +229,161 @@ footer { border-top: 1px solid var(--line); margin-top: 48px; padding-top: 18px;
     <span class="chip ok">Working</span> built and connected end to end
     <span class="chip setup">Needs setup</span> works once a service key is set on the server
     <span class="chip new">New</span> added this week, not yet tested on a phone
-    <span class="chip part">Partial</span> works with a known limit
   </div>
 
   <h3>Accounts and profile</h3>
   <div class="tablebox"><table>
     <tr><th>Feature</th><th>What it does</th><th>Status</th></tr>
     <tr><td>Sign-up and login</td><td>Email one-time code, password login, forgot password</td><td><span class="chip setup">Needs setup</span></td></tr>
-    <tr><td>Onboarding and invites</td><td>Guided first steps, invite links, referral bonus after the friend's first verified action</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Profile</td><td>Photo, bio, emirate, level, Eco Points, streak, verified tick</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Language and theme</td><td>English and Arabic (right-to-left), light and dark mode</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Privacy and account</td><td>Privacy policy, terms, notification preferences, delete account (removes personal data, including from new features)</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>UAE PASS</td><td>Sign in with the national digital identity, verified-resident badge, link from Settings</td><td><span class="chip new">New</span> <span class="chip setup">Needs setup</span></td></tr>
+    <tr><td>Onboarding and invites</td><td>Guided first steps, invite links, referral bonus</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Profile and settings</td><td>Photo, emirate, level, Eco Points, Arabic and English, dark mode</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Privacy</td><td>Privacy policy, terms, notification choices, delete account (removes personal data from every feature)</td><td><span class="chip ok">Working</span></td></tr>
   </table></div>
 
   <h3>Social</h3>
   <div class="tablebox"><table>
     <tr><th>Feature</th><th>What it does</th><th>Status</th></tr>
-    <tr><td>Feeds</td><td>Friends feed and a personalised “For you” feed, follows</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Posts</td><td>Photo or video from a searchable catalogue of 30 eco activities, filters, music, tag friends, hashtags, mentions</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Stories and reels</td><td>Stories with viewers, reels with trending sounds</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Comments</td><td>Threaded comments with reactions and pins</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Trending</td><td>Trending hashtags and top posts</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Communities</td><td>Join groups, group chat, community challenges and events</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Creator tools</td><td>Creator profiles, follower counts, creator analytics</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Do it too chains</td><td>Copy someone's action and join a chain of people who did the same</td><td><span class="chip new">New</span></td></tr>
-    <tr><td>Auto-translate</td><td>“See translation” on posts and comments in English, Arabic, Hindi, Urdu, Tagalog and Malayalam</td><td><span class="chip new">New</span> <span class="chip setup">Needs setup</span></td></tr>
-    <tr><td>Eco Lens</td><td>Impact effects drawn on photos, including a sticker showing your real CO₂ saved</td><td><span class="chip new">New</span></td></tr>
+    <tr><td>Feeds and posts</td><td>Friends and "For you" feeds, posts from 30 eco activities, tags, hashtags, music</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Stories, reels, comments</td><td>Stories, reels with sounds, threaded comments with reactions</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Communities and creators</td><td>Groups with chat and challenges, creator profiles and analytics</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Do it too chains</td><td>Copy someone's action and join their chain</td><td><span class="chip new">New</span></td></tr>
+    <tr><td>Auto-translate</td><td>Posts and comments in 6 languages</td><td><span class="chip new">New</span> <span class="chip setup">Needs setup</span></td></tr>
+    <tr><td>Eco Lens</td><td>Impact effects drawn on photos</td><td><span class="chip new">New</span></td></tr>
   </table></div>
 
-  <h3>Verification and points</h3>
+  <h3>Action, verification and impact</h3>
   <div class="tablebox"><table>
     <tr><th>Feature</th><th>What it does</th><th>Status</th></tr>
-    <tr><td>Friend verification</td><td>Friends confirm a post before points are paid</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>AI verification</td><td>Instant AI check with an “AI-verified” badge, AI moderation, duplicate-photo detection</td><td><span class="chip setup">Needs setup</span></td></tr>
-    <tr><td>Eco Points</td><td>Ledger, levels, streaks, streak freezes, badges, leaderboard</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Field verification</td><td>GPS geofence and time window checks for campaigns, fake-GPS detection, verifier approval</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>QR check-ins</td><td>Scan a code at a site to check in and earn points</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Verification</td><td>Friend checks, AI check, GPS geofences, field verifiers, QR check-ins</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Challenges and campaigns</td><td>Friend challenges, battles, sponsored challenges, campaigns, events, pickups</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Missions and leagues</td><td>Missions for your neighbourhood, weekly neighbourhood and emirate leagues</td><td><span class="chip new">New</span></td></tr>
+    <tr><td>Recycling stations</td><td>Map of stations, scan after a drop-off, report full or broken, history</td><td><span class="chip new">New</span></td></tr>
+    <tr><td>Report &amp; Restore, Eco Map</td><td>Report issues on a map, find eco places</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Carbon tracker and My impact</td><td>Footprint, impact totals, verifiable certificate</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Impact passport</td><td>Verified record and volunteer hours with a QR for schools and employers</td><td><span class="chip new">New</span></td></tr>
+    <tr><td>Green Wrapped</td><td>Year-in-review story with a shareable card</td><td><span class="chip new">New</span></td></tr>
+    <tr><td>Health sync</td><td>Points for steps and cycling from Apple Health or Health Connect</td><td><span class="chip new">New</span></td></tr>
+    <tr><td>My bills</td><td>AI reads electricity and water bills; points for using less</td><td><span class="chip new">New</span> <span class="chip setup">Needs setup</span></td></tr>
+    <tr><td>Household, Eco Academy</td><td>Shared weekly goal; daily lesson and quiz</td><td><span class="chip new">New</span></td></tr>
   </table></div>
 
-  <h3>Action and impact</h3>
+  <h3>Rewards, money and real-time</h3>
   <div class="tablebox"><table>
     <tr><th>Feature</th><th>What it does</th><th>Status</th></tr>
-    <tr><td>Challenges and battles</td><td>Friend challenges, weekly battles, sponsored challenges</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Campaigns</td><td>Join official campaigns, submit evidence, see progress</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Events</td><td>Green events calendar with RSVPs</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Report &amp; Restore</td><td>Report an environmental issue with photo and location, follow it to resolution</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Eco Map</td><td>Recycling points and eco places near you</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Recycling pickup</td><td>Book a pickup and earn points per kilogram collected</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Snap &amp; Sort</td><td>Photograph an item to learn how to recycle it</td><td><span class="chip setup">Needs setup</span></td></tr>
-    <tr><td>Carbon tracker</td><td>Personal footprint against the UAE average and the 1.5°C target, with tips</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>My impact</td><td>Trees, waste, CO₂, volunteer hours, plus a certificate anyone can verify by QR</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Green Wrapped</td><td>Year-in-review story with a card sized for Instagram and TikTok stories</td><td><span class="chip new">New</span></td></tr>
-    <tr><td>Health sync</td><td>Points for steps and cycling from Apple Health or Health Connect, up to 15 a day</td><td><span class="chip new">New</span></td></tr>
-    <tr><td>My bills</td><td>AI reads DEWA, ADDC, SEWA or Etihad WE bills and rewards using less than last month</td><td><span class="chip new">New</span> <span class="chip setup">Needs setup</span></td></tr>
-    <tr><td>Household</td><td>Families and flatmates share a weekly points goal with a bonus</td><td><span class="chip new">New</span></td></tr>
-    <tr><td>Eco Academy</td><td>14 lessons, one a day, with a 3-question quiz and points, in English and Arabic</td><td><span class="chip new">New</span></td></tr>
-  </table></div>
-
-  <h3>Rewards and money</h3>
-  <div class="tablebox"><table>
-    <tr><th>Feature</th><th>What it does</th><th>Status</th></tr>
-    <tr><td>Rewards</td><td>Redeem points for vouchers, experiences, donations and transport</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Paid partner rewards</td><td>Card payment through Stripe Checkout</td><td><span class="chip setup">Needs setup</span></td></tr>
-    <tr><td>Swap &amp; Share</td><td>Give away or swap items, with waste saved counted</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>My Forest</td><td>Spend points to fund a real Ghaf, Mangrove or Sidr tree, then follow it with a map and photos</td><td><span class="chip new">New</span></td></tr>
-    <tr><td>Brand deals</td><td>Apply to paid briefs from brands, post the action, link it, get paid</td><td><span class="chip new">New</span> <span class="chip part">Partial</span></td></tr>
-  </table></div>
-
-  <h3>Real-time and assistants</h3>
-  <div class="tablebox"><table>
-    <tr><th>Feature</th><th>What it does</th><th>Status</th></tr>
-    <tr><td>Chat</td><td>One-to-one chat with images and voice notes, typing indicator, friends only</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Voice and video calls</td><td>Calls between friends with a relay server for mobile data, plus a “Call details” log</td><td><span class="chip part">Partial</span></td></tr>
-    <tr><td>Live streaming</td><td>Go live with comments and hearts</td><td><span class="chip setup">Needs setup</span></td></tr>
-    <tr><td>Notifications</td><td>Notification centre with grouping and bulk actions, plus push notifications</td><td><span class="chip setup">Needs setup</span></td></tr>
-    <tr><td>Offline and uploads</td><td>Works on slow networks, uploads continue in the background with retry</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>AI companion</td><td>Daily plan and goals, an eco assistant chat</td><td><span class="chip setup">Needs setup</span></td></tr>
-    <tr><td>Hey Greeny</td><td>Voice assistant that opens screens and starts actions, in English and Arabic</td><td><span class="chip ok">Working</span></td></tr>
-  </table></div>
-
-  <h3>Organisations</h3>
-  <div class="tablebox"><table>
-    <tr><th>Feature</th><th>What it does</th><th>Status</th></tr>
-    <tr><td>Teams</td><td>Companies, schools and communities register, invite members and see a dashboard</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>ESG reports</td><td>Organisation impact report shareable by link</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Public website</td><td>Organisations page with an enquiry form that reaches the admin</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Rewards and Swap &amp; Share</td><td>Redeem points, paid partner rewards (Stripe), second-hand swaps</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>My Forest</td><td>Fund a real tree and follow it with a map and photos</td><td><span class="chip new">New</span></td></tr>
+    <tr><td>Brand deals</td><td>Paid briefs for creators, automatic payouts through Stripe Connect</td><td><span class="chip new">New</span> <span class="chip setup">Needs setup</span></td></tr>
+    <tr><td>Chat</td><td>Text, images and voice notes</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Calls</td><td>Voice and video; rings with the phone's own call screen and ringtone, even when locked or closed; keeps going in other apps</td><td><span class="chip new">New</span> <span class="chip setup">Needs setup</span></td></tr>
+    <tr><td>Live, notifications, assistants</td><td>Live streaming, push notifications, AI companion, Hey Greeny voice assistant</td><td><span class="chip setup">Needs setup</span></td></tr>
   </table></div>
 </section>
 
 <section id="admin">
-  <h2>Admin dashboard</h2>
-  <p class="sub">A website for the GreenifyX team and, later, for partners. Responsive on desktop, tablet and phone.</p>
+  <h2>Dashboards</h2>
+  <p class="sub">One website with three kinds of login: admins see everything, partners see their own organisation, auditors see the audit trail.</p>
   <div class="tablebox"><table>
     <tr><th>Area</th><th>Pages</th><th>Status</th></tr>
-    <tr><td>Insight</td><td>Overview KPIs; Analytics with daily, weekly and monthly actives, retention cohorts, funnel, emirates and heat map; AI insights; Impact by action and emirate</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Field work</td><td>Campaigns, Verification queue, Report &amp; Restore, Eco places, QR check-ins, Recycling pickups, Events</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Points and rewards</td><td>Eco Points ledger, Rewards, Sponsored challenges, Verified badges</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>Content</td><td>Eco activities catalogue, Moderation, Challenges</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>People and partners</td><td>Users (search, filter, suspend), Organisations, Website enquiries</td><td><span class="chip ok">Working</span></td></tr>
-    <tr><td>New this week</td><td>My Forest (mark trees planted, post photo updates, refund) and Brand deals (create deals, accept creators, mark paid)</td><td><span class="chip new">New</span></td></tr>
-    <tr><td>Public pages</td><td>Organisations site, ESG report, certificate check, invite link, payment result</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Insight</td><td>Overview (including UAE PASS verified residents), Analytics, AI insights, Impact, Home and health</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Field work</td><td>Campaigns, Missions and leagues, Verification, Report &amp; Restore, Eco places, QR check-ins, Recycling stations, Pickups, Events</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Points and rewards</td><td>Eco Points, Audit trail, Rewards, Sponsored challenges, Badges, My Forest, Brand deals</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Content</td><td>Eco activities, Eco Academy lesson editor, Moderation, Challenges</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>People and partners</td><td>Users (with a UAE PASS filter), Organisations, Partner and auditor logins, Website enquiries</td><td><span class="chip ok">Working</span></td></tr>
+    <tr><td>Partner portal</td><td>Live campaigns, members, impact, PDF / Excel / CSV downloads, monthly email</td><td><span class="chip new">New</span></td></tr>
+    <tr><td>Public pages</td><td>Organisations site, ESG report, certificate check, impact passport, invite link, payment and payout results</td><td><span class="chip ok">Working</span></td></tr>
   </table></div>
 </section>
 
 <section id="health">
   <h2>Technical health check</h2>
-  <p class="sub">What was checked on 14 November 2026, and the result.</p>
+  <p class="sub">What was checked on 14 November 2026.</p>
   <div class="tablebox"><table>
     <tr><th>Check</th><th>Result</th><th>Status</th></tr>
-    <tr><td>App and admin against the server</td><td>All 235 server calls in the mobile app and admin match a real server endpoint with the right method. No broken buttons or dead screens.</td><td><span class="chip ok">Pass</span></td></tr>
-    <tr><td>Server tests</td><td>134 of 134 pass (points, verification, rewards, payments, push, security headers, rate limits and all new features)</td><td><span class="chip ok">Pass</span></td></tr>
-    <tr><td>Mobile app tests</td><td>11 of 11 pass</td><td><span class="chip ok">Pass</span></td></tr>
-    <tr><td>Code analysis</td><td>Admin: no issues. Mobile: no errors, 6 minor deprecation notices in the voice assistant</td><td><span class="chip ok">Pass</span></td></tr>
-    <tr><td>Calls</td><td>Fixed this week (relay settings and dropped network details). Confirmed working on two phones.</td><td><span class="chip ok">Pass</span></td></tr>
-    <tr><td>Unused server endpoints</td><td>4 endpoints have no screen yet: delete a bill, delete one notification, list my check-ins, list translation languages</td><td><span class="chip part">Minor</span></td></tr>
+    <tr><td>App and dashboards against the server</td><td>All 280 calls from the app and dashboards match a real server endpoint. No broken buttons.</td><td><span class="chip ok">Pass</span></td></tr>
+    <tr><td>Server tests</td><td>161 of 161 pass, including calls, UAE PASS, reports, stations, missions and the passport</td><td><span class="chip ok">Pass</span></td></tr>
+    <tr><td>App and dashboard tests</td><td>Mobile 11 of 11, dashboard 4 of 4</td><td><span class="chip ok">Pass</span></td></tr>
+    <tr><td>Code analysis</td><td>Dashboard: no issues. Mobile: no errors, 6 old minor notices in the voice assistant</td><td><span class="chip ok">Pass</span></td></tr>
+    <tr><td>Account deletion</td><td>Removes personal data from every feature, including bills and photos, steps, passport and UAE PASS link</td><td><span class="chip ok">Pass</span></td></tr>
+    <tr><td>Android build</td><td>Couldn't be compiled in the review environment; must be built once with <code>flutter run</code></td><td><span class="chip part">To check</span></td></tr>
   </table></div>
 </section>
 
-<section id="broken">
-  <h2>What needs fixing</h2>
-  <p class="sub">Things that are wrong today. None of them stops a demo.</p>
-  <div class="note good" style="margin-bottom:12px"><strong>Fixed on 14 November 2026:</strong> deleting an account now also removes that person's utility bills and bill photos, synced steps, Eco Academy progress, household membership and open brand deal applications. Funded trees and paid deal records stay, without personal details.</div>
+<section id="gaps">
+  <h2>Still to do</h2>
+  <p class="sub">Everything from the previous report's "needs fixing" list is done. What remains is testing and switching services on.</p>
+  <div class="note good" style="margin-bottom:12px"><strong>Done this week:</strong> calls ring a closed phone with a ringtone and keep going in other apps; bill scans survive server restarts; typed bills can be deleted; check-in history; admin pages for health, bills, households and lessons; editable Academy lessons; automatic brand deal payouts; dashboard tests; README updated; Arabic for every new screen.</div>
   <div class="note">
-    <div class="issue"><div class="sev med"></div><b>Bill scans are lost if the server restarts</b><p>A scanned bill's reading is held in server memory for 30 minutes before saving. If Render restarts in that window, the member has to scan again. Move it to the database.</p></div>
-    <div class="issue"><div class="sev med"></div><b>README is out of date</b><p>The project README doesn't list this week's ten features or the new settings. Partners and developers often read it first.</p></div>
-    <div class="issue"><div class="sev low"></div><b>Missing small screens</b><p>Members can't delete a typed-in bill or see a list of their QR check-ins, even though the server supports both.</p></div>
-    <div class="issue"><div class="sev low"></div><b>Some Arabic reads unevenly</b><p>A few sentences built from parts, such as the Wrapped banner, may read awkwardly right to left. Some server messages, like “Needs 100+ followers”, are English only.</p></div>
+    <div class="issue"><div class="sev high"></div><b>Test the new features on real phones</b><p>Especially ringing a locked phone, Health sync, scanning a bill, scanning a station and UAE PASS sign-in. Build the Android app once to confirm the new native call code compiles.</p></div>
+    <div class="issue"><div class="sev med"></div><b>Switch services on</b><p>UAE PASS needs onboarding with TDRA to get its keys. iPhone ringing needs an Apple push key. Brand deal payouts need Stripe Connect turned on. HealthKit must be ticked in Xcode.</p></div>
+    <div class="issue"><div class="sev low"></div><b>Known limits</b><p>Eco Lens effects are drawn on the photo, not face-tracking. Video pauses when the app goes to the background on iPhone (an Apple rule), though voice continues. PDF reports show non-Latin names as "?"; the Excel version keeps them. A few server messages are still English only.</p></div>
   </div>
-</section>
-
-<section id="incomplete">
-  <h2>Built, but not finished</h2>
-  <p class="sub">These work, but have a gap to close or a setting to switch on.</p>
-  <h3>Not yet tested on real phones</h3>
-  <ul>
-    <li>Green Wrapped, Health sync, My bills, Do it too, My Forest, auto-translate, Eco Lens, Household, Eco Academy and Brand deals were built and pass automated checks, but nobody has used them on a phone yet.</li>
-    <li>Health sync needs the HealthKit capability switched on in Xcode for iPhone (steps are in the iOS build guide). On Android it raised the minimum to Android 8.0.</li>
-  </ul>
-  <h3>Known limits</h3>
-  <ul>
-    <li><strong>Calls ring only when the friend's app is open.</strong> If it's closed, the caller sees “isn't online” and the friend gets a missed-call notification. Ringing a locked phone needs CallKit (iPhone) and ConnectionService (Android).</li>
-    <li><strong>Brand deal payouts are manual.</strong> Admins pay creators by bank transfer and mark them paid. There's no automatic payout yet.</li>
-    <li><strong>No admin pages yet</strong> for Health sync, utility bills, households or Eco Academy. Lessons are fixed in the code and can't be edited from the dashboard.</li>
-    <li><strong>Eco Lens is drawn effects,</strong> not face-tracking camera filters like Instagram's.</li>
-    <li><strong>Reports aren't downloadable files.</strong> ESG and impact reports are web pages, and analytics export is “copy CSV” only. Government partners will usually ask for PDF and Excel.</li>
-    <li><strong>No UAE PASS sign-in.</strong> It's on the planned list.</li>
-    <li><strong>CO₂ is estimated,</strong> not certified, and challenge progress is self-reported.</li>
-    <li><strong>One server instance.</strong> Reminders run inside the single Render server, and on a free plan the server sleeps and the app shows a “waking up” message.</li>
-    <li><strong>Testing depth.</strong> The admin has no automated tests and there are no end-to-end tests across app, server and admin.</li>
-  </ul>
-  <h3>Switched on by server settings</h3>
-  <div class="tablebox"><table>
-    <tr><th>Service</th><th>Turns on</th><th>Without it</th></tr>
-    <tr><td>Brevo email</td><td>Sign-up codes and password reset</td><td>No one can sign up</td></tr>
-    <tr><td>Claude AI key</td><td>AI verification, Snap &amp; Sort, bill reading, auto-translate, AI insights</td><td>Fallbacks run: friend verification, typed bills, no translation</td></tr>
-    <tr><td>Firebase</td><td>Push notifications</td><td>In-app notifications only</td></tr>
-    <tr><td>TURN relay</td><td>Calls on mobile data</td><td>Calls mostly work on Wi-Fi only</td></tr>
-    <tr><td>Stripe</td><td>Paid partner rewards</td><td>“Card payments coming soon”</td></tr>
-    <tr><td>LiveKit</td><td>Live streaming</td><td>“Live video is coming soon”</td></tr>
-    <tr><td>Cloudinary</td><td>Photo, video and voice note storage</td><td>Uploads fail</td></tr>
-  </table></div>
 </section>
 
 <section id="next">
   <h2>Next 5 features</h2>
-  <p class="sub">Chosen to win and keep partnerships with UAE authorities and communities. Each has a mobile side and an admin side. Effort is a rough guide for one developer.</p>
+  <p class="sub">The five proposed last time are now built. These are the next five, chosen for authorised communities and government partners.</p>
 
   <article class="feature">
-    <header><h3>1. UAE PASS sign-in and verified residents</h3><span class="chip setup">Effort: medium</span></header>
-    <p class="why">Government partners need to know participants are real UAE residents. UAE PASS is the national digital identity, so it removes fake accounts and makes reports credible.</p>
+    <header><h3>1. Official community pages</h3><span class="chip setup">Effort: medium</span></header>
+    <p class="why">Verified organisations, such as municipal departments, NGOs, schools and resident associations, get their own page and panel. They post updates whenever they want and run their own campaigns. Residents follow them and get notified.</p>
     <div class="cols">
-      <div><h4>Mobile</h4><p>“Sign in with UAE PASS”, a verified-resident badge, and faster sign-up with no email code.</p></div>
-      <div><h4>Admin</h4><p>Filter and report by verified residents only, with verified-resident share shown on every dashboard and export.</p></div>
+      <div><h4>Mobile</h4><p>Follow official pages with a verified badge, an "Official" tab of updates, notifications for new posts and campaigns, and one-tap join from the page.</p></div>
+      <div><h4>Web panel</h4><p>A community panel to post announcements with photos, create campaigns and missions, see followers and reach. Admins approve each community and set what it may do, for example "campaigns need approval".</p></div>
     </div>
   </article>
 
   <article class="feature">
-    <header><h3>2. Partner portal with downloadable reports</h3><span class="chip setup">Effort: medium</span></header>
-    <p class="why">Each authority or company wants its own view and a monthly report it can forward, not access to everyone's data.</p>
+    <header><h3>2. Volunteer shifts and hours</h3><span class="chip setup">Effort: medium</span></header>
+    <p class="why">Communities and authorities run volunteer days with roles and time slots. Hours should count automatically and be trusted by schools and employers.</p>
     <div class="cols">
-      <div><h4>Mobile</h4><p>Partner-branded campaign and challenge pages, so residents see who runs them.</p></div>
-      <div><h4>Admin</h4><p>Partner logins that only see their own campaigns, areas and members. Monthly PDF and Excel impact reports, sent by email automatically.</p></div>
+      <div><h4>Mobile</h4><p>Sign up for a shift, get reminders, check in and out with a QR at the site, and see hours go straight into the impact passport.</p></div>
+      <div><h4>Web panel</h4><p>Create shifts with roles and capacity, see who signed up, mark attendance, and issue certificates in one click.</p></div>
     </div>
   </article>
 
   <article class="feature">
-    <header><h3>3. Recycling drop-off network</h3><span class="chip setup">Effort: medium</span></header>
-    <p class="why">Municipalities measure recycling in kilograms at collection points. Linking app activity to real drop-offs gives them figures they already report on.</p>
+    <header><h3>3. Authority inbox for citizen reports</h3><span class="chip setup">Effort: medium</span></header>
+    <p class="why">Report &amp; Restore already collects issues. Routing each one to the right authority, with response times, turns GreenifyX into a public service channel.</p>
     <div class="cols">
-      <div><h4>Mobile</h4><p>Scan the QR code on a recycling station or reverse-vending machine to log a drop-off and earn points. Find the nearest station with live status.</p></div>
-      <div><h4>Admin</h4><p>Manage stations, see drop-offs and estimated kilograms per station and area, and flag stations that are full or misused.</p></div>
+      <div><h4>Mobile</h4><p>Residents see who is handling their report, progress updates and before/after photos when it's fixed.</p></div>
+      <div><h4>Web panel</h4><p>Each authority gets an inbox for its own area, sets response-time targets, assigns teams and closes reports with a photo. A dashboard shows time to resolve per area.</p></div>
     </div>
   </article>
 
   <article class="feature">
-    <header><h3>4. Neighbourhood leagues and targeted missions</h3><span class="chip setup">Effort: small to medium</span></header>
-    <p class="why">Authorities want action where it's needed, such as one beach, one district or one week. Local pride drives participation.</p>
+    <header><h3>4. Schools programme</h3><span class="chip setup">Effort: medium</span></header>
+    <p class="why">Schools are a fast route to families. A safe, curriculum-friendly version for classes makes GreenifyX part of the school year.</p>
     <div class="cols">
-      <div><h4>Mobile</h4><p>Leaderboards by neighbourhood and emirate, plus missions that appear only for people in a chosen area, with a push alert when one starts nearby.</p></div>
-      <div><h4>Admin</h4><p>Draw an area on the map, launch a mission to people there, and watch results on the heat map in real time.</p></div>
+      <div><h4>Mobile</h4><p>Class accounts with parent consent for under-18s, Eco Academy tracks by grade, and an inter-school league.</p></div>
+      <div><h4>Web panel</h4><p>A teacher dashboard with class progress, assignments from the Academy, a printable class impact certificate and a school-level report.</p></div>
     </div>
   </article>
 
   <article class="feature">
-    <header><h3>5. Impact passport and audit trail</h3><span class="chip setup">Effort: medium to large</span></header>
-    <p class="why">Turns estimates into evidence. Schools and employers can recognise verified volunteer hours, and authorities can audit any number on a report.</p>
+    <header><h3>5. Open data and SDG reporting</h3><span class="chip setup">Effort: medium to large</span></header>
+    <p class="why">Government partners report against national and UN Sustainable Development Goals. Anonymised, aggregated GreenifyX data can feed those reports directly.</p>
     <div class="cols">
-      <div><h4>Mobile</h4><p>A personal impact passport with verified volunteer hours and actions, and a QR code a school or employer can scan to confirm them.</p></div>
-      <div><h4>Admin</h4><p>A trail from every reported figure back to the actions and verifiers behind it, a third-party auditor role, random-sample checks, and evidence exports.</p></div>
+      <div><h4>Mobile</h4><p>A public "UAE impact" screen showing totals by emirate and goal, so residents see the bigger picture they're part of.</p></div>
+      <div><h4>Web panel</h4><p>An open-data page and a secure data feed (API) with aggregated, anonymised figures per emirate and month, mapped to SDG targets, plus embeddable charts for partner websites.</p></div>
     </div>
   </article>
-  <p class="small">Also worth doing soon, though not headline features: calls that ring when the app is closed, admin pages for bills, households and Eco Academy, and automatic payouts for brand deals.</p>
+  <p class="small">Also worth doing soon: face-tracking Eco Lens filters, and Arabic for the remaining server messages.</p>
 </section>
 
 <section id="deck">
   <h2>Presentation outline</h2>
-  <p class="sub">A suggested 10-slide deck for a partnership meeting, built from this report.</p>
+  <p class="sub">A suggested 10-slide deck for a partnership meeting.</p>
   <ol class="slides">
-    <li><strong>Title.</strong> GreenifyX: verified environmental action for the UAE. Your name and the pilot status.</li>
+    <li><strong>Title.</strong> GreenifyX: verified environmental action for the UAE.</li>
     <li><strong>The problem.</strong> Awareness doesn't show impact, and partners can't verify participation.</li>
-    <li><strong>The loop.</strong> Act, verify, reward, redeem, report (use the five steps above).</li>
-    <li><strong>Live demo.</strong> Post an action, verify it, see points, open the admin overview. Use demo data.</li>
-    <li><strong>Trust.</strong> Verification layers, anti-cheat, the points ledger, and honest CO₂ estimates.</li>
-    <li><strong>What you get.</strong> The panel for the partner in the room, from “What each partner gets”.</li>
-    <li><strong>Built for the UAE.</strong> All seven emirates, Arabic and English, Ghaf and mangrove planting, DEWA, ADDC and SEWA bills, Asia/Dubai time.</li>
-    <li><strong>Pilot proposal.</strong> One campaign or one district for 8–12 weeks, with agreed measures such as participants, verified actions and kilograms collected.</li>
-    <li><strong>Roadmap.</strong> The next 5 features, with UAE PASS and the partner portal first.</li>
+    <li><strong>The loop.</strong> Act, verify, reward, redeem, report.</li>
+    <li><strong>Live demo.</strong> Sign in with UAE PASS, post for a mission, scan a recycling station, then open the partner portal and download the report.</li>
+    <li><strong>Trust.</strong> UAE PASS, verification layers, anti-cheat, audit trail, honest CO₂ estimates.</li>
+    <li><strong>What you get.</strong> The panel for the partner in the room.</li>
+    <li><strong>Built for the UAE.</strong> Seven emirates, Arabic and English, Ghaf and mangroves, DEWA, ADDC and SEWA bills, Asia/Dubai time.</li>
+    <li><strong>Pilot proposal.</strong> One neighbourhood or campaign for 8 to 12 weeks, with agreed measures: participants, verified actions, kilograms recycled.</li>
+    <li><strong>Roadmap.</strong> The next 5 features, starting with official community pages.</li>
     <li><strong>The ask.</strong> A named contact, a pilot area, data and branding permissions, and a review date.</li>
   </ol>
 </section>
@@ -466,13 +392,14 @@ footer { border-top: 1px solid var(--line); margin-top: 48px; padding-top: 18px;
   <h2>Before a demo</h2>
   <p class="sub">Do these so nothing fails in front of a partner.</p>
   <ul>
+    <li>Build and install the latest app on two phones and try each new feature once, in English and in Arabic.</li>
     <li>Wake the server a few minutes early, or move Render to a paid plan so it doesn't sleep.</li>
-    <li>Load demo data with <code>npm run seed:demo</code>: 24 members across all seven emirates, 96 posts, challenges and comments. Remove it afterwards with <code>npm run seed:demo -- --clear</code>; real accounts are never touched.</li>
-    <li>Check the server settings above are set, especially the AI key, Firebase and the TURN relay.</li>
-    <li>Install the latest build on two phones, and try each new feature once in English and once in Arabic.</li>
+    <li>Load demo data with <code>npm run seed:demo</code>, then add a neighbourhood, a mission and a recycling station from the dashboard. Remove demo data afterwards with <code>npm run seed:demo -- --clear</code>.</li>
+    <li>Create a partner login for the partner you're meeting so they can see their own portal.</li>
+    <li>Check the server settings: AI key, Firebase, TURN relay, and the Apple push key for iPhone ringing.</li>
     <li>Change the TURN relay password, since it was shared in chat.</li>
   </ul>
-  <footer class="small">Prepared from a full review of the GreenifyX code at commit a544708 on 14 November 2026. Counts come from the code itself: feature folders, admin pages, server routes and test runs.</footer>
+  <footer class="small">Prepared from a full review of the GreenifyX code on 14 November 2026. Counts come from the code itself: feature folders, dashboard pages, server routes and test runs.</footer>
 </section>
 
 </div>

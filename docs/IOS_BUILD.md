@@ -25,6 +25,7 @@ open ios/Runner.xcworkspace
 In Xcode, select **Runner**, open **Signing & Capabilities**, and choose your Team. Then add these capabilities:
 - **Push Notifications**
 - **Background Modes**: Remote notifications, Audio, Voice over IP. These are already declared in Info.plist; Xcode only needs them ticked.
+- **Push Notifications** must stay on: calls ring a closed iPhone through Apple VoIP pushes (PushKit). In the Apple Developer account, create an APNs key (.p8) and set these on the server: `APNS_KEY_P8` (the file's text on one line, with `\n` for line breaks), `APNS_KEY_ID`, `APNS_TEAM_ID`, and `APNS_PRODUCTION=true` for TestFlight/App Store builds.
 - **HealthKit** (for Health sync: steps and cycling workouts). The usage text is already in Info.plist. Also enable HealthKit for the App ID in your Apple Developer account.
 
 Connect an iPhone and press Run. To share the app with testers or a client:

@@ -111,6 +111,7 @@ class _UsersPageState extends State<UsersPage> {
                       ButtonSegment(value: 'active', label: Text('Active')),
                       ButtonSegment(value: 'suspended', label: Text('Suspended')),
                       ButtonSegment(value: 'verifiers', label: Text('Verifiers')),
+                      ButtonSegment(value: 'residents', label: Text('UAE PASS')),
                       ButtonSegment(value: 'admins', label: Text('Admins')),
                     ],
                     selected: {_status},

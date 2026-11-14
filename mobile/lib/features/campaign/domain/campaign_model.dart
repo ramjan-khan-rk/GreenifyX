@@ -38,6 +38,7 @@ class CampaignModel {
   final String category;
   final String organiserName;
   final String organizationName;
+  final String organizationLogo;
   final bool organizationVerified;
   final String emirate;
   final String locationName;
@@ -79,6 +80,7 @@ class CampaignModel {
     required this.category,
     required this.organiserName,
     this.organizationName = '',
+    this.organizationLogo = '',
     this.organizationVerified = false,
     required this.emirate,
     required this.locationName,
@@ -128,6 +130,7 @@ class CampaignModel {
       category: _str(j['category']),
       organiserName: _str(j['organiserName']),
       organizationName: _str((j['organization'] as Map?)?['name']),
+      organizationLogo: _str((j['organization'] as Map?)?['logo']),
       organizationVerified: (j['organization'] as Map?)?['verified'] == true,
       emirate: _str(j['emirate']),
       locationName: _str(j['locationName']),

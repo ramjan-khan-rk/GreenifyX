@@ -14,6 +14,7 @@ import '../../core/services/api_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/friendly_error.dart';
 import '../wrapped/wrapped_screen.dart';
+import '../passport/passport_screen.dart';
 
 typedef Json = Map<String, dynamic>;
 
@@ -123,6 +124,19 @@ class _ImpactScreenState extends State<ImpactScreen> {
                   subtitle: Text(tr("Your year in green, ready to share"), style: const TextStyle(color: Colors.white70)),
                   trailing: const Icon(Icons.play_circle_fill_rounded, color: Colors.white),
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => WrappedScreen(year: wrappedYear()))),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Material(
+                color: const Color(0xFF2B2440),
+                borderRadius: BorderRadius.circular(18),
+                child: ListTile(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                  leading: const Icon(Icons.badge_rounded, color: Colors.white),
+                  title: Text(tr("Impact passport"), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                  subtitle: Text(tr("Verified actions and volunteer hours, with a QR for schools and employers"), style: const TextStyle(color: Colors.white70)),
+                  trailing: const Icon(Icons.chevron_right_rounded, color: Colors.white),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PassportScreen())),
                 ),
               ),
               const SizedBox(height: 20),

@@ -4,8 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'dart:math';
+
+import 'package:flutter_callkit_incoming/entities/entities.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+
 import '../../../core/services/api_service.dart';
 import '../../../core/services/socket_service.dart';
+import 'call_native.dart';
 
 /// One-to-one voice/video calls over WebRTC, signalled through the app's socket.
 ///
@@ -79,7 +85,7 @@ class CallCoordinator extends ChangeNotifier {
 
   /// host = same Wi-Fi, srflx = through the internet (STUN), relay = through a TURN server.
   void _countCandidate(String? c, String side) {
-    final m = RegExp(r" typ (w+)").firstMatch(c ?? "");
+    final m = RegExp(r" typ (\w+)").firstMatch(c ?? "");
     final kind = "$side ${m?.group(1) ?? "?"}";
     _candidateKinds[kind] = (_candidateKinds[kind] ?? 0) + 1;
   }
@@ -90,11 +96,91 @@ class CallCoordinator extends ChangeNotifier {
     if (raw is Map) unawaited(_onSignal(Map<String, dynamic>.from(raw)));
   }
 
+  /// This call's id, shared with the phone's own call screen (CallKit / Android call UI).
+  String callId = "";
+  /// Answered or declined on the phone's own call screen before the call reached the app.
+  final Map<String, String> _nativeChoice = {};
+  bool _nativeAnswered = false;
+  StreamSubscription<dynamic>? _nativeEvents;
+
+  static String _newId() {
+    final r = Random.secure();
+    String hex(int n) => List.generate(n, (_) => r.nextInt(16).toRadixString(16)).join();
+    return "${hex(8)}-${hex(4)}-4${hex(3)}-a${hex(3)}-${hex(12)}";
+  }
+
   /// Safe to call many times; the socket registry keeps the listener across reconnects.
   void bind() {
     if (_bound) return;
     _bound = true;
     SocketService.instance.on("call:signal", _onRaw);
+    // Ask the server for any call that rang while the app was closed, now and after every reconnect.
+    if (SocketService.instance.isConnected) SocketService.instance.emit("call:ready", {});
+    SocketService.instance.status.listen((ok) {
+      if (ok) SocketService.instance.emit("call:ready", {});
+    });
+    _nativeEvents = FlutterCallkitIncoming.onEvent.listen(_onNative, onError: (_) {});
+    unawaited(_resumeNativeAccept());
+    unawaited(CallNative.requestPermissions());
+    unawaited(_registerVoip());
+  }
+
+  /// The app was opened by tapping Accept on the lock screen: answer as soon as the call arrives.
+  Future<void> _resumeNativeAccept() async {
+    try {
+      for (final c in await FlutterCallkitIncoming.activeCalls()) {
+        final from = c.extra?["callerId"]?.toString() ?? "";
+        if (from.isNotEmpty && c.isAccepted) {
+          _nativeChoice[from] = "accept";
+          _log("answered on the lock screen, waiting for the call to arrive");
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _registerVoip() async {
+    final token = await CallNative.voipToken();
+    if (token.isEmpty) return;
+    try {
+      await ApiService.dio.post("/users/me/push-token", data: {"token": token, "platform": "ios_voip"});
+    } catch (_) {}
+  }
+
+  /// Taps on the phone's own call screen.
+  void _onNative(CallEvent? e) {
+    if (e == null) return;
+    switch (e) {
+      case CallEventActionCallAccept(:final callKitParams):
+        final from = callKitParams.extra?["callerId"]?.toString() ?? peerId;
+        _log("accepted on the phone's call screen");
+        _nativeAnswered = true;
+        if (phase == "incoming" && from == peerId) {
+          unawaited(accept());
+        } else {
+          _nativeChoice[from] = "accept";
+        }
+      case CallEventActionCallDecline(:final callKitParams):
+        final from = callKitParams.extra?["callerId"]?.toString() ?? peerId;
+        _log("declined on the phone's call screen");
+        if (phase == "incoming" && from == peerId) {
+          unawaited(reject());
+        } else {
+          // The app wasn't handling this call yet: decline it on the server.
+          unawaited(CallNative.declineByToken(callKitParams.extra, callKitParams.id));
+        }
+      case CallEventActionCallEnded():
+        if (busy) unawaited(hangUp());
+      case CallEventActionCallTimeout():
+        if (phase == "incoming") _endWith("Missed call");
+      default:
+        break;
+    }
+  }
+
+  @override
+  void dispose() {
+    _nativeEvents?.cancel();
+    super.dispose();
   }
 
   Future<void> start({required String userId, required String userName, required bool withVideo}) async {
@@ -108,6 +194,8 @@ class CallCoordinator extends ChangeNotifier {
     holdOpen = false;
     _candidateKinds.clear();
     _log("calling $userName (${withVideo ? "video" : "voice"})");
+    callId = _newId();
+    _nativeAnswered = false;
     peerId = userId;
     peerName = userName;
     video = withVideo;
@@ -147,6 +235,8 @@ class CallCoordinator extends ChangeNotifier {
       return;
     }
     _log("offer sent, waiting for answer");
+    unawaited(CallNative.startOutgoing(id: callId, name: peerName, video: video));
+    unawaited(CallNative.playRingback());
     detail = "Ringing…";
     notifyListeners();
     _ringTimer = Timer(_ringTimeout, () {
@@ -175,6 +265,8 @@ class CallCoordinator extends ChangeNotifier {
       return;
     }
     _log("accepted");
+    // Answered in the app: stop the phone's own ringing screen.
+    if (!_nativeAnswered) unawaited(CallNative.end(callId));
     _ringTimer?.cancel();
     outgoing = false;
     phase = "connecting";
@@ -217,6 +309,7 @@ class CallCoordinator extends ChangeNotifier {
     // the camera and microphone (a stuck device must never trap the call).
     phase = "idle";
     notifyListeners();
+    unawaited(_releaseNative());
     await _teardown().timeout(const Duration(seconds: 4), onTimeout: () {});
   }
 
@@ -266,6 +359,10 @@ class CallCoordinator extends ChangeNotifier {
     _log("CONNECTED. Candidates: $_candidateSummary");
     _ringTimer?.cancel();
     _connectTimer?.cancel();
+    unawaited(CallNative.stopRingback());
+    if (outgoing || _nativeAnswered) unawaited(CallNative.connected(callId));
+    // Keep the microphone (and camera) running when the person switches to another app.
+    unawaited(CallNative.startBackgroundService(peerName: peerName, video: video));
     phase = "live";
     detail = "Connected";
     connectedAt = DateTime.now();
@@ -284,6 +381,7 @@ class CallCoordinator extends ChangeNotifier {
     _connectTimer?.cancel();
     if (notifyPeer && peerId.isNotEmpty) _send("end");
     unawaited(_teardown());
+    unawaited(_releaseNative());
     phase = "ended";
     detail = reason;
     notifyListeners();
@@ -294,6 +392,14 @@ class CallCoordinator extends ChangeNotifier {
         notifyListeners();
       }
     });
+  }
+
+  /// Stop the ringback, the phone's call screen and the background service.
+  Future<void> _releaseNative() async {
+    await CallNative.stopRingback();
+    if (callId.isNotEmpty) await CallNative.end(callId);
+    await CallNative.stopBackgroundService();
+    _nativeAnswered = false;
   }
 
   Future<void> _teardown() async {
@@ -437,6 +543,17 @@ class CallCoordinator extends ChangeNotifier {
       _ringTimer = Timer(_ringTimeout, () {
         if (phase == "incoming") _endWith("Missed call");
       });
+      callId = data["callId"]?.toString().isNotEmpty == true ? data["callId"].toString() : _newId();
+      final choice = _nativeChoice.remove(from);
+      if (choice == "accept") {
+        // Already answered on the lock screen: connect straight away.
+        _nativeAnswered = true;
+        _log("answering: it was accepted on the phone's call screen");
+        unawaited(accept());
+      } else {
+        // Ring with the phone's own call screen and ringtone (works on the lock screen too).
+        unawaited(CallNative.showIncoming(id: callId, name: peerName, video: video, extra: {"callerId": from}));
+      }
       return;
     }
 
@@ -446,8 +563,11 @@ class CallCoordinator extends ChangeNotifier {
     }
 
     switch (type) {
+      case "ringing_push":
+        _log("friend's app is closed: their phone is ringing");
       case "answer":
         if (data["sdp"] is Map) {
+          unawaited(CallNative.stopRingback());
           _ringTimer?.cancel();
           phase = "connecting";
           detail = "Connecting…";
@@ -503,6 +623,7 @@ class CallCoordinator extends ChangeNotifier {
       "to": peerId,
       "type": type,
       "video": video,
+      if (callId.isNotEmpty) "callId": callId,
       "sdp": ?sdp,
       "candidate": ?candidate,
     });

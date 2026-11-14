@@ -70,6 +70,9 @@ dependencies:
   path_provider: ^2.1.5
   file_picker: ^10.3.3
   health: ^13.1.4
+  flutter_callkit_incoming: ^3.1.6
+  flutter_foreground_task: ^11.0.3
+  flutter_web_auth_2: ^5.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -96,6 +99,7 @@ flutter:
     - assets/brand/greenifyx-brand-board.png
     - assets/brand/app_icon.png
     - assets/brand/app_icon_rounded.png
+    - assets/sounds/ringback.wav
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

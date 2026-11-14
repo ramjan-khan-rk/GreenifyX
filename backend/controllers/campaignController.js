@@ -32,7 +32,7 @@ export const campaignView = (c, me) => {
     organiserName: c.organiserName,
     organization:
       c.organization && c.organization.name !== undefined
-        ? { _id: c.organization._id, name: c.organization.name, type: c.organization.type, verified: c.organization.status === "verified" }
+        ? { _id: c.organization._id, name: c.organization.name, type: c.organization.type, logo: c.organization.logo || "", verified: c.organization.status === "verified" }
         : null,
     emirate: c.emirate,
     locationName: c.locationName,
@@ -86,7 +86,7 @@ export const listCampaigns = async (req, res) => {
     if (req.query.category) filter.category = String(req.query.category);
 
     const [items, total] = await Promise.all([
-      Campaign.find(filter).sort({ startDate: 1 }).skip(skip).limit(limit).populate("organization", "name type status"),
+      Campaign.find(filter).sort({ startDate: 1 }).skip(skip).limit(limit).populate("organization", "name type status logo"),
       Campaign.countDocuments(filter),
     ]);
     res.json({
@@ -108,7 +108,7 @@ export const getCampaign = async (req, res) => {
     if (!isId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid id" });
     const c = await Campaign.findById(req.params.id)
       .populate("verifiers", "name profileImage")
-      .populate("organization", "name type status");
+      .populate("organization", "name type status logo");
     if (!c || c.status === "draft") return res.status(404).json({ success: false, message: "Campaign not found" });
 
     const evidence = await VerificationReport.find({ campaign: c._id, status: "approved" })

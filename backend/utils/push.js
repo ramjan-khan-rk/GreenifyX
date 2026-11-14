@@ -97,6 +97,18 @@ const accessToken = async () => {
   return cachedToken.value;
 };
 
+/** Send a raw FCM v1 message (used for data-only call pushes). Returns the HTTP status, or 0 when push is off. */
+export const sendFcm = async (message) => {
+  if (!pushEnabled()) return 0;
+  const token = await accessToken();
+  const res = await fetch(`https://fcm.googleapis.com/v1/projects/${loadAccount().project_id}/messages:send`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(message),
+  });
+  return res.status;
+};
+
 /** Send a stored Notification to all of the receiver's devices. Never throws. */
 export const pushNotification = async (n) => {
   if (!pushEnabled() || !n?.receiver) return;
@@ -104,11 +116,14 @@ export const pushNotification = async (n) => {
     const { default: User } = await import("../models/User.js");
     const user = await User.findById(n.receiver).select("pushTokens notificationPrefs");
     if (!user || !wantsPush(user, n.type) || !user.pushTokens?.length) return;
+    // iPhone VoIP tokens are only for ringing calls (Apple PushKit), never for FCM.
+    const fcmTokens = user.pushTokens.filter((t) => t.platform !== "ios_voip");
+    if (!fcmTokens.length) return;
     const token = await accessToken();
     const project = loadAccount().project_id;
     const dead = [];
     await Promise.all(
-      user.pushTokens.map(async (t) => {
+      fcmTokens.map(async (t) => {
         const res = await fetch(`https://fcm.googleapis.com/v1/projects/${project}/messages:send`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },

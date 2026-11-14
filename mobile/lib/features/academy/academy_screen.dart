@@ -7,6 +7,12 @@ import '../../core/utils/friendly_error.dart';
 
 typedef Json = Map<String, dynamic>;
 
+/// Lesson text in the app language: the admin-written Arabic when there is one, else the app's own.
+String _t(dynamic en, dynamic ar) {
+  final a = ar?.toString() ?? "";
+  return AppLocale.isArabic && a.isNotEmpty ? a : tr(en?.toString() ?? "");
+}
+
 /// Eco Academy: a 60-second lesson a day with a 3-question quiz.
 class AcademyScreen extends StatefulWidget {
   const AcademyScreen({super.key});
@@ -67,7 +73,7 @@ class _AcademyScreenState extends State<AcademyScreen> {
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Text(tr("TODAY'S LESSON · 60 SECONDS"), style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w800, letterSpacing: 1.2, fontSize: 12)),
                         const SizedBox(height: 10),
-                        Text("${today["emoji"]}  ${tr(today["title"].toString())}", style: const TextStyle(color: Colors.white, fontSize: 21, fontWeight: FontWeight.w900)),
+                        Text("${today["emoji"]}  ${_t(today["title"], today["titleAr"])}", style: const TextStyle(color: Colors.white, fontSize: 21, fontWeight: FontWeight.w900)),
                         const SizedBox(height: 10),
                         Text(
                           today["passed"] == true ? "✅ ${tr("Done today. Come back tomorrow for a new one!")}" : "${tr("Pass the quiz for")} +${d["points"]} ${tr("Eco Points")}",
@@ -84,7 +90,7 @@ class _AcademyScreenState extends State<AcademyScreen> {
                   Card(
                     child: ListTile(
                       leading: Text(l["emoji"].toString(), style: const TextStyle(fontSize: 26)),
-                      title: Text(tr(l["title"].toString()), style: const TextStyle(fontWeight: FontWeight.w700)),
+                      title: Text(_t(l["title"], l["titleAr"]), style: const TextStyle(fontWeight: FontWeight.w700)),
                       trailing: l["passed"] == true
                           ? const Icon(Icons.check_circle_rounded, color: AppColors.eco)
                           : (l["score"] != null ? Text("${l["score"]}/3", style: TextStyle(color: AppColors.subtitle)) : const Icon(Icons.chevron_right_rounded)),
@@ -176,7 +182,7 @@ class _LessonScreenState extends State<LessonScreen> {
     final quiz = (l["quiz"] as List).map((e) => Json.from(e as Map)).toList();
     final pageCount = cards.length + 1;
     return Scaffold(
-      appBar: AppBar(title: Text("${l["emoji"]} ${tr(l["title"].toString())}")),
+      appBar: AppBar(title: Text("${l["emoji"]} ${_t(l["title"], l["titleAr"])}")),
       body: Column(children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
@@ -202,7 +208,7 @@ class _LessonScreenState extends State<LessonScreen> {
                   child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                     Text(l["emoji"].toString(), style: const TextStyle(fontSize: 56)),
                     const SizedBox(height: 20),
-                    Text(tr(cards[i]), textAlign: TextAlign.center, style: const TextStyle(fontSize: 20, height: 1.45, fontWeight: FontWeight.w600)),
+                    Text(_t(cards[i], (l["cardsAr"] as List?)?.elementAtOrNull(i)), textAlign: TextAlign.center, style: const TextStyle(fontSize: 20, height: 1.45, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 30),
                     FilledButton(
                       onPressed: () => _pages.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeOut),
@@ -212,11 +218,11 @@ class _LessonScreenState extends State<LessonScreen> {
                 ),
               ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 30), children: [
                 for (var i = 0; i < quiz.length; i++) ...[
-                  Text("${i + 1}. ${tr(quiz[i]["q"].toString())}", style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800)),
+                  Text("${i + 1}. ${_t(quiz[i]["q"], quiz[i]["qAr"])}", style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 6),
                   for (var o = 0; o < (quiz[i]["options"] as List).length; o++)
                     _Option(
-                      label: tr((quiz[i]["options"] as List)[o].toString()),
+                      label: _t((quiz[i]["options"] as List)[o], (quiz[i]["optionsAr"] as List?)?.elementAtOrNull(o)),
                       selected: _answers[i] == o,
                       state: _result == null
                           ? null
