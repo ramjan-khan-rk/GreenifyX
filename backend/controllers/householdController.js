@@ -6,6 +6,7 @@ import { creditPoints } from "../utils/ledger.js";
 import { weekWindow } from "../utils/week.js";
 import { NOT_EARNED } from "../utils/wrapped.js";
 import { sendServerError } from "../utils/httpError.js";
+import { removeFromHousehold } from "../utils/accountCleanup.js";
 import {
   GOAL_BONUS,
   MAX_MEMBERS,
@@ -129,15 +130,7 @@ export const joinHousehold = async (req, res) => {
 // POST /api/household/leave — the last person out closes it; ownership passes on.
 export const leaveHousehold = async (req, res) => {
   try {
-    const h = await Household.findOne({ members: req.user._id });
-    if (!h) return res.json({ success: true });
-    h.members = h.members.filter((m) => String(m) !== String(req.user._id));
-    if (!h.members.length) {
-      await h.deleteOne();
-    } else {
-      if (String(h.owner) === String(req.user._id)) h.owner = h.members[0];
-      await h.save();
-    }
+    await removeFromHousehold(req.user._id);
     res.json({ success: true });
   } catch (error) {
     return sendServerError(res, "Unable to leave the household");

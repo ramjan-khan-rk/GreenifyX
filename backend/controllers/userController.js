@@ -5,6 +5,7 @@ import { escapeRegex } from "../utils/escapeRegex.js";
 import { parsePagination } from "../utils/pagination.js";
 import { sendServerError } from "../utils/httpError.js";
 import { normalizeEmirate } from "../utils/emirates.js";
+import { removeFeatureData } from "../utils/accountCleanup.js";
 
 // COMPLETE / UPDATE PROFILE
 export const updateProfile = async (req, res) => {
@@ -282,6 +283,8 @@ export const deleteAccount = async (req, res) => {
     u.suspendedReason = "Account deleted by user";
     u.deletedAt = new Date();
     await u.save();
+    // Bills (and their photos), synced steps, household, lessons and deal pitches.
+    await removeFeatureData(u._id);
     res.json({ success: true, message: "Your account was deleted" });
   } catch (e) {
     return sendServerError(res, "Unable to delete account");
