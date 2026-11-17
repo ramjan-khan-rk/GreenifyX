@@ -9,12 +9,15 @@ class LegalScreen extends StatelessWidget {
   const LegalScreen({super.key, required this.title, required this.sections});
 
   static LegalScreen get privacy => AppLocale.isArabic ? _privacyAr : LegalScreen(title: tr("Privacy policy"), sections: const [
-    ("What we collect", "Your name, contact details, profile photo, posts, messages and the location attached to activities you submit for verification."),
-    ("Why we use it", "To run your account, verify environmental actions, award Eco Points, connect you with friends and teams, and keep the community safe."),
-    ("Location", "Location is only read when you submit evidence, report an issue or open the Eco Map. It is used to check you were at the activity site."),
+    ("What we collect", "Your name, contact details, profile photo, posts, messages, voice notes and the location attached to activities you submit for verification. If you allow it, daily steps and cycling distance from Health Connect or Apple Health, and the utility bills you scan."),
+    ("Why we use it", "To run your account, verify environmental actions, award Eco Points, connect you with friends and teams, and keep the community safe. We never use your data for advertising."),
+    ("Location", "Location is only read when you submit evidence, check in, scan a recycling station, report an issue or open the Eco Map. It is used to check you were at the activity site."),
+    ("Health data", "Steps and cycling data are only used to award Eco Points. They are never sold, never shared and never used for ads. You can turn Health sync off at any time."),
+    ("Calls", "Voice and video calls go directly between phones and are never recorded."),
     ("Sharing", "We never sell your data. Organisations you join see your verified impact in their team dashboard. Verifiers see the evidence you submit."),
-    ("Your choices", "You can edit your profile, switch notifications off and delete your account at any time from Settings."),
-    ("Contact", "Questions about your data: privacy@greenifyx.ae"),
+    ("Your choices", "You can edit your profile, switch notifications off and delete your account at any time from Settings. Deleting removes your personal data; only anonymous impact totals remain."),
+    ("Full policy", "Read the full policy at greenifyx-admin.netlify.app/privacy.html"),
+    ("Contact", "Questions about your data: ramjankhan8824@gmail.com"),
   ]);
 
   static LegalScreen get terms => AppLocale.isArabic ? _termsAr : LegalScreen(title: tr("Terms of use"), sections: const [
@@ -26,12 +29,15 @@ class LegalScreen extends StatelessWidget {
   ]);
 
   static const _privacyAr = LegalScreen(title: "سياسة الخصوصية", sections: [
-    ("ما الذي نجمعه", "اسمك وبيانات التواصل وصورة ملفك ومنشوراتك ورسائلك والموقع المرفق بالأنشطة التي ترسلها للتحقق."),
-    ("لماذا نستخدمه", "لتشغيل حسابك، والتحقق من الأعمال البيئية، ومنح النقاط، وربطك بالأصدقاء والفرق، والحفاظ على أمان المجتمع."),
-    ("الموقع", "لا نقرأ موقعك إلا عند إرسال دليل أو بلاغ أو فتح الخريطة البيئية، للتأكد من وجودك في موقع النشاط."),
+    ("ما الذي نجمعه", "اسمك وبيانات التواصل وصورة ملفك ومنشوراتك ورسائلك ورسائلك الصوتية والموقع المرفق بالأنشطة التي ترسلها للتحقق. وإذا سمحت بذلك: خطوات المشي ومسافة ركوب الدراجة من Health Connect أو Apple Health، وفواتير الخدمات التي تصورها."),
+    ("لماذا نستخدمه", "لتشغيل حسابك، والتحقق من الأعمال البيئية، ومنح النقاط، وربطك بالأصدقاء والفرق، والحفاظ على أمان المجتمع. لا نستخدم بياناتك للإعلانات أبداً."),
+    ("الموقع", "لا نقرأ موقعك إلا عند إرسال دليل أو تسجيل الحضور أو مسح محطة إعادة التدوير أو إرسال بلاغ أو فتح الخريطة البيئية، للتأكد من وجودك في موقع النشاط."),
+    ("بيانات الصحة", "تُستخدم الخطوات وبيانات ركوب الدراجة لمنح النقاط فقط. لا نبيعها ولا نشاركها ولا نستخدمها للإعلانات، ويمكنك إيقاف المزامنة في أي وقت."),
+    ("المكالمات", "المكالمات الصوتية والمرئية تتم مباشرة بين الهواتف ولا تُسجَّل أبداً."),
     ("المشاركة", "لا نبيع بياناتك أبداً. تطّلع الجهات التي تنضم إليها على أثرك المُتحقق منه، ويطّلع المُدققون على الأدلة التي ترسلها."),
-    ("خياراتك", "يمكنك تعديل ملفك وإيقاف الإشعارات وحذف حسابك في أي وقت من الإعدادات."),
-    ("التواصل", "لأي استفسار عن بياناتك: privacy@greenifyx.ae"),
+    ("خياراتك", "يمكنك تعديل ملفك وإيقاف الإشعارات وحذف حسابك في أي وقت من الإعدادات. الحذف يزيل بياناتك الشخصية، وتبقى فقط إجماليات الأثر بشكل مجهول."),
+    ("السياسة الكاملة", "اقرأ السياسة الكاملة على greenifyx-admin.netlify.app/privacy.html"),
+    ("التواصل", "لأي استفسار عن بياناتك: ramjankhan8824@gmail.com"),
   ]);
 
   static const _termsAr = LegalScreen(title: "شروط الاستخدام", sections: [
