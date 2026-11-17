@@ -6,6 +6,7 @@ import LessonProgress from "../models/LessonProgress.js";
 import BrandDeal from "../models/BrandDeal.js";
 import ForestTree from "../models/ForestTree.js";
 import BillScan from "../models/BillScan.js";
+import QuickLog from "../models/QuickLog.js";
 import User from "../models/User.js";
 import { Dropoff } from "../models/RecyclingStation.js";
 
@@ -47,6 +48,7 @@ export const removeFeatureData = async (userId) => {
     UtilityBill.deleteMany({ user: userId }),
     HealthDay.deleteMany({ user: userId }),
     LessonProgress.deleteMany({ user: userId }),
+    QuickLog.deleteMany({ user: userId }),
     removeFromHousehold(userId),
     // Open or declined applications go; accepted, delivered or paid ones stay as the brand's record.
     BrandDeal.updateMany({ "applications.user": userId }, { $pull: { applications: { user: userId, status: { $in: ["applied", "rejected"] } } } }),

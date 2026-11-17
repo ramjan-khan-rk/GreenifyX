@@ -26,6 +26,8 @@ In Xcode, select **Runner**, open **Signing & Capabilities**, and choose your Te
 - **Push Notifications**
 - **Background Modes**: Remote notifications, Audio, Voice over IP. These are already declared in Info.plist; Xcode only needs them ticked.
 - **Push Notifications** must stay on: calls ring a closed iPhone through Apple VoIP pushes (PushKit). In the Apple Developer account, create an APNs key (.p8) and set these on the server: `APNS_KEY_P8` (the file's text on one line, with `\n` for line breaks), `APNS_KEY_ID`, `APNS_TEAM_ID`, and `APNS_PRODUCTION=true` for TestFlight/App Store builds.
+- **App Groups** with `group.com.ramjankhan.greenifyx` (the home-screen widget reads the streak and points from it).
+- **Home-screen widget** (one-time): File → New → Target → Widget Extension, name it `GreenifyWidget`, untick "Include Configuration Intent". Replace the generated Swift file with `ios/GreenifyWidget/GreenifyWidget.swift`, and add the same App Group to the widget target.
 - **HealthKit** (for Health sync: steps and cycling workouts). The usage text is already in Info.plist. Also enable HealthKit for the App ID in your Apple Developer account.
 
 Connect an iPhone and press Run. To share the app with testers or a client:

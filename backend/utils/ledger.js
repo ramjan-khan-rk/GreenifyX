@@ -31,13 +31,36 @@ export const creditPoints = async ({ userId, amount, type, reason = "", campaign
 
   const user = await User.findById(userId);
   if (user) {
+    const before = { streak: Number(user.streak) || 0, level: Number(user.level) || 1, freezes: Number(user.streakFreezes) || 0 };
     applyEcoAward(user, points);
     await user.save();
+    celebrate({ user, before, type, points, post }).catch(() => {});
     if (user.referredBy && !user.referralRewardedAt && REFERRAL_TRIGGERS.has(type)) {
       await payReferral(user).catch((e) => console.error("Referral reward failed:", e.message));
     }
   }
   return tx;
+};
+
+/**
+ * Moments of joy: tell the member's app to celebrate (confetti for firsts,
+ * streak milestones, a saved streak or a level up). First-ever actions also earn a badge.
+ */
+const celebrate = async ({ user, before, type, points, post }) => {
+  const [{ momentFor }, { emitToUser }] = await Promise.all([import("./moments.js"), import("../socket/socket.js")]);
+  const firstOfType = (await PointsTransaction.countDocuments({ user: user._id, type, status: "credited", amount: { $gt: 0 } })) === 1;
+  let co2Kg = 0;
+  if (post) {
+    const [{ default: Post }, { kgForActivity }] = await Promise.all([import("../models/Post.js"), import("./impact.js")]);
+    const p = await Post.findById(post).select("activity").lean();
+    if (p) co2Kg = kgForActivity(p.activity);
+  }
+  const after = { streak: Number(user.streak) || 0, level: Number(user.level) || 1, freezes: Number(user.streakFreezes) || 0 };
+  const moment = momentFor({ type, points, before, after, firstOfType, co2Kg });
+  if (moment.badge && !(user.badges || []).includes(moment.badge)) {
+    await User.updateOne({ _id: user._id }, { $addToSet: { badges: moment.badge } });
+  }
+  emitToUser(user._id, "celebrate", moment);
 };
 
 export const REFERRAL_BONUS = 50;

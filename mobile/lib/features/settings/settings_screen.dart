@@ -22,6 +22,7 @@ import '../../core/services/push_service.dart';
 import '../voice/greeny.dart';
 import '../growth/growth_screens.dart';
 import '../auth/data/uae_pass_auth.dart';
+import '../../core/widgets/celebration.dart';
 import '../../core/services/api_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -33,7 +34,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _api = SettingsApi();
-  final Map<String, bool> _prefs = {"messages": true, "calls": true, "social": true, "campaigns": true, "points": true};
+  final Map<String, bool> _prefs = {"messages": true, "calls": true, "social": true, "campaigns": true, "points": true, "nudges": true};
   String _language = "en";
   bool _loaded = false;
 
@@ -43,6 +44,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     "social": ("Friends, likes & comments", Icons.favorite_border_rounded),
     "campaigns": ("Campaigns & events", Icons.campaign_outlined),
     "points": ("Eco Points & rewards", Icons.stars_outlined),
+    "nudges": ("Helpful tips (one a day at most)", Icons.tips_and_updates_outlined),
   };
 
   @override
@@ -258,6 +260,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ]),
             ),
           ]),
+          const _Label("Celebrations"),
+          _Card(children: const [_CelebrationSoundRow()]),
           const _Label("Appearance"),
           _Card(children: [
             ValueListenableBuilder<ThemeMode>(
@@ -399,4 +403,34 @@ class _UaePassRowState extends State<_UaePassRow> {
       onTap: _verified || _busy ? null : _link,
     );
   }
+}
+
+/// Turn the celebration chime on or off (confetti and vibration stay).
+class _CelebrationSoundRow extends StatefulWidget {
+  const _CelebrationSoundRow();
+  @override
+  State<_CelebrationSoundRow> createState() => _CelebrationSoundRowState();
+}
+
+class _CelebrationSoundRowState extends State<_CelebrationSoundRow> {
+  bool _on = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Celebration.soundOn().then((v) {
+      if (mounted) setState(() => _on = v);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => SwitchListTile(
+        secondary: Icon(Icons.celebration_outlined, color: AppColors.ink),
+        title: Text(tr("Celebration sounds"), style: const TextStyle(fontWeight: FontWeight.w600)),
+        value: _on,
+        onChanged: (v) {
+          setState(() => _on = v);
+          Celebration.setSound(v);
+        },
+      );
 }

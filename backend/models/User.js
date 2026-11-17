@@ -160,6 +160,7 @@ const userSchema = new mongoose.Schema(
       social: { type: Boolean, default: true },
       campaigns: { type: Boolean, default: true },
       points: { type: Boolean, default: true },
+      nudges: { type: Boolean, default: true },
     },
 
     // Push notification device tokens (Firebase Cloud Messaging).
@@ -190,6 +191,9 @@ const userSchema = new mongoose.Schema(
       linkedAt: Date,
     },
     isVerifiedResident: { type: Boolean, default: false, index: true },
+
+    // Day (YYYY-MM-DD, UAE) of the last smart nudge, so there is never more than one a day.
+    lastNudgeDay: { type: String, default: "" },
 
     // Neighbourhood for leagues and missions; home point rounded to ~1 km.
     homeZone: { type: mongoose.Schema.Types.ObjectId, ref: "Zone", index: true },

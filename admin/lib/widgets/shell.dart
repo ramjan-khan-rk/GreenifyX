@@ -27,6 +27,7 @@ const navItems = [
   NavItem('/analytics', 'Analytics', Icons.insights_rounded),
   NavItem('/campaigns', 'Campaigns', Icons.forest_rounded),
   NavItem('/missions', 'Missions and leagues', Icons.flag_rounded),
+  NavItem('/seasons', 'Seasons and moments', Icons.celebration_rounded),
   NavItem('/verification', 'Verification', Icons.fact_check_rounded),
   NavItem('/issues', 'Report & Restore', Icons.report_gmailerrorred_rounded),
   NavItem('/places', 'Eco places', Icons.place_rounded),

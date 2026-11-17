@@ -345,6 +345,57 @@ const Map<String, String> stringsArFeatures = {
   "The bonus is paid when your post is verified.": "تُمنح المكافأة عند توثيق منشورك.",
   "All UAE": "كل الإمارات",
 
+  // ---------- Moments of joy ----------
+  "Celebrations": "الاحتفالات",
+  "Celebration sounds": "أصوات الاحتفال",
+  "Your first verified action!": "أول عمل موثّق لك!",
+  "Your first check-in!": "أول تسجيل حضور لك!",
+  "Your first lesson passed!": "أول درس تجتازه!",
+  "Your first mission done!": "أول مهمة تنجزها!",
+  "Your first steps counted!": "أول خطوات تُحتسب لك!",
+  "Your first bill tracked!": "أول فاتورة تتابعها!",
+  "Your first pickup collected!": "أول استلام لك!",
+  "Your first swap!": "أول مبادلة لك!",
+  "Your first battle won!": "أول منافسة تفوز بها!",
+  "Your first campaign!": "أول حملة لك!",
+  "Streak saved!": "أُنقذت سلسلتك!",
+
+  // ---------- Live social proof ----------
+  "live now": "متصلون الآن",
+  "people in": "أشخاص في",
+  "recycled today": "أعادوا التدوير اليوم",
+  "verified actions in": "أعمال موثقة في",
+  "today": "اليوم",
+  "just finished today's lesson": "أنهى درس اليوم للتو",
+  "just did": "قام للتو بـ",
+  "done in your area": "أُنجز في منطقتك",
+
+  // ---------- Seasons ----------
+  "Badge earned": "تم كسب الشارة",
+  "actions this season": "أعمال هذا الموسم",
+  "on GreenifyX": "على GreenifyX",
+  "verified actions by me this season": "أعمال موثقة قمت بها هذا الموسم",
+  "days left": "أيام متبقية",
+  "Do another action": "قم بعمل آخر",
+  "Take part now": "شارك الآن",
+
+  // ---------- Quick log, shortcuts and tips ----------
+  "Quick log": "تسجيل سريع",
+  "Habit streak": "سلسلة العادات",
+  "day habit streak": "يوماً من العادات المتتالية",
+  "Small habits don't earn Eco Points, because nobody verifies them. They build your habit streak instead.":
+      "العادات الصغيرة لا تكسب نقاطاً بيئية لأن أحداً لا يوثقها، لكنها تبني سلسلة عاداتك.",
+  "Refilled a bottle": "أعدت تعبئة قارورة",
+  "Used my own bag": "استخدمت كيسي الخاص",
+  "Took the metro or bus": "استقللت المترو أو الحافلة",
+  "Used my own cup": "استخدمت كوبي الخاص",
+  "Said no to plastic": "رفضت البلاستيك",
+  "Saved leftovers": "حفظت بقايا الطعام",
+  "Switched off lights and AC": "أطفأت الأضواء والمكيف",
+  "Today's lesson": "درس اليوم",
+  "New post": "منشور جديد",
+  "Helpful tips (one a day at most)": "نصائح مفيدة (واحدة يومياً كحد أقصى)",
+
   // ---------- Call details ----------
   "Hide details": "إخفاء التفاصيل",
   "Call details": "تفاصيل المكالمة",

@@ -9,6 +9,16 @@ export const startScheduler = () => {
         const n = await sendStreakReminders();
         if (n) console.log(`Streak reminders sent: ${n}`);
       }
+      // Announce a season (National Day, Ramadan...) as soon as it starts.
+      const { announceSeasons } = await import("../controllers/seasonController.js");
+      const told = await announceSeasons();
+      if (told) console.log(`Season announced to ${told} people`);
+
+      // Smart nudges: at most one helpful nudge per person per day.
+      const { sendNudges } = await import("../controllers/nudgeController.js");
+      const nudged = await sendNudges();
+      if (nudged) console.log(`Nudges sent: ${nudged}`);
+
       // Partner reports on the 1st of the month, from 09:00 UAE time.
       const uaeNow = new Date(Date.now() + 4 * 3600e3);
       if (uaeNow.getUTCDate() === 1 && uaeHour >= 9) {

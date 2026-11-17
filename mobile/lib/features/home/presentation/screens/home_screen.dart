@@ -44,6 +44,9 @@ import '../../../academy/academy_screen.dart';
 import '../../../deals/deals_screen.dart';
 import '../../../stations/stations_screen.dart';
 import '../../../missions/missions_screen.dart';
+import '../../../seasons/season_banner.dart';
+import '../widgets/pulse_strip.dart';
+import '../../../quicklog/quick_log.dart';
 import '../../../market/market_screens.dart';
 import '../../../social/reels_screen.dart';
 import '../../../growth/growth_screens.dart';
@@ -89,6 +92,7 @@ class HomeScreen extends ConsumerWidget {
           data: (user) {
             SessionUser.update(id: user.id, name: user.name, profileImage: user.profileImage);
             HealthSync.syncIfOn();
+            HomeWidgetSync.refreshOnce();
             final first = user.name.trim().split(" ").first;
             final actions = [
               HomeAction(Icons.add_a_photo_rounded, tr("Post"), const [Color(0xFFE36A4A), Color(0xFFF2B544)], () => _go(context, const CreatePostScreen())),
@@ -116,6 +120,7 @@ class HomeScreen extends ConsumerWidget {
               HomeAction(Icons.cottage_rounded, tr("Household"), const [Color(0xFFF2B544), Color(0xFFE36A4A)], () => _go(context, const HouseholdScreen())),
               HomeAction(Icons.school_rounded, tr("Eco Academy"), const [Color(0xFF7F53AC), Color(0xFF647DEE)], () => _go(context, const AcademyScreen())),
               HomeAction(Icons.handshake_rounded, tr("Brand deals"), const [Color(0xFF2B2440), Color(0xFFE36A4A)], () => _go(context, const DealsScreen())),
+              HomeAction(Icons.bolt_outlined, tr("Quick log"), const [Color(0xFF11998E), Color(0xFFF2B544)], () => showQuickLog(context)),
               HomeAction(Icons.recycling_rounded, tr("Recycle"), const [Color(0xFF1F8A70), Color(0xFF56AB2F)], () => _go(context, const StationsScreen())),
               HomeAction(Icons.flag_circle_rounded, tr("Missions"), const [Color(0xFFC2413B), Color(0xFFF2B544)], () => _go(context, const MissionsScreen())),
               HomeAction(Icons.mic_rounded, "Greeny", const [Color(0xFF38EF7D), Color(0xFF11998E)], () => Greeny.instance.open(context)),
@@ -179,6 +184,8 @@ class HomeScreen extends ConsumerWidget {
                     onRewards: () => _go(context, const RewardsScreen()),
                   ),
                   const WrappedBanner(),
+                  const SeasonBanner(),
+                  const PulseStrip(),
                   const StreakCard(),
                   const CompanionCard(),
                   const SponsoredStrip(),

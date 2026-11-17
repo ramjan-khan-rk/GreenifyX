@@ -73,6 +73,8 @@ dependencies:
   flutter_callkit_incoming: ^3.1.6
   flutter_foreground_task: ^11.0.3
   flutter_web_auth_2: ^5.1.0
+  quick_actions: ^1.1.1
+  home_widget: ^0.10.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -100,6 +102,7 @@ flutter:
     - assets/brand/app_icon.png
     - assets/brand/app_icon_rounded.png
     - assets/sounds/ringback.wav
+    - assets/sounds/celebrate.wav
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

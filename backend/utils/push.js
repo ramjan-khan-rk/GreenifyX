@@ -28,6 +28,7 @@ const PREF_FOR_TYPE = {
   points: "points",
   reward: "points",
   pickup: "points",
+  nudge: "nudges",
 };
 
 export const prefKeyFor = (type) => PREF_FOR_TYPE[type] || "social";

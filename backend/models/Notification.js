@@ -38,6 +38,7 @@ const notificationSchema = new mongoose.Schema(
         "sponsored",
         "pickup",
         "event",
+        "nudge",
       ],
       required: true,
     },

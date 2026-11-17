@@ -24,6 +24,13 @@ import '../../../home/presentation/screens/home_screen.dart';
 import '../../../notifications/application/providers/notification_provider.dart';
 import '../../../profile/presentation/screens/account_screen.dart';
 import '../../../../core/i18n/app_locale.dart';
+import '../../../../core/widgets/celebration.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:quick_actions/quick_actions.dart';
+import '../../../quicklog/quick_log.dart';
+import '../../../checkin/scan_screen.dart';
+import '../../../academy/academy_screen.dart';
+import '../../../post/presentation/screens/create_post_screen.dart';
 import '../../../../core/services/push_service.dart';
 import '../../../../core/services/session_user.dart';
 import '../../../auth/application/providers/auth_provider.dart';
@@ -72,6 +79,37 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
     ));
   }
 
+  /// Long-press the app icon: Quick log, Scan, Today's lesson, New post.
+  void _setUpShortcuts() {
+    if (kIsWeb) return;
+    const actions = QuickActions();
+    actions.initialize((type) {
+      if (!mounted) return;
+      switch (type) {
+        case "quick_log":
+          showQuickLog(context);
+        case "scan":
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanScreen()));
+        case "lesson":
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const AcademyScreen()));
+        case "post":
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const CreatePostScreen()));
+      }
+    });
+    actions.setShortcutItems([
+      ShortcutItem(type: "quick_log", localizedTitle: tr("Quick log")),
+      ShortcutItem(type: "scan", localizedTitle: tr("Scan QR")),
+      ShortcutItem(type: "lesson", localizedTitle: tr("Today's lesson")),
+      ShortcutItem(type: "post", localizedTitle: tr("New post")),
+    ]).catchError((_) {});
+  }
+
+  /// Moments of joy sent by the server when points land.
+  void _onCelebrate(dynamic raw) {
+    if (!mounted || raw is! Map) return;
+    Celebration.show(context, Map<String, dynamic>.from(raw));
+  }
+
   void _onRealtimeEvent(dynamic _) {
     ref.invalidate(chatsProvider);
     ref.invalidate(chatProvider);
@@ -93,12 +131,14 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
     socket.on("challengeRejected", _onRealtimeEvent);
     socket.on("challengeCompleted", _onRealtimeEvent);
     socket.on("newNotification", _onRealtimeEvent);
+    socket.on("celebrate", _onCelebrate);
     final calls = CallCoordinator.instance;
     calls.bind();
     calls.addListener(_onIncomingCall);
     PushService.instance.register();
     UploadQueue.instance.completed.addListener(_onPosted);
     Greeny.instance.loadPrefs();
+    _setUpShortcuts();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) OnboardingScreen.maybeShow(context);
     });
@@ -130,6 +170,7 @@ class _BottomNavScreenState extends ConsumerState<BottomNavScreen> {
     socket.off("challengeRejected", _onRealtimeEvent);
     socket.off("challengeCompleted", _onRealtimeEvent);
     socket.off("newNotification", _onRealtimeEvent);
+    socket.off("celebrate", _onCelebrate);
     CallCoordinator.instance.removeListener(_onIncomingCall);
     super.dispose();
   }

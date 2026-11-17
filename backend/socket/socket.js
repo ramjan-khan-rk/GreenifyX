@@ -382,3 +382,6 @@ export const emitToUser = (userId, event, payload) => {
   if (!io) return;
   io.to(roomFor(userId.toString())).emit(event, payload);
 };
+
+/** How many members have the app open right now (for "live now" on Home). */
+export const onlineCount = () => onlineUsers.size;

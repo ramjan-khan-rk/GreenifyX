@@ -78,6 +78,14 @@ Current mobile version: **1.0.2 (build 3)**.
 * Notification centre: bundled, grouped, bulk actions, plus push notifications (Firebase)
 * Offline mode and background uploads
 
+### ✨ Everyday touches
+
+* **Moments of joy**: confetti, a vibration and a chime for first-ever actions, streak milestones, a saved streak and level ups; first-ever actions earn a badge; points show a real-world translation ("like not driving 7 km")
+* **Live social proof** on Home: "14 people in JLT recycled today", friends' latest actions, mission progress and a "live now" counter
+* **UAE seasons and moments**: Eid Al Etihad (pre-scheduled for 1 to 3 December), Green Ramadan, Earth Hour and Back to school, each with a themed banner, badge and share card; admins schedule them and everyone is notified when one starts
+* **Smart nudges**: at most one helpful tip a day, chosen by heat in your emirate, your usual weekly habit, or a recycling station near home; none during a season's quiet hours (e.g. iftar); can be switched off in Settings
+* **Quick log** for small daily habits (refill, own bag, metro...), which earns no points but builds a habit streak; **home-screen widget** (streak, points, habits) and **app shortcuts** on long-press
+
 ### 🤖 Assistants
 
 * AI eco companion and assistant

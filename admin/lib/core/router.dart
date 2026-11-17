@@ -30,6 +30,7 @@ import '../pages/stations_page.dart';
 import '../pages/missions_page.dart';
 import '../pages/audit_pages.dart';
 import '../pages/home_pages.dart';
+import '../pages/seasons_page.dart';
 import '../widgets/shell.dart';
 import 'session.dart';
 
@@ -89,6 +90,7 @@ final GoRouter adminRouter = GoRouter(
         GoRoute(path: '/audit', pageBuilder: (context, state) => _page(state, const AuditPage())),
         GoRoute(path: '/home-health', pageBuilder: (context, state) => _page(state, const HomeHealthPage())),
         GoRoute(path: '/lessons', pageBuilder: (context, state) => _page(state, const LessonsPage())),
+        GoRoute(path: '/seasons', pageBuilder: (context, state) => _page(state, const SeasonsPage())),
         GoRoute(path: '/analytics', pageBuilder: (context, state) => _page(state, const AnalyticsPage())),
         GoRoute(path: '/insights', pageBuilder: (context, state) => _page(state, const InsightsPage())),
         GoRoute(path: '/impact', pageBuilder: (context, state) => _page(state, const ImpactPage())),

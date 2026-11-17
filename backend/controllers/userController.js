@@ -197,7 +197,7 @@ export const searchUsers = async (req, res) => {
 
 // ---------------- Settings ----------------
 
-const PREF_KEYS = ["messages", "calls", "social", "campaigns", "points"];
+const PREF_KEYS = ["messages", "calls", "social", "campaigns", "points", "nudges"];
 
 // GET /api/users/me/settings
 export const getSettings = async (req, res) => {
